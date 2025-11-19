@@ -1,5 +1,5 @@
-
-# AstraGuard AI — Round 2 Prototype (Complete)
+# AstraGuard-AI
+🚀 Autonomous Fault Detection & Recovery System for CubeSats | 🤖 Real-Time Telemetry Simulation • 🛰️ Anomaly Detection • 🔧 State Machine • 📊 Streamlit Dashboard • 🎥 3D Attitude Visualizer
 
 **Overview**
 AstraGuard AI simulates an onboard intelligence stack that detects anomalies in CubeSat telemetry and autonomously triggers recovery actions.
