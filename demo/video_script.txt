@@ -1,0 +1,10 @@
+
+Video Script (40-60s):
+
+0-5s: Title card - "AstraGuard AI: Autonomous Fault Detection & Recovery for CubeSats"
+5-12s: Show live telemetry dashboard (normal operation)
+12-22s: Injected fault occurs (power/thermal/attitude) - dashboard flags anomaly & classification appears
+22-32s: State machine triggers recovery action (SAFE_MODE / STABILIZING) - show event log entry
+32-45s: Optional: 3D simulation shows attitude correction / stabilization
+45-60s: Closing card with GitHub link and "Prototype demo - SkyHack 2025"
+Narration: Short captions explaining what's happening (no long voiceover needed)

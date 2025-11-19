@@ -1,0 +1,11 @@
+
+Demo instructions (short):
+1. Install requirements: pip install -r requirements.txt
+2. Train anomaly model (first run will auto-train if not present):
+   python3 anomaly/anomaly_detector.py
+3. Start dashboard:
+   streamlit run dashboard/app.py
+4. (Optional) In another terminal, run 3D attitude sim:
+   python3 simulation/attitude_3d.py
+5. Watch dashboard: when a fault appears, the dashboard will show classification and state.
+6. Record a 40-60s video following the Demo Flow (see video_script.txt)
