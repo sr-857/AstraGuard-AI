@@ -1,7 +1,22 @@
 
-streamlit
-numpy
-scikit-learn
-altair
-pandas
-matplotlib
+# AstraGuard AI - Requirements
+# Autonomous Fault Detection & Recovery System for CubeSats
+
+# Core dependencies
+numpy>=1.21.0
+scikit-learn>=1.0.0
+pandas>=1.3.0
+matplotlib>=3.5.0
+altair>=4.0.0
+streamlit>=1.20.0
+
+# Optional dependencies for enhanced functionality
+jupyter>=1.0.0          # For notebook support
+seaborn>=0.11.0         # Enhanced visualization
+plotly>=5.0.0           # Interactive plots
+
+# Development dependencies (optional)
+pytest>=6.0.0           # Testing framework
+black>=21.0.0           # Code formatting
+flake8>=3.9.0           # Linting
+mypy>=0.910             # Type checking
