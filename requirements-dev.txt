@@ -31,7 +31,7 @@ build>=0.7.0
 twine>=4.0.0
 
 # Install in development mode
--e .
+-e .[dev]
 
 # Include all runtime dependencies
 -r requirements.txt
