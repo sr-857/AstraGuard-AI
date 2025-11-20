@@ -192,7 +192,7 @@ def create_system_status_panel() -> None:
         "ANOMALY_DETECTED": "#FFC107",
         "FAULT_DETECTED": "#F44336",
         "RECOVERY_IN_PROGRESS": "#2196F3",
-        "SAFE_MODE": "#9C27B0"
+        "SAFE_MODE": "#9C27B0",
     }.get(current_state, "#9E9E9E")
 
     st.markdown("### System State")
@@ -200,7 +200,7 @@ def create_system_status_panel() -> None:
         f"<div style='background-color: {state_color}; color: white; "
         "padding: 10px; border-radius: 5px; text-align: center; "
         f"font-weight: bold;'>{current_state}</div>",
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
     # Fault status

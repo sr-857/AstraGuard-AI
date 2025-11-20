@@ -1,4 +1,5 @@
 """Basic tests that don't require external dependencies."""
+
 import pytest
 
 
@@ -13,6 +14,7 @@ def test_anomaly_detector_import():
     # This will help verify if the module structure is correct
     try:
         from anomaly import anomaly_detector  # noqa: F401
+
         assert True
     except ImportError as e:
         pytest.fail(f"Failed to import anomaly_detector: {e}")

@@ -2,7 +2,11 @@
 
 import numpy as np
 from unittest.mock import patch, MagicMock
-from anomaly.anomaly_detector import validate_telemetry, dict_to_features, detect_anomaly
+from anomaly.anomaly_detector import (
+    validate_telemetry,
+    dict_to_features,
+    detect_anomaly,
+)
 
 
 def test_dict_to_features():
@@ -12,7 +16,7 @@ def test_dict_to_features():
         "current": 0.55,
         "temperature": 25.0,
         "gyro": 0.1,
-        "wheel_speed": 480.0
+        "wheel_speed": 480.0,
     }
     result = dict_to_features(telemetry)
     # Verify the result is a numpy array with the correct shape and values
@@ -29,7 +33,7 @@ def test_validate_telemetry():
         "current": 0.55,
         "temperature": 24.0,
         "gyro": 0.01,
-        "wheel_speed": 480.0
+        "wheel_speed": 480.0,
     }
     # Test valid telemetry
     result = validate_telemetry(valid_telemetry)
@@ -50,7 +54,7 @@ def test_validate_telemetry():
     assert "voltage" in result["missing_values"]
 
 
-@patch('anomaly.anomaly_detector.load_model')
+@patch("anomaly.anomaly_detector.load_model")
 def test_detect_anomaly(mock_load_model):
     """Test anomaly detection with mocked model."""
     # Setup mock model
@@ -64,7 +68,7 @@ def test_detect_anomaly(mock_load_model):
         "current": 0.55,
         "temperature": 25.0,
         "gyro": 0.1,
-        "wheel_speed": 3000.0
+        "wheel_speed": 3000.0,
     }
     # Test detection
     is_anomalous, score = detect_anomaly(telemetry)
