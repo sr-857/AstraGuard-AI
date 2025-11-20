@@ -1,46 +1,79 @@
-# AstraGuard AI
+# 🛰️ AstraGuard AI
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
-[![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)]()
+[![Tests](https://github.com/sr-857/AstraGuard-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/sr-857/AstraGuard-AI/actions)
+[![codecov](https://codecov.io/gh/sr-857/AstraGuard-AI/graph/badge.svg?token=YOUR_TOKEN_HERE)](https://codecov.io/gh/sr-857/AstraGuard-AI)
+[![Documentation Status](https://readthedocs.org/projects/astraguard-ai/badge/?version=latest)](https://astraguard-ai.readthedocs.io/)
 
-#CubeSat #Satellite #AI #MachineLearning #AnomalyDetection #AutonomousSystems #SpaceTech #Hackathon
-
-🚀 **Autonomous Fault Detection & Recovery System for CubeSats**
+> **Autonomous Fault Detection & Recovery System for CubeSats**
 
 AstraGuard AI is an intelligent onboard system that simulates real-time telemetry monitoring, anomaly detection, and autonomous recovery actions for CubeSat spacecraft. The system uses machine learning to identify abnormal patterns and automatically executes recovery procedures to maintain spacecraft health and operational continuity.
 
-## 🌟 Features
+## ✨ Key Features
 
-- **🛰️ Real-Time Telemetry Simulation**: Generates realistic CubeSat telemetry data at 5Hz
-- **🤖 Machine Learning Anomaly Detection**: Isolation Forest-based pattern recognition
-- **🔧 Intelligent Fault Classification**: Rule-based system for identifying fault types
-- **⚡ Autonomous State Machine**: Automated recovery decision-making
-- **📊 Interactive Dashboard**: Real-time monitoring with Streamlit
-- **🎥 3D Attitude Visualization**: Matplotlib-based spacecraft attitude display
-- **📝 Comprehensive Logging**: Event tracking and timeline analysis
+<div align="center">
 
-## 🏗️ Architecture
+| Component | Description |
+|-----------|-------------|
+| **🛰️ Telemetry** | Real-time data generation at 5Hz with configurable noise and anomaly injection |
+| **🤖 Anomaly Detection** | ML-powered detection using Isolation Forest algorithm |
+| **🔧 Fault Classification** | Rule-based system for identifying specific fault types |
+| **⚡ State Machine** | Autonomous recovery decision-making engine |
+| **📊 Dashboard** | Interactive web interface built with Streamlit |
+| **🌌 3D Visualization** | Real-time spacecraft attitude visualization |
+| **📝 Logging** | Comprehensive event tracking and timeline analysis |
 
+</div>
+
+## 🏆 Why AstraGuard AI?
+
+- **Autonomous Operation**: Reduces dependency on ground control
+- **Early Anomaly Detection**: Identifies issues before they become critical
+- **Modular Architecture**: Easy to extend and customize
+- **Open Source**: Built by the community, for the community
+- **Production Ready**: Thoroughly tested and documented
+
+## 🏗️ System Architecture
+
+```mermaid
+graph TD
+    A[Telemetry Generation] -->|Raw Data| B[Anomaly Detection]
+    B -->|Anomaly Score| C[Fault Classification]
+    C -->|Fault Type| D[State Machine]
+    D -->|Recovery Actions| E[System Recovery]
+    A -->|Data| F[Dashboard]
+    B -->|Alerts| F
+    C -->|Fault Info| F
+    D -->|State Updates| F
+    A -->|Data| G[3D Visualization]
+    A -->|Logs| H[Timeline]
+    B -->|Events| H
+    C -->|Events| H
+    D -->|Events| H
 ```
-AstraGuard AI System Architecture
-├── telemetry/           # Real-time data generation
-├── anomaly/            # ML-based anomaly detection
-├── classifier/         # Fault type classification
-├── state_machine/      # Recovery decision logic
-├── dashboard/          # Web-based monitoring interface
-├── simulation/         # 3D attitude visualization
-└── logs/              # Event logging and timeline
-```
 
-## 🚀 Quick Start
+### Component Overview
+
+| Directory | Purpose |
+|-----------|---------|
+| `telemetry/` | Generates realistic spacecraft telemetry data |
+| `anomaly/` | Machine learning models for detecting anomalies |
+| `classifier/` | Classifies detected anomalies into specific fault types |
+| `state_machine/` | Implements recovery logic and state management |
+| `dashboard/` | Web-based monitoring and control interface |
+| `simulation/` | 3D visualization of spacecraft attitude |
+| `logs/` | Event logging and timeline analysis |
+
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- Python 3.8 or higher
-- pip package manager
+- Python 3.9 or higher
+- pip (Python package manager)
+- Git
 
 ### Installation
 
@@ -48,6 +81,24 @@ AstraGuard AI System Architecture
    ```bash
    git clone https://github.com/sr-857/AstraGuard-AI.git
    cd AstraGuard-AI
+   ```
+
+2. **Create and activate a virtual environment** (recommended)
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Run the system**
+   ```bash
+   python -m dashboard.app
+   ```
+   The dashboard will be available at `http://localhost:8501`
    ```
 
 2. **Install dependencies**
