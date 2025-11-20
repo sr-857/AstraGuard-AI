@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, patch
 # Skip tests if sklearn is not available
 try:
     import sklearn  # noqa: F401
+
     SKLEARN_AVAILABLE = True
 except ImportError:
     SKLEARN_AVAILABLE = False
@@ -29,10 +30,6 @@ if SKLEARN_AVAILABLE:
 
             # Mock the model path
             with patch(
-                'anomaly.anomaly_detector.MODEL_PATH',
-                Path('/tmp/mock_model.pkl')
+                "anomaly.anomaly_detector.MODEL_PATH", Path("/tmp/mock_model.pkl")
             ):
-                yield {
-                    "mock_model": mock_model,
-                    "mock_load_model": mock_load_model
-                }
+                yield {"mock_model": mock_model, "mock_load_model": mock_load_model}
