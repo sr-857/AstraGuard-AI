@@ -1,10 +1,14 @@
 # AstraGuard AI
 
-🚀 **Autonomous Fault Detection & Recovery System for CubeSats**
-
-[![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://python.org)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python Version](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 [![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)]()
+
+#CubeSat #Satellite #AI #MachineLearning #AnomalyDetection #AutonomousSystems #SpaceTech #Hackathon
+
+🚀 **Autonomous Fault Detection & Recovery System for CubeSats**
 
 AstraGuard AI is an intelligent onboard system that simulates real-time telemetry monitoring, anomaly detection, and autonomous recovery actions for CubeSat spacecraft. The system uses machine learning to identify abnormal patterns and automatically executes recovery procedures to maintain spacecraft health and operational continuity.
 
@@ -227,6 +231,10 @@ python3 telemetry/telemetry_stream.py 2>&1 | tee debug.log
 - Include comprehensive docstrings
 - Write unit tests for new features
 - Update documentation for API changes
+
+## 📚 Documentation
+
+For additional documentation, including system architecture diagrams, API references, and implementation details, please refer to our [AstraGuard AI Documentation on Google Drive](https://drive.google.com/file/d/191JIBcRAU2ai8tDSliY8ztnEm-ZAHgkV/view).
 
 ## 📝 License
 

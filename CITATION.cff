@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use AstraGuard AI in your research, please cite it using these metadata."
+title: "AstraGuard AI: Autonomous Fault Detection & Recovery System for CubeSats"
+authors:
+  - family-names: "Roy"
+    given-names: "Subhajit"
+    orcid: "https://orcid.org/YOUR-ORCID-ID"
+version: 1.0.0
+date-released: 2025-11-20
+repository-code: "https://github.com/sr-857/AstraGuard-AI"
+url: "https://github.com/sr-857/AstraGuard-AI"
+keywords:
+  - "cubesat"
+  - "anomaly-detection"
+  - "machine-learning"
+  - "space-technology"
+  - "autonomous-systems"
+license: MIT
+abstract: "AstraGuard AI is an intelligent onboard system that simulates real-time telemetry monitoring, anomaly detection, and autonomous recovery actions for CubeSat spacecraft. The system uses machine learning to identify abnormal patterns and automatically executes recovery procedures to maintain spacecraft health and operational continuity."
