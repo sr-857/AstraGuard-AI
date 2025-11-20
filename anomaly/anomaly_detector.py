@@ -9,9 +9,16 @@ Author: Subhajit Roy
 
 import os
 import pickle
+from typing import Tuple, Dict, Any, Optional
 
 import numpy as np
-from sklearn.ensemble import IsolationForest
+
+try:
+    from sklearn.ensemble import IsolationForest
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    SKLEARN_AVAILABLE = False
+    IsolationForest = None  # type: ignore
 
 # Constants
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "anomaly_if.pkl")

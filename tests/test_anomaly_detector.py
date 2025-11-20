@@ -1,8 +1,7 @@
 """Tests for the anomaly detection module."""
-import numpy as np
 import pytest
+from unittest.mock import patch, MagicMock
 from anomaly.anomaly_detector import (
-    detect_anomaly,
     validate_telemetry,
     dict_to_features
 )
@@ -17,9 +16,18 @@ def test_dict_to_features():
         "gyro": 0.1,
         "wheel_speed": 3000.0
     }
-    expected = np.array([[7.9, 0.55, 25.0, 0.1, 3000.0]])
-    result = dict_to_features(telemetry)
-    np.testing.assert_array_almost_equal(result, expected)
+    # Test with mock numpy
+    with patch('numpy.array') as mock_array:
+        mock_array.return_value = [[7.9, 0.55, 25.0, 0.1, 3000.0]]
+        result = dict_to_features(telemetry)
+        assert mock_array.called
+        # Verify the values are in the expected order
+        args = mock_array.call_args[0][0]
+        assert args[0] == 7.9      # voltage
+        assert args[1] == 0.55     # current
+        assert args[2] == 25.0     # temperature
+        assert args[3] == 0.1      # gyro
+        assert args[4] == 3000.0   # wheel_speed
 
 
 def test_validate_telemetry():
@@ -43,11 +51,19 @@ def test_validate_telemetry():
     assert "voltage" in result["errors"]
 
 
-# This is a basic test - in a real scenario, we'd mock the model
-# or use a test fixture with pre-trained weights
-def test_detect_anomaly():
-    """Test anomaly detection with basic input validation."""
-    # Create a test telemetry sample
+@patch('anomaly.anomaly_detector.load_model')
+def test_detect_anomaly(mock_load_model):
+    """Test anomaly detection with mocked model."""
+    # Setup mock model
+    mock_model = MagicMock()
+    mock_model.predict.return_value = [-1]  # -1 indicates anomaly
+    mock_model.decision_function.return_value = [-0.5]  # Some score
+    mock_load_model.return_value = mock_model
+    
+    # Import here to avoid loading sklearn during test collection
+    from anomaly.anomaly_detector import detect_anomaly
+    
+    # Test data
     telemetry = {
         "voltage": 7.9,
         "current": 0.55,
@@ -56,7 +72,12 @@ def test_detect_anomaly():
         "wheel_speed": 3000.0
     }
     
-    # Just test that the function runs and returns expected types
+    # Test detection
     is_anomalous, score = detect_anomaly(telemetry)
+    
+    # Verify results
     assert isinstance(is_anomalous, bool)
     assert isinstance(score, float)
+    mock_load_model.assert_called_once()
+    mock_model.predict.assert_called_once()
+    mock_model.decision_function.assert_called_once()
