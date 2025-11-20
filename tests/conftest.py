@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 # Skip tests if sklearn is not available
 try:
-    from sklearn.exceptions import NotFittedError
+    import sklearn  # noqa: F401
     SKLEARN_AVAILABLE = True
 except ImportError:
     SKLEARN_AVAILABLE = False
