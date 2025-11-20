@@ -8,7 +8,7 @@
 [![codecov](https://codecov.io/gh/sr-857/AstraGuard-AI/graph/badge.svg?token=YOUR_TOKEN_HERE)](https://codecov.io/gh/sr-857/AstraGuard-AI)
 [![Documentation Status](https://readthedocs.org/projects/astraguard-ai/badge/?version=latest)](https://astraguard-ai.readthedocs.io/)
 
-> **Autonomous Fault Detection & Recovery System for CubeSats**
+> **Autonomous Fault Detection & Recovery System for CubeSats//**
 
 AstraGuard AI is an intelligent onboard system that simulates real-time telemetry monitoring, anomaly detection, and autonomous recovery actions for CubeSat spacecraft. The system uses machine learning to identify abnormal patterns and automatically executes recovery procedures to maintain spacecraft health and operational continuity.
 
