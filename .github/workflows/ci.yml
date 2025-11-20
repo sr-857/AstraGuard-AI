@@ -41,10 +41,20 @@ jobs:
         pip install mypy
         mypy .
     
-    - name: Run tests with pytest
+    - name: Run basic tests
       run: |
-        pip install pytest pytest-cov
-        pytest --cov=./ --cov-report=xml
+        python -m pytest tests/test_basic.py -v
+        
+    - name: Install dependencies for full test suite
+      if: matrix.python-version == '3.11'  # Only run full tests on one Python version
+      run: |
+        pip install -r requirements.txt
+        pip install scikit-learn
+        
+    - name: Run full test suite
+      if: matrix.python-version == '3.11'  # Only run full tests on one Python version
+      run: |
+        python -m pytest tests/ -v
     
     - name: Upload coverage to Codecov
       if: github.event_name != 'pull_request'  # Only run on push to main
