@@ -71,7 +71,7 @@ graph TD
 
 For detailed information about the AstraGuard AI system, please refer to the comprehensive documentation:
 
-📄 [AstraGuard AI: Autonomous Fault Detection & Recovery for Small Satellites (PDF)](/report/AstraGuard_Round2_Report.pdf)
+📄 [AstraGuard AI: Autonomous Fault Detection & Recovery for Small Satellites (PDF)](/report/AstraGuard%20AI_%20Autonomous%20Fault%20Detection%20&%20Recovery%20for%20Small%20Satellites.pdf)
 
 This document provides in-depth information about the system architecture, algorithms, implementation details, and usage guidelines.
 
