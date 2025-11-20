@@ -1,11 +1,23 @@
 """Tests for the anomaly detection module."""
 
+import pytest
 import numpy as np
 from unittest.mock import patch, MagicMock
-from anomaly.anomaly_detector import (
-    validate_telemetry,
-    dict_to_features,
-    detect_anomaly,
+
+# Skip tests if sklearn is not available
+try:
+    from anomaly.anomaly_detector import (
+        validate_telemetry,
+        dict_to_features,
+        detect_anomaly,
+    )
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    SKLEARN_AVAILABLE = False
+
+pytestmark = pytest.mark.skipif(
+    not SKLEARN_AVAILABLE, 
+    reason="sklearn not available, skipping anomaly detection tests"
 )
 
 

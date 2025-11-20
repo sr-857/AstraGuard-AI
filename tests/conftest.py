@@ -4,6 +4,18 @@ import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+# Skip tests if sklearn is not available
+try:
+    from sklearn.exceptions import NotFittedError
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    SKLEARN_AVAILABLE = False
+
+pytest_plugins = []
+
+# Only add the mock_anomaly_detector fixture if sklearn is available
+if SKLEARN_AVAILABLE:
+
 
 # Mock the model loading in the anomaly detector module
 @pytest.fixture(autouse=True)
