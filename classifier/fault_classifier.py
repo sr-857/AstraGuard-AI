@@ -57,36 +57,37 @@ def classify(telemetry_state: Dict[str, Optional[float]]) -> str:
         # Validate data types
         if not all(
             isinstance(x, (int, float))
-            for x in [voltage, temperature, gyro, wheel_speed]
+            for x in [voltage, temperature, gyro, wheel_speed, current]
         ):
             return "sensor_fault"
 
-        # Check for power faults (priority 1 - critical)
+        # Check for power fault (voltage)
         if voltage < THRESHOLDS["voltage_critical"]:
+            return "power_fault_critical"
+        if voltage < THRESHOLDS["voltage_low"]:
             return "power_fault"
-        elif voltage < THRESHOLDS["voltage_low"]:
-            return "power_fault"
-
-        # Check for thermal faults (priority 2)
+        
+        # Check for thermal fault (temperature)
         if temperature > THRESHOLDS["temperature_critical"]:
+            return "thermal_fault_critical"
+        if temperature > THRESHOLDS["temperature_high"]:
             return "thermal_fault"
-        elif temperature > THRESHOLDS["temperature_high"]:
-            return "thermal_fault"
-
-        # Check for attitude faults (priority 3)
+        
+        # Check for attitude fault (gyro)
         if abs(gyro) > THRESHOLDS["gyro_critical"]:
+            return "attitude_fault_critical"
+        if abs(gyro) > THRESHOLDS["gyro_high"]:
             return "attitude_fault"
-        elif abs(gyro) > THRESHOLDS["gyro_high"]:
-            return "attitude_fault"
-
-        # Check wheel speed for sensor issues
-        min_wheel, max_wheel = THRESHOLDS["wheel_speed_nominal"]
-        if not (min_wheel <= wheel_speed <= max_wheel):
-            # Could be sensor fault or actual wheel issue
-            if wheel_speed < 100 or wheel_speed > 1000:  # Unreasonable values
-                return "sensor_fault"
-
-        # If no faults detected, return normal
+        
+        # Check for wheel speed anomaly
+        wheel_min, wheel_max = THRESHOLDS["wheel_speed_nominal"]
+        if not (wheel_min <= wheel_speed <= wheel_max):
+            return "wheel_anomaly"
+        
+        # Check for sensor fault (None values or invalid data)
+        if any(v is None for v in [voltage, current, temperature, gyro, wheel_speed]):
+            return "sensor_fault"
+        
         return "normal"
 
     except Exception as e:

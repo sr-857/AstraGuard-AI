@@ -9,7 +9,6 @@ Author: Subhajit Roy
 
 import os
 import pickle
-from typing import Tuple
 
 import numpy as np
 from sklearn.ensemble import IsolationForest

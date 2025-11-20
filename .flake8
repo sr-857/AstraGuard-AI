@@ -1,0 +1,9 @@
+[flake8]
+max-line-length = 120
+extend-ignore = E203, W503  # Allow some whitespace for better readability
+per-file-ignores =
+    # Ignore line length in test files
+    tests/*: E501
+    # Ignore complexity in main application files
+    dashboard/app.py: C901
+    classifier/fault_classifier.py: C901

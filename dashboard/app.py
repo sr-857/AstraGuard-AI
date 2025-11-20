@@ -186,20 +186,21 @@ def create_system_status_panel() -> None:
     current_fault = st.session_state.history["fault_type"][-1]
     current_score = st.session_state.history["anomaly_score"][-1]
 
-    # System state
+    # Display system state
     state_color = {
-        "NORMAL": "green",
-        "SAFE_MODE": "red",
-        "COOLING": "orange",
-        "STABILIZING": "blue",
-        "DIAGNOSTICS": "yellow",
-        "UNKNOWN": "gray",
-    }.get(current_state, "gray")
-
-    st.markdown(f"### System State")
+        "NORMAL": "#4CAF50",
+        "ANOMALY_DETECTED": "#FFC107",
+        "FAULT_DETECTED": "#F44336",
+        "RECOVERY_IN_PROGRESS": "#2196F3",
+        "SAFE_MODE": "#9C27B0"
+    }.get(current_state, "#9E9E9E")
+    
+    st.markdown("### System State")
     st.markdown(
-        f"<div style='background-color: {state_color}; color: white; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold;'>{current_state}</div>",
-        unsafe_allow_html=True,
+        f"<div style='background-color: {state_color}; color: white; "
+        "padding: 10px; border-radius: 5px; text-align: center; "
+        f"font-weight: bold;'>{current_state}</div>",
+        unsafe_allow_html=True
     )
 
     # Fault status

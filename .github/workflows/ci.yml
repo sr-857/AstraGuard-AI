@@ -29,8 +29,7 @@ jobs:
     - name: Lint with flake8
       run: |
         pip install flake8
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 . --count --max-complexity=10 --max-line-length=127 --statistics
+        flake8 . --config=.flake8
     
     - name: Check code formatting with black
       run: |
