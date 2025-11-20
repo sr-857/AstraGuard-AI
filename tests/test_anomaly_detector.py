@@ -16,7 +16,7 @@ except ImportError:
     SKLEARN_AVAILABLE = False
 
 pytestmark = pytest.mark.skipif(
-    not SKLEARN_AVAILABLE, 
+    not SKLEARN_AVAILABLE,
     reason="sklearn not available, skipping anomaly detection tests"
 )
 
