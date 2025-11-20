@@ -194,7 +194,7 @@ def create_system_status_panel() -> None:
         "RECOVERY_IN_PROGRESS": "#2196F3",
         "SAFE_MODE": "#9C27B0"
     }.get(current_state, "#9E9E9E")
-    
+
     st.markdown("### System State")
     st.markdown(
         f"<div style='background-color: {state_color}; color: white; "
@@ -204,7 +204,7 @@ def create_system_status_panel() -> None:
     )
 
     # Fault status
-    st.markdown(f"### Fault Status")
+    st.markdown("### Fault Status")
     if current_fault == "normal":
         st.success("✅ No active faults")
     else:
@@ -220,7 +220,7 @@ def create_system_status_panel() -> None:
         st.caption(get_fault_description(current_fault))
 
     # Statistics
-    st.markdown(f"### Statistics")
+    st.markdown("### Statistics")
     col1, col2 = st.columns(2)
     with col1:
         st.metric("Total Samples", st.session_state.total_samples)

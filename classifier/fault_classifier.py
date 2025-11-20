@@ -42,7 +42,6 @@ def classify(telemetry_state: Dict[str, Optional[float]]) -> str:
         temperature = telemetry_state.get("temperature")
         gyro = telemetry_state.get("gyro")
         wheel_speed = telemetry_state.get("wheel_speed")
-        telemetry_state.get("current")
 
         # Check for sensor faults (missing or None values)
         if wheel_speed is None:
@@ -57,7 +56,7 @@ def classify(telemetry_state: Dict[str, Optional[float]]) -> str:
         # Validate data types
         if not all(
             isinstance(x, (int, float))
-            for x in [voltage, temperature, gyro, wheel_speed, current]
+            for x in [voltage, temperature, gyro, wheel_speed]
         ):
             return "sensor_fault"
 
@@ -66,28 +65,28 @@ def classify(telemetry_state: Dict[str, Optional[float]]) -> str:
             return "power_fault_critical"
         if voltage < THRESHOLDS["voltage_low"]:
             return "power_fault"
-        
+
         # Check for thermal fault (temperature)
         if temperature > THRESHOLDS["temperature_critical"]:
             return "thermal_fault_critical"
         if temperature > THRESHOLDS["temperature_high"]:
             return "thermal_fault"
-        
+
         # Check for attitude fault (gyro)
         if abs(gyro) > THRESHOLDS["gyro_critical"]:
             return "attitude_fault_critical"
         if abs(gyro) > THRESHOLDS["gyro_high"]:
             return "attitude_fault"
-        
+
         # Check for wheel speed anomaly
         wheel_min, wheel_max = THRESHOLDS["wheel_speed_nominal"]
         if not (wheel_min <= wheel_speed <= wheel_max):
             return "wheel_anomaly"
-        
+
         # Check for sensor fault (None values or invalid data)
-        if any(v is None for v in [voltage, current, temperature, gyro, wheel_speed]):
+        if any(v is None for v in [voltage, temperature, gyro, wheel_speed]):
             return "sensor_fault"
-        
+
         return "normal"
 
     except Exception as e:

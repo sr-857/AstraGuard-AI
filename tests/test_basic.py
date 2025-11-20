@@ -1,10 +1,12 @@
 """Basic tests that don't require external dependencies."""
 import pytest
 
+
 def test_imports():
     """Test that basic imports work."""
     # This is a simple test that should always pass
     assert True
+
 
 def test_anomaly_detector_import():
     """Test that we can import the anomaly detector module."""

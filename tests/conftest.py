@@ -1,7 +1,9 @@
 """Pytest configuration and fixtures."""
+
 import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+
 
 # Mock the model loading in the anomaly detector module
 @pytest.fixture(autouse=True)
@@ -13,9 +15,13 @@ def mock_anomaly_detector():
         mock_model.predict.return_value = [-1]  # Default to anomaly
         mock_model.decision_function.return_value = [-0.5]  # Some score
         mock_load_model.return_value = mock_model
-        
+
         # Mock the model path
-        with patch('anomaly.anomaly_detector.MODEL_PATH', 
-                  Path('/tmp/mock_model.pkl')):
-            yield {"mock_model": mock_model, 
-                  "mock_load_model": mock_load_model}
+        with patch(
+            'anomaly.anomaly_detector.MODEL_PATH',
+            Path('/tmp/mock_model.pkl')
+        ):
+            yield {
+                "mock_model": mock_model,
+                "mock_load_model": mock_load_model
+            }

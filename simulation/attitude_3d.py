@@ -274,7 +274,7 @@ def animate(duration: int = 30, solid: bool = False, show_axes: bool = True) -> 
 
         # Add title with current attitude
         ax.set_title(
-            f"CubeSat Attitude Visualization\n"
+            "CubeSat Attitude Visualization\n"
             + f"Roll: {roll:.1f}°, Pitch: {pitch:.1f}°, Yaw: {yaw:.1f}°\n"
             + f"Time: {elapsed_time:.1f}s",
             fontsize=12,
@@ -330,7 +330,7 @@ def main() -> None:
         solid_mode = False
         show_axes = True
 
-    print(f"\nStarting visualization with:")
+    print("\nStarting visualization with:")
     print(f"- Duration: {duration} seconds")
     print(f"- Rendering: {'Solid' if solid_mode else 'Wireframe'}")
     print(f"- Axes: {'Shown' if show_axes else 'Hidden'}")
