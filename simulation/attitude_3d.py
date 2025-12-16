@@ -9,7 +9,7 @@ Author: Subhajit Roy
 """
 
 import time
-from typing import Tuple
+from typing import Tuple, cast
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -235,7 +235,7 @@ def animate(duration: int = 30, solid: bool = False, show_axes: bool = True) -> 
     """
     plt.ion()
     fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection="3d")
+    ax = cast(Axes3D, fig.add_subplot(111, projection="3d"))
 
     start_time = time.time()
     frame_count = 0
@@ -247,9 +247,9 @@ def animate(duration: int = 30, solid: bool = False, show_axes: bool = True) -> 
         ax.clear()
 
         # Set axis properties
-        ax.set_xlim([-2, 2])
-        ax.set_ylim([-2, 2])
-        ax.set_zlim([-2, 2])
+        ax.set_xlim(-2, 2)
+        ax.set_ylim(-2, 2)
+        ax.set_zlim(-2, 2)
         ax.set_xlabel("X")
         ax.set_ylabel("Y")
         ax.set_zlabel("Z")
