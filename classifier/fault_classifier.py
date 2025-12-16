@@ -7,7 +7,7 @@ of fault based on telemetry parameters.
 Author: Subhajit Roy
 """
 
-from typing import Dict, Optional
+from typing import Dict, Optional, List, TypedDict, Any
 
 # Fault classification thresholds
 THRESHOLDS = {
@@ -19,6 +19,14 @@ THRESHOLDS = {
     "gyro_critical": 0.1,  # Critical attitude disturbance
     "wheel_speed_nominal": (470, 490),  # Normal wheel speed range
 }
+
+
+class ValidationResult(TypedDict):
+    valid: bool
+    missing_fields: List[str]
+    invalid_values: List[str]
+    warnings: List[str]
+    can_classify: bool
 
 
 def classify(telemetry_state: Dict[str, Optional[float]]) -> str:
@@ -60,28 +68,36 @@ def classify(telemetry_state: Dict[str, Optional[float]]) -> str:
         ):
             return "sensor_fault"
 
+        # Cast to float for type safety (we know they are numbers now)
+        v_val = float(voltage)  # type: ignore
+        t_val = float(temperature)  # type: ignore
+        g_val = float(gyro)  # type: ignore
+        w_val = float(wheel_speed)  # type: ignore
+
         # Check for power fault (voltage)
-        if voltage < THRESHOLDS["voltage_critical"]:
+        if v_val < THRESHOLDS["voltage_critical"]:  # type: ignore
             return "power_fault_critical"
-        if voltage < THRESHOLDS["voltage_low"]:
+        if v_val < THRESHOLDS["voltage_low"]:  # type: ignore
             return "power_fault"
 
         # Check for thermal fault (temperature)
-        if temperature > THRESHOLDS["temperature_critical"]:
+        if t_val > THRESHOLDS["temperature_critical"]:  # type: ignore
             return "thermal_fault_critical"
-        if temperature > THRESHOLDS["temperature_high"]:
+        if t_val > THRESHOLDS["temperature_high"]:  # type: ignore
             return "thermal_fault"
 
         # Check for attitude fault (gyro)
-        if abs(gyro) > THRESHOLDS["gyro_critical"]:
+        if abs(g_val) > THRESHOLDS["gyro_critical"]:  # type: ignore
             return "attitude_fault_critical"
-        if abs(gyro) > THRESHOLDS["gyro_high"]:
+        if abs(g_val) > THRESHOLDS["gyro_high"]:  # type: ignore
             return "attitude_fault"
 
         # Check for wheel speed anomaly
-        wheel_min, wheel_max = THRESHOLDS["wheel_speed_nominal"]
-        if not (wheel_min <= wheel_speed <= wheel_max):
-            return "wheel_anomaly"
+        wheel_range = THRESHOLDS["wheel_speed_nominal"]
+        if isinstance(wheel_range, tuple):
+            wheel_min, wheel_max = wheel_range
+            if not (wheel_min <= w_val <= wheel_max):
+                return "wheel_anomaly"
 
         # Check for sensor fault (None values or invalid data)
         if any(v is None for v in [voltage, temperature, gyro, wheel_speed]):
@@ -105,9 +121,13 @@ def get_fault_severity(fault_type: str) -> str:
     """
     severity_map = {
         "power_fault": "critical",
+        "power_fault_critical": "critical",
         "thermal_fault": "high",
+        "thermal_fault_critical": "critical",
         "attitude_fault": "medium",
+        "attitude_fault_critical": "high",
         "sensor_fault": "medium",
+        "wheel_anomaly": "high",
         "normal": "low",
         "unknown": "medium",
     }
@@ -126,9 +146,13 @@ def get_fault_description(fault_type: str) -> str:
     """
     descriptions = {
         "power_fault": "Power system anomaly detected - voltage below operational threshold",
+        "power_fault_critical": "CRITICAL POWER FAILURE - Voltage critically low",
         "thermal_fault": "Thermal anomaly detected - temperature above safe operating limits",
+        "thermal_fault_critical": "CRITICAL THERMAL RUNAWAY - Temperature critically high",
         "attitude_fault": "Attitude control anomaly detected - excessive angular rates",
+        "attitude_fault_critical": "CRITICAL ATTITUDE LOSS - Spacecraft tumbling",
         "sensor_fault": "Sensor malfunction detected - invalid or missing telemetry data",
+        "wheel_anomaly": "Reaction wheel speed anomaly detected",
         "normal": "All systems operating within normal parameters",
         "unknown": "Unknown system state - requires investigation",
     }
@@ -138,7 +162,7 @@ def get_fault_description(fault_type: str) -> str:
 
 def validate_telemetry_for_classification(
     telemetry_state: Dict[str, Optional[float]],
-) -> Dict:
+) -> ValidationResult:
     """Validate telemetry data for fault classification.
 
     Args:
@@ -147,7 +171,7 @@ def validate_telemetry_for_classification(
     Returns:
         Dictionary with validation results and recommendations
     """
-    validation_result = {
+    validation_result: ValidationResult = {
         "valid": True,
         "missing_fields": [],
         "invalid_values": [],
@@ -251,11 +275,11 @@ def main() -> None:
         print(f"Data: {test['data']}")
 
         # Validate telemetry
-        validation = validate_telemetry_for_classification(test["data"])
+        validation = validate_telemetry_for_classification(test["data"])  # type: ignore
 
         if validation["can_classify"]:
             # Classify fault
-            fault_type = classify(test["data"])
+            fault_type = classify(test["data"])  # type: ignore
             severity = get_fault_severity(fault_type)
             description = get_fault_description(fault_type)
 

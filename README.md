@@ -139,7 +139,7 @@ Once the dashboard is running, open your browser to `http://localhost:8501` to v
 
 ## 📊 System Components
 
-### Telemetry Generator (`telemetry/telemetry_stream.py`)
+### Telemetry Generator (`astraguard/telemetry/telemetry_stream.py`)
 - Simulates realistic CubeSat telemetry parameters
 - Voltage, current, temperature, gyroscope, reaction wheel speed
 - 10% fault injection probability for testing
@@ -197,7 +197,7 @@ python3 classifier/fault_classifier.py
 python3 state_machine/state_engine.py
 
 # Test telemetry generation
-python3 telemetry/telemetry_stream.py | head -10
+python3 astraguard/telemetry/telemetry_stream.py | head -10
 ```
 
 ### Integration Test
@@ -206,7 +206,7 @@ Run the complete system:
 
 ```bash
 # Terminal 1: Start telemetry stream
-python3 telemetry/telemetry_stream.py
+python3 astraguard/telemetry/telemetry_stream.py
 
 # Terminal 2: Start dashboard
 streamlit run dashboard/app.py
@@ -272,7 +272,7 @@ Enable verbose logging:
 
 ```bash
 export PYTHONUNBUFFERED=1
-python3 telemetry/telemetry_stream.py 2>&1 | tee debug.log
+python3 astraguard/telemetry/telemetry_stream.py 2>&1 | tee debug.log
 ```
 
 ## 🤝 Contributing

@@ -29,7 +29,7 @@ This script provides a step-by-step guide for demonstrating AstraGuard AI's capa
 1. **Start the System**
    ```bash
    # Terminal 1 - Start telemetry
-   python telemetry/telemetry_stream.py
+   python astraguard/telemetry/telemetry_stream.py
    
    # Terminal 2 - Start dashboard
    streamlit run dashboard/app.py

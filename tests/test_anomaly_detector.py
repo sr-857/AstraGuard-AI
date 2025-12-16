@@ -1,10 +1,7 @@
 import pytest
 from anomaly.anomaly_detector import detect_anomaly
 
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/main
 def test_anomaly_detector_normal():
     state = {
         "voltage": 7.9,
@@ -17,10 +14,7 @@ def test_anomaly_detector_normal():
     assert is_anomalous in [True, False]
     assert isinstance(score, float)
 
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/main
 def test_anomaly_detector_fault():
     state = {
         "voltage": 6.2,

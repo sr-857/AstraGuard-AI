@@ -10,7 +10,7 @@ Author: Subhajit Roy
 
 import time
 from enum import Enum
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Any
 
 
 class SystemState(Enum):
@@ -48,17 +48,33 @@ def decide_action(fault_type: str) -> Tuple[str, str]:
             SystemState.SAFE_MODE.value,
             "Reduce load, disable payload, conserve power",
         ),
+        "power_fault_critical": (
+            SystemState.SAFE_MODE.value,
+            "CRITICAL: Immediate load shedding and safe mode entry",
+        ),
         "thermal_fault": (
             SystemState.COOLING.value,
             "Adjust heaters/thermal valves or reduce load",
+        ),
+        "thermal_fault_critical": (
+            SystemState.SAFE_MODE.value,
+            "CRITICAL: Thermal runaway imminent - entering safe mode",
         ),
         "attitude_fault": (
             SystemState.STABILIZING.value,
             "Fire reaction wheels / command attitude correction",
         ),
+        "attitude_fault_critical": (
+            SystemState.STABILIZING.value,
+            "CRITICAL: Aggressive stabilization required",
+        ),
         "sensor_fault": (
             SystemState.DIAGNOSTICS.value,
             "Run sensor reset and redundancy switch",
+        ),
+        "wheel_anomaly": (
+            SystemState.DIAGNOSTICS.value,
+            "Investigate reaction wheel anomaly",
         ),
         "normal": (SystemState.NORMAL.value, "No action required"),
         "unknown": (SystemState.UNKNOWN.value, "Investigate unknown system state"),
@@ -69,7 +85,7 @@ def decide_action(fault_type: str) -> Tuple[str, str]:
     )
 
 
-def get_recovery_commands(action: str) -> Dict[str, any]:
+def get_recovery_commands(action: str) -> Dict[str, Any]:
     """
     Get specific recovery commands for a given action.
 
@@ -153,7 +169,7 @@ class StateMachine:
 
     def process_fault(
         self, fault_type: str, telemetry_data: Optional[Dict] = None
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Process a fault and determine appropriate response.
 
@@ -220,7 +236,7 @@ class StateMachine:
 
         return False
 
-    def resume_normal_operation(self) -> Dict[str, any]:
+    def resume_normal_operation(self) -> Dict[str, Any]:
         """
         Resume normal operation after recovery.
 
@@ -240,7 +256,7 @@ class StateMachine:
             "timestamp": time.time(),
         }
 
-    def get_system_status(self) -> Dict[str, any]:
+    def get_system_status(self) -> Dict[str, Any]:
         """
         Get current system status.
 
