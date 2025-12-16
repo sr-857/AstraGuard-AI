@@ -156,7 +156,7 @@ def validate_telemetry(telemetry_dict: dict) -> ValidationResult:
     validation_results: ValidationResult = {
         "valid": True,
         "out_of_range": [],
-        "missing_values": []
+        "missing_values": [],
     }
 
     for feature, (min_val, max_val) in NORMAL_RANGES.items():

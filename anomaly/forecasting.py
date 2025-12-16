@@ -37,7 +37,9 @@ def forecast_battery(model: Prophet, minutes: int = 20) -> pd.DataFrame:
     return forecast.tail(minutes)[["ds", "yhat"]]
 
 
-def predict_failure_time(forecast: pd.DataFrame, threshold: float = 6.0) -> Optional[pd.Timestamp]:
+def predict_failure_time(
+    forecast: pd.DataFrame, threshold: float = 6.0
+) -> Optional[pd.Timestamp]:
     """
     Predict the time when the battery level will fall below the threshold.
 
@@ -49,9 +51,9 @@ def predict_failure_time(forecast: pd.DataFrame, threshold: float = 6.0) -> Opti
         Timestamp of failure or None if no failure predicted.
     """
     # Filter for future predictions where yhat < threshold
-    critical = forecast[forecast['yhat'] < threshold]
+    critical = forecast[forecast["yhat"] < threshold]
 
     if not critical.empty:
-        return critical.iloc[0]['ds']
+        return critical.iloc[0]["ds"]
 
     return None
