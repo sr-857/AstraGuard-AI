@@ -59,7 +59,7 @@ graph TD
 
 | Directory | Purpose |
 |-----------|---------|
-| `telemetry/` | Generates realistic spacecraft telemetry data |
+| `astraguard/telemetry/` | Generates realistic spacecraft telemetry data |
 | `anomaly/` | Machine learning models for detecting anomalies |
 | `classifier/` | Classifies detected anomalies into specific fault types |
 | `state_machine/` | Implements recovery logic and state management |
@@ -99,43 +99,42 @@ This document provides in-depth information about the system architecture, algor
 
 3. **Install dependencies**
    ```bash
-   pip install -r requirements.txt
+   pip install -e .
    ```
 
-4. **Run the system**
-   ```bash
-   python -m dashboard.app
-   ```
-   The dashboard will be available at `http://localhost:8501`
-   ```
+### Quick Start
 
-2. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
+Launch the interactive dashboard to see the system in action:
 
-3. **Train the anomaly detection model**
-   ```bash
-   python3 anomaly/anomaly_detector.py
-   ```
+```bash
+python cli.py dashboard
+```
 
-4. **Launch the dashboard**
-   ```bash
-   streamlit run dashboard/app.py
-   ```
+The dashboard will be available at `http://localhost:8501`.
 
-5. **Optional: Launch 3D visualization**
-   ```bash
-   python3 simulation/attitude_3d.py
-   ```
+## 💻 Usage
 
-### Usage
+AstraGuard AI provides a unified CLI for all operations.
 
-Once the dashboard is running, open your browser to `http://localhost:8501` to view:
-- Live telemetry data streams
-- Real-time anomaly detection results
-- System state and recovery actions
-- Historical event timeline
+**Start Telemetry Stream:**
+```bash
+python cli.py telemetry
+```
+
+**Run Anomaly Detection:**
+```bash
+python cli.py classify
+```
+
+**Launch 3D Simulation:**
+```bash
+python cli.py simulate
+```
+
+**View Event Logs:**
+```bash
+python cli.py logs
+```
 
 ## 📊 System Components
 
@@ -184,35 +183,14 @@ Once the dashboard is running, open your browser to `http://localhost:8501` to v
 
 ### Unit Tests
 
-Test individual components:
+Test individual components using the CLI or standard python commands:
 
 ```bash
-# Test anomaly detection
-python3 anomaly/anomaly_detector.py
+# Run all tests
+python -m pytest tests/
 
-# Test fault classification
-python3 classifier/fault_classifier.py
-
-# Test state machine
-python3 state_machine/state_engine.py
-
-# Test telemetry generation
-python3 astraguard/telemetry/telemetry_stream.py | head -10
-```
-
-### Integration Test
-
-Run the complete system:
-
-```bash
-# Terminal 1: Start telemetry stream
-python3 astraguard/telemetry/telemetry_stream.py
-
-# Terminal 2: Start dashboard
-streamlit run dashboard/app.py
-
-# Terminal 3: Start 3D visualization
-python3 simulation/attitude_3d.py
+# Test specific components
+python cli.py classify  # Tests fault classifier
 ```
 
 ## 📈 Performance Metrics
@@ -252,12 +230,13 @@ Edit `state_machine/state_engine.py` to configure:
 ### Common Issues
 
 **Model not found error:**
+The model is trained automatically when you run the dashboard. You can also trigger it manually:
 ```bash
-python3 anomaly/anomaly_detector.py  # This will train and save the model
+python anomaly/anomaly_detector.py
 ```
 
 **Dashboard not updating:**
-- Check telemetry stream is running
+- Check telemetry stream is running (`python cli.py telemetry`)
 - Verify JSON output format
 - Check browser console for errors
 
@@ -272,7 +251,7 @@ Enable verbose logging:
 
 ```bash
 export PYTHONUNBUFFERED=1
-python3 astraguard/telemetry/telemetry_stream.py 2>&1 | tee debug.log
+python cli.py telemetry 2>&1 | tee debug.log
 ```
 
 ## 🤝 Contributing
@@ -291,9 +270,21 @@ python3 astraguard/telemetry/telemetry_stream.py 2>&1 | tee debug.log
 - Write unit tests for new features
 - Update documentation for API changes
 
-## 📚 Documentation
+## 📄 Citation
 
-For additional documentation, including system architecture diagrams, API references, and implementation details, please refer to our [AstraGuard AI Documentation on Google Drive](https://drive.google.com/file/d/191JIBcRAU2ai8tDSliY8ztnEm-ZAHgkV/view).
+If you use AstraGuard AI in your research, please cite it using the following BibTeX:
+
+```bibtex
+@misc{AstraGuardAI,
+  author = {Roy, Subhajit},
+  title = {AstraGuard AI: Autonomous Fault Detection \& Recovery System for CubeSats},
+  year = {2025},
+  month = {11},
+  url = {https://github.com/sr-857/AstraGuard-AI},
+  note = {GitHub repository},
+  license = {MIT}
+}
+```
 
 ## 📝 License
 
