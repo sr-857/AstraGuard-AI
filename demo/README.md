@@ -16,7 +16,7 @@ This directory contains materials for demonstrating AstraGuard AI's capabilities
 
 1. **Start the telemetry simulator**:
    ```bash
-   python telemetry/telemetry_stream.py
+   python astraguard/telemetry/telemetry_stream.py
    ```
 
 2. **In a new terminal, start the dashboard**:
