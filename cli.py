@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import argparse
 import sys
 import subprocess
@@ -5,7 +6,9 @@ import os
 
 
 def run_telemetry():
-    subprocess.run([sys.executable, os.path.join("astraguard", "telemetry", "telemetry_stream.py")])
+    subprocess.run(
+        [sys.executable, os.path.join("astraguard", "telemetry", "telemetry_stream.py")]
+    )
 
 
 def run_dashboard():
@@ -38,7 +41,11 @@ def main():
     subparsers.add_parser("simulate", help="Run 3D attitude simulation")
     subparsers.add_parser("classify", help="Run fault classifier tests")
     logs_parser = subparsers.add_parser("logs", help="Event log utilities")
-    logs_parser.add_argument("--export", metavar="PATH", help="Export event log to file (same as logs/timeline.py)")
+    logs_parser.add_argument(
+        "--export",
+        metavar="PATH",
+        help="Export event log to file (same as logs/timeline.py)",
+    )
 
     args = parser.parse_args()
     if args.command == "telemetry":
