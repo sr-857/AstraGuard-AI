@@ -185,8 +185,8 @@ def get_event_statistics() -> Dict[str, Any]:
             }
 
         # Count event types and severities
-        event_types = {}
-        severity_counts = {}
+        event_types: Dict[str, int] = {}
+        severity_counts: Dict[str, int] = {}
 
         for event in all_events:
             parts = event.split(" | ")

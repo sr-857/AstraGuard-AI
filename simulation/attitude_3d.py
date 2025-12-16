@@ -13,8 +13,8 @@ from typing import Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
-from mpl_toolkits.mplot3d import Axes3D
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+from mpl_toolkits.mplot3d import Axes3D  # type: ignore
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection  # type: ignore
 
 
 def rotation_matrix(ax_deg: float, ay_deg: float, az_deg: float) -> np.ndarray:

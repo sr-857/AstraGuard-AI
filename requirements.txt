@@ -20,3 +20,5 @@ pytest>=6.0.0           # Testing framework
 black>=21.0.0           # Code formatting
 flake8>=3.9.0           # Linting
 mypy>=0.910             # Type checking
+prophet>=1.1.0            # Time series forecasting
+

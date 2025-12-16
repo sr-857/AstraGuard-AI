@@ -11,10 +11,10 @@ import json
 import subprocess
 import time
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 import altair as alt
-import pandas as pd
+import pandas as pd  # type: ignore
 import streamlit as st
 
 # Import project modules
@@ -59,7 +59,7 @@ def initialize_session_state() -> None:
         st.session_state.anomaly_count = 0
 
 
-def start_telemetry_stream() -> subprocess.Popen:
+def start_telemetry_stream() -> Optional[subprocess.Popen]:
     """Start the telemetry stream as a subprocess."""
     telemetry_py = Path(__file__).parent.parent / "telemetry" / "telemetry_stream.py"
 

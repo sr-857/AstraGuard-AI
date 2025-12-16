@@ -3,23 +3,29 @@ import sys
 import subprocess
 import os
 
+
 def run_telemetry():
-    subprocess.run([sys.executable, os.path.join("telemetry", "telemetry_stream.py")])
+    subprocess.run([sys.executable, os.path.join("astraguard", "telemetry", "telemetry_stream.py")])
+
 
 def run_dashboard():
     subprocess.run(["streamlit", "run", os.path.join("dashboard", "app.py")])
 
+
 def run_simulation():
     subprocess.run([sys.executable, os.path.join("simulation", "attitude_3d.py")])
 
+
 def run_classifier():
     subprocess.run([sys.executable, os.path.join("classifier", "fault_classifier.py")])
+
 
 def run_logs(args):
     cmd = [sys.executable, os.path.join("logs", "timeline.py")]
     if args.export:
         cmd.extend(["--export", args.export])
     subprocess.run(cmd)
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -47,6 +53,7 @@ def main():
         run_logs(args)
     else:
         parser.print_help()
+
 
 if __name__ == "__main__":
     main()

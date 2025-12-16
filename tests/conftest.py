@@ -6,13 +6,13 @@ from unittest.mock import MagicMock, patch
 
 # Skip tests if sklearn is not available
 try:
-    import sklearn  # noqa: F401
+    import sklearn  # type: ignore # noqa: F401
 
     SKLEARN_AVAILABLE = True
 except ImportError:
     SKLEARN_AVAILABLE = False
 
-pytest_plugins = []
+pytest_plugins: list[str] = []
 
 # Only add the mock_anomaly_detector fixture if sklearn is available
 if SKLEARN_AVAILABLE:
@@ -21,7 +21,6 @@ if SKLEARN_AVAILABLE:
     @pytest.fixture(autouse=True)
     def mock_anomaly_detector():
         """Mock the anomaly detector module to avoid loading real models."""
-<<<<<<< HEAD
         with patch("anomaly.anomaly_detector.load_model") as mock_load_model:
             # Create a mock model
             mock_model = MagicMock()
@@ -34,9 +33,3 @@ if SKLEARN_AVAILABLE:
                 "anomaly.anomaly_detector.MODEL_PATH", Path("/tmp/mock_model.pkl")
             ):
                 yield {"mock_model": mock_model, "mock_load_model": mock_load_model}
-=======
-        with patch("anomaly.anomaly_detector.load_model", MagicMock()), patch(
-            "anomaly.anomaly_detector.detect_anomaly", MagicMock(return_value=(False, 0.05))
-        ):
-            yield
->>>>>>> origin/main

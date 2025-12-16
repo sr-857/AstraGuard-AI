@@ -9,12 +9,12 @@ Author: Subhajit Roy
 
 import os
 import pickle
-from typing import Tuple
+from typing import Tuple, List, Dict, Union, TypedDict
 
 import numpy as np
 
 try:
-    from sklearn.ensemble import IsolationForest
+    from sklearn.ensemble import IsolationForest  # type: ignore
 
     SKLEARN_AVAILABLE = True
 except ImportError:
@@ -31,6 +31,12 @@ NORMAL_RANGES = {
     "gyro": (-0.05, 0.05),
     "wheel_speed": (470, 490),
 }
+
+
+class ValidationResult(TypedDict):
+    valid: bool
+    out_of_range: List[str]
+    missing_values: List[str]
 
 
 def synthesize_normal(n_samples: int = 1000) -> np.ndarray:
@@ -138,7 +144,7 @@ def detect_anomaly(telemetry_sample: dict) -> Tuple[bool, float]:
         return True, -1.0
 
 
-def validate_telemetry(telemetry_dict: dict) -> dict:
+def validate_telemetry(telemetry_dict: dict) -> ValidationResult:
     """Validate telemetry values against expected ranges.
 
     Args:
@@ -147,7 +153,11 @@ def validate_telemetry(telemetry_dict: dict) -> dict:
     Returns:
         Dictionary with validation results
     """
-    validation_results = {"valid": True, "out_of_range": [], "missing_values": []}
+    validation_results: ValidationResult = {
+        "valid": True,
+        "out_of_range": [],
+        "missing_values": []
+    }
 
     for feature, (min_val, max_val) in NORMAL_RANGES.items():
         value = telemetry_dict.get(feature)
