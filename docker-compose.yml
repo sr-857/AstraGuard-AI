@@ -25,7 +25,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: astra-guard-backend
     ports:
       - "8000:8000"
     environment:
