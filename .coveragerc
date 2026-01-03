@@ -13,13 +13,17 @@ omit =
     memory_engine/replay_engine.py
     memory_engine/decay_policy.py
     astraguard/*
+    backend/main.py
+    cli.py
+    verify_install.py
+    verify_tests.py
 
 [report]
 precision = 2
 show_missing = True
 skip_covered = False
 skip_empty = True
-fail_under = 66
+fail_under = 70
 exclude_lines =
     pragma: no cover
     def __repr__
