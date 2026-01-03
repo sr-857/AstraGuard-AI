@@ -119,13 +119,30 @@ class DistributedResilienceCoordinator:
         """Gracefully shutdown coordination."""
         self._running = False
 
-        # Cancel background tasks
-        if self._state_publisher_task:
-            self._state_publisher_task.cancel()
-        if self._leader_renewal_task:
-            self._leader_renewal_task.cancel()
-        if self._vote_collector_task:
-            self._vote_collector_task.cancel()
+        # Cancel and await background tasks with proper exception handling
+        tasks_to_cancel = [
+            ("state_publisher", self._state_publisher_task),
+            ("leader_renewal", self._leader_renewal_task),
+            ("vote_collector", self._vote_collector_task),
+        ]
+
+        for task_name, task in tasks_to_cancel:
+            if task:
+                try:
+                    task.cancel()
+                    await task
+                except asyncio.CancelledError:
+                    logger.debug(f"Task {task_name} cancelled successfully")
+                except Exception as e:
+                    logger.warning(f"Error during {task_name} shutdown: {e}")
+                finally:
+                    # Clear task reference
+                    if task_name == "state_publisher":
+                        self._state_publisher_task = None
+                    elif task_name == "leader_renewal":
+                        self._leader_renewal_task = None
+                    elif task_name == "vote_collector":
+                        self._vote_collector_task = None
 
         logger.info("Distributed coordination stopped")
 
