@@ -30,6 +30,17 @@ def run_logs(args):
     subprocess.run(cmd)
 
 
+def run_api(args):
+    cmd = [sys.executable, "run_api.py"]
+    if args.host:
+        cmd.extend(["--host", args.host])
+    if args.port:
+        cmd.extend(["--port", str(args.port)])
+    if args.reload:
+        cmd.append("--reload")
+    subprocess.run(cmd)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="AstraGuard-AI: Unified CLI\nUse `cli.py <subcommand>`"
@@ -47,6 +58,24 @@ def main():
         help="Export event log to file (same as logs/timeline.py)",
     )
 
+    api_parser = subparsers.add_parser("api", help="Run REST API server")
+    api_parser.add_argument(
+        "--host",
+        default="0.0.0.0",
+        help="Host to bind to (default: 0.0.0.0)"
+    )
+    api_parser.add_argument(
+        "--port",
+        type=int,
+        default=8000,
+        help="Port to bind to (default: 8000)"
+    )
+    api_parser.add_argument(
+        "--reload",
+        action="store_true",
+        help="Enable auto-reload for development"
+    )
+
     args = parser.parse_args()
     if args.command == "telemetry":
         run_telemetry()
@@ -58,6 +87,8 @@ def main():
         run_classifier()
     elif args.command == "logs":
         run_logs(args)
+    elif args.command == "api":
+        run_api(args)
     else:
         parser.print_help()
 

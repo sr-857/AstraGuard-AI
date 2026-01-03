@@ -331,7 +331,125 @@ if st.session_state.telemetry_active:
                 })
             st.dataframe(pd.DataFrame(decision_display), use_container_width=True)
 
+    # Footer
+    st.markdown("""
+    <style>
+    .site-footer {
+        background: rgba(10, 14, 26, 0.8);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 2rem 0;
+        margin-top: 3rem;
+        color: #b8b8d1;
+        font-family: 'Source Sans Pro', sans-serif;
+    }
+    .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .footer-logo {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 700;
+        color: #ffffff;
+    }
+    .footer-links {
+        display: flex;
+        gap: 1.5rem;
+    }
+    .footer-links a {
+        color: #b8b8d1;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.2s;
+    }
+    .footer-links a:hover {
+        color: #3b82f6;
+    }
+    .footer-copyright {
+        font-size: 0.85rem;
+        color: #8b8ba7;
+    }
+    </style>
+    <div class="site-footer">
+        <div class="footer-content">
+            <div class="footer-logo">
+                <span>AstraGuard</span>
+            </div>
+            <div class="footer-links">
+                <a href="#" target="_self">Start Telemetry</a>
+                <a href="#" target="_self">Stop Telemetry</a>
+            </div>
+            <div class="footer-copyright">
+                &copy; 2025 AstraGuard AI. All rights reserved.
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
     time.sleep(0.5)  # Slow down slightly to see changes
     st.rerun()
 else:
     st.info("📡 Telemetry is offline. Click 'Start Telemetry' to view streams.")
+
+    # Footer for offline state
+    st.markdown("""
+    <style>
+    .site-footer {
+        background: rgba(10, 14, 26, 0.8);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 2rem 0;
+        margin-top: 3rem;
+        color: #b8b8d1;
+        font-family: 'Source Sans Pro', sans-serif;
+    }
+    .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .footer-logo {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 700;
+        color: #ffffff;
+    }
+    .footer-links {
+        display: flex;
+        gap: 1.5rem;
+    }
+    .footer-links a {
+        color: #b8b8d1;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.2s;
+    }
+    .footer-links a:hover {
+        color: #3b82f6;
+    }
+    .footer-copyright {
+        font-size: 0.85rem;
+        color: #8b8ba7;
+    }
+    </style>
+    <div class="site-footer">
+        <div class="footer-content">
+            <div class="footer-logo">
+                <span>AstraGuard</span>
+            </div>
+             <div class="footer-links">
+                <a href="#" target="_self">Start Telemetry</a>
+                <a href="#" target="_self">Stop Telemetry</a>
+            </div>
+            <div class="footer-copyright">
+                &copy; 2025 AstraGuard AI. All rights reserved.
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)

@@ -14,7 +14,7 @@
 
   <br />
 
-  **[📚 Documentation](docs/TECHNICAL.md)** | **[📄 Technical Report](docs/TECHNICAL_REPORT.md)** | **[🧪 Research Lab](research/)** | **[🐛 Report Bug](.github/ISSUE_TEMPLATE/bug_report.yml)** | **[✨ Request Feature](.github/ISSUE_TEMPLATE/feature_request.yml)**
+  **[📚 Documentation](docs/TECHNICAL.md)** | **[📄 Technical Report](docs/TECHNICAL_REPORT.md)** | **[🧪 Research Lab](research/)** | **[📝 Changelog](CHANGES.md)** | **[🐛 Report Bug](.github/ISSUE_TEMPLATE/bug_report.yml)** | **[✨ Request Feature](.github/ISSUE_TEMPLATE/feature_request.yml)**
 
 </div>
 
@@ -130,6 +130,7 @@ We want to run this project like a real training ground. Our goal isn't just to 
 | **🎯 Adaptive Responses** | Same anomaly triggers different actions depending on operational phase constraints. |
 | **🛡️ Centralized Error Handling** | Graceful degradation with fallback behaviors ensures system resilience. Errors are caught, logged, and handled without cascading failures. |
 | **📈 Health Monitoring** | Real-time system health status with component-level degradation tracking exposed to dashboard. |
+| **🌐 REST API** | Production-ready FastAPI REST API for external telemetry ingestion and programmatic access. |
 
 ---
 
@@ -166,6 +167,61 @@ AstraGuard AI includes a robust error-handling layer that ensures system resilie
   - State transition fails? → Revert to last known-good state
 
 **See [docs/ERROR_HANDLING_GUIDE.md](docs/ERROR_HANDLING_GUIDE.md) for implementation details and best practices.**
+
+---
+
+### 🌐 REST API for External Integration
+
+AstraGuard AI now provides a production-ready REST API for programmatic access to telemetry ingestion and anomaly detection:
+
+**Key Endpoints:**
+- `POST /api/v1/telemetry` - Submit single telemetry point
+- `POST /api/v1/telemetry/batch` - Submit batch of telemetry (1-1000 items)
+- `GET /api/v1/status` - Get system health and component status
+- `GET /api/v1/phase` - Get current mission phase with constraints
+- `POST /api/v1/phase` - Update mission phase with validation
+- `GET /api/v1/memory/stats` - Query memory store statistics
+- `GET /api/v1/history/anomalies` - Retrieve anomaly history with filtering
+
+**Features:**
+- Input validation with Pydantic models
+- OpenAPI/Swagger documentation at `/docs`
+- CORS support for web frontends
+- Batch processing for historical data analysis
+- Phase-aware anomaly detection
+- 100% test coverage (23/23 tests passing)
+
+**Quick Start:**
+```bash
+# Start the API server
+python run_api.py
+
+# Or via CLI
+python cli.py api
+
+# Access interactive documentation
+# http://localhost:8000/docs
+```
+
+**Example Usage:**
+```python
+import requests
+
+response = requests.post('http://localhost:8000/api/v1/telemetry', json={
+    "voltage": 7.2,
+    "temperature": 35.5,
+    "gyro": 0.08
+})
+
+result = response.json()
+if result['is_anomaly']:
+    print(f"ANOMALY: {result['anomaly_type']}")
+    print(f"Action: {result['recommended_action']}")
+```
+
+**Documentation:**
+- [Usage Examples](examples/api_usage_examples.py)
+- [Complete Changelog](CHANGES.md)
 
 ---
 
@@ -248,7 +304,71 @@ We are looking for **6–10 contributors** for ECWoC '26 to help us build someth
    streamlit run dashboard/app.py
    ```
 
+4. **Or start the REST API Server**
+   ```bash
+   python run_api.py
+   # Access API docs at http://localhost:8000/docs
+   ```
+
+### Available Commands
+
+```bash
+# Run Streamlit dashboard
+python cli.py dashboard
+
+# Run REST API server
+python cli.py api
+
+# Run REST API with auto-reload (development)
+python cli.py api --reload
+
+# Run telemetry stream generator
+python cli.py telemetry
+
+# Run fault classifier
+python cli.py classify
+
+# Export event logs
+python cli.py logs --export output.json
+```
+
 ---
+```md
+### 🛠️ Common Issues & Troubleshooting
+
+- **Python version errors**
+  - **Issue**: Installation fails due to unsupported Python version.
+  - **Solution**: Ensure Python `3.9+` is installed and selected correctly.
+    ```bash
+    python --version
+    ```
+
+- **Dependency installation failure**
+  - **Issue**: `pip install -r requirements.txt` fails.
+  - **Solution**: Upgrade pip and retry:
+    ```bash
+    pip install --upgrade pip
+    pip install -r requirements.txt
+    ```
+
+- **Streamlit command not found**
+  - **Issue**: `streamlit` is not recognized as a command.
+  - **Solution**: Install Streamlit explicitly:
+    ```bash
+    pip install streamlit
+    ```
+
+- **Port already in use**
+  - **Issue**: Dashboard fails to start due to port conflict.
+  - **Solution**: Stop the conflicting service or run Streamlit on another port:
+    ```bash
+    streamlit run dashboard/app.py --server.port 8502
+    ```
+
+- **Environment variable issues**
+  - **Issue**: Application behaves unexpectedly due to missing environment variables.
+  - **Solution**: Ensure required variables are set as described in the documentation.
+
 
 ## 🤝 Contributing
 

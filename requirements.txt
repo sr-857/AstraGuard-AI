@@ -9,9 +9,16 @@ uvicorn[standard]==0.30.0
 streamlit==1.50.0
 altair==5.2.0
 
+ 
 # API & async
 aiohttp==3.9.3
 pydantic==2.7.0
+=======
+# API and server
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
+httpx>=0.25.0  # For testing FastAPI with TestClient
 
 # ML (CPU-only torch, sentence-transformers)
 torch==2.2.0
