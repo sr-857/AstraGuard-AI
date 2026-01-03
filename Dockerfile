@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 
 # Install Python dependencies with CPU-only torch
-RUN pip install --no-cache-dir --only-binary=:all: \
+RUN pip install --no-cache-dir \
     --extra-index-url https://download.pytorch.org/whl/cpu \
     -r requirements.txt && \
     rm -rf ~/.cache/pip /tmp/* /var/tmp/*

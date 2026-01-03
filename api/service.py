@@ -40,6 +40,23 @@ from fastapi.responses import Response
 from core.metrics import get_metrics_text, get_metrics_content_type
 import numpy as np
 
+# Observability imports
+try:
+    from astraguard.observability import (
+        startup_metrics_server,
+        track_request,
+        track_anomaly_detection,
+        ANOMALY_DETECTIONS,
+        REQUEST_COUNT,
+        DETECTION_LATENCY,
+    )
+    from astraguard.tracing import initialize_tracing, setup_auto_instrumentation, instrument_fastapi, span_anomaly_detection
+    from astraguard.logging_config import setup_json_logging, get_logger, log_request, log_detection, log_error
+    OBSERVABILITY_ENABLED = True
+except ImportError:
+    OBSERVABILITY_ENABLED = False
+    print("Warning: Observability modules not available. Running without monitoring.")
+
 
 # Configuration
 MAX_ANOMALY_HISTORY_SIZE = 10000  # Maximum number of anomalies to keep in memory
@@ -72,6 +89,19 @@ async def lifespan(app: FastAPI):
     """Application lifespan manager."""
     # Initialize components
     initialize_components()
+
+    # Initialize observability (if available)
+    if OBSERVABILITY_ENABLED:
+        try:
+            logger = get_logger(__name__)
+            setup_json_logging(log_level=os.getenv("LOG_LEVEL", "INFO"))
+            initialize_tracing()
+            setup_auto_instrumentation()
+            instrument_fastapi(app)
+            startup_metrics_server(port=9090)
+            logger.info("event", "observability_initialized", service="astra-guard", version="1.0.0")
+        except Exception as e:
+            print(f"Warning: Observability initialization failed: {e}")
 
     yield
 
@@ -144,6 +174,27 @@ async def root():
     )
 
 
+@app.get("/metrics", tags=["monitoring"])
+async def get_metrics():
+    """
+    Prometheus metrics endpoint.
+    
+    Returns Prometheus-formatted metrics including:
+    - HTTP request count and latency
+    - Anomaly detection metrics
+    - Circuit breaker state
+    - Retry attempts
+    - Recovery actions
+    """
+    if not OBSERVABILITY_ENABLED:
+        return {"error": "Observability not enabled"}
+    
+    from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+    from starlette.responses import Response
+    
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+
 @app.get("/health", response_model=HealthCheckResponse)
 async def health_check():
     """Health check endpoint."""
@@ -171,97 +222,131 @@ async def submit_telemetry(telemetry: TelemetryInput):
     Returns:
         AnomalyResponse with detection results and recommended actions
     """
+    request_start = time.time()
+    
     try:
-        # Convert telemetry to dict
-        data = {
-            "voltage": telemetry.voltage,
-            "temperature": telemetry.temperature,
-            "gyro": telemetry.gyro,
-            "current": telemetry.current or 0.0,
-            "wheel_speed": telemetry.wheel_speed or 0.0,
-        }
-
-        # Detect anomaly (uses heuristic if model not loaded)
-        is_anomaly, anomaly_score = detect_anomaly(data)
-
-        # Classify fault type
-        anomaly_type = classify(data)
-
-        # Get phase-aware decision if anomaly detected
-        if is_anomaly:
-            decision = phase_aware_handler.handle_anomaly(
-                anomaly_type=anomaly_type,
-                severity_score=anomaly_score,
-                confidence=0.85,
-                anomaly_metadata={"telemetry": data}
-            )
-
-            response = AnomalyResponse(
-                is_anomaly=True,
-                anomaly_score=anomaly_score,
-                anomaly_type=decision['anomaly_type'],
-                severity_score=decision['severity_score'],
-                severity_level=decision['policy_decision']['severity'],
-                mission_phase=decision['mission_phase'],
-                recommended_action=decision['recommended_action'],
-                escalation_level=decision['policy_decision']['escalation_level'],
-                is_allowed=decision['policy_decision']['is_allowed'],
-                allowed_actions=decision['policy_decision']['allowed_actions'],
-                should_escalate_to_safe_mode=decision['should_escalate_to_safe_mode'],
-                confidence=decision['detection_confidence'],
-                reasoning=decision['reasoning'],
-                recurrence_count=decision['recurrence_info']['count'],
-                timestamp=telemetry.timestamp if telemetry.timestamp else datetime.now()
-            )
-
-            # Store in history
-            anomaly_history.append(response)
-
-            # Store in memory with embedding (simple feature vector)
-            embedding = np.array([
-                telemetry.voltage,
-                telemetry.temperature,
-                abs(telemetry.gyro),
-                telemetry.current or 0.0,
-                telemetry.wheel_speed or 0.0
-            ])
-            memory_store.write(
-                embedding=embedding,
-                metadata={
-                    "anomaly_type": anomaly_type,
-                    "severity": anomaly_score,
-                    "critical": decision['should_escalate_to_safe_mode']
-                },
-                timestamp=telemetry.timestamp
-            )
-
+        if OBSERVABILITY_ENABLED:
+            with track_request("anomaly_detection"):
+                with span_anomaly_detection(data_size=1, model_name="detector_v1"):
+                    response = await _process_telemetry(telemetry, request_start)
         else:
-            # No anomaly
-            response = AnomalyResponse(
-                is_anomaly=False,
-                anomaly_score=anomaly_score,
-                anomaly_type="normal",
-                severity_score=0.0,
-                severity_level="LOW",
-                mission_phase=state_machine.get_current_phase().value,
-                recommended_action="NO_ACTION",
-                escalation_level="NO_ACTION",
-                is_allowed=True,
-                allowed_actions=[],
-                should_escalate_to_safe_mode=False,
-                confidence=0.9,
-                reasoning="All telemetry parameters within normal range",
-                recurrence_count=0,
-                timestamp=telemetry.timestamp if telemetry.timestamp else datetime.now()
+            response = await _process_telemetry(telemetry, request_start)
+
+        if OBSERVABILITY_ENABLED and response.is_anomaly:
+            logger = get_logger(__name__)
+            ANOMALY_DETECTIONS.labels(severity=response.severity_level.lower()).inc()
+            log_detection(
+                logger,
+                severity=response.severity_level,
+                detected_type=response.anomaly_type,
+                confidence=response.confidence,
+                instance_id="telemetry"
             )
 
         return response
 
     except Exception as e:
+        if OBSERVABILITY_ENABLED:
+            logger = get_logger(__name__)
+            log_error(logger, e, {"endpoint": "/api/v1/telemetry"})
+        
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Anomaly detection failed: {str(e)}"
         ) from e
+
+
+async def _process_telemetry(telemetry: TelemetryInput, request_start: float) -> AnomalyResponse:
+    """Internal telemetry processing logic."""
+    # Convert telemetry to dict
+    data = {
+        "voltage": telemetry.voltage,
+        "temperature": telemetry.temperature,
+        "gyro": telemetry.gyro,
+        "current": telemetry.current or 0.0,
+        "wheel_speed": telemetry.wheel_speed or 0.0,
+    }
+
+    # Detect anomaly (uses heuristic if model not loaded)
+    is_anomaly, anomaly_score = detect_anomaly(data)
+
+    # Classify fault type
+    anomaly_type = classify(data)
+
+    # Get phase-aware decision if anomaly detected
+    if is_anomaly:
+        decision = phase_aware_handler.handle_anomaly(
+            anomaly_type=anomaly_type,
+            severity_score=anomaly_score,
+            confidence=0.85,
+            anomaly_metadata={"telemetry": data}
+        )
+
+        response = AnomalyResponse(
+            is_anomaly=True,
+            anomaly_score=anomaly_score,
+            anomaly_type=decision['anomaly_type'],
+            severity_score=decision['severity_score'],
+            severity_level=decision['policy_decision']['severity'],
+            mission_phase=decision['mission_phase'],
+            recommended_action=decision['recommended_action'],
+            escalation_level=decision['policy_decision']['escalation_level'],
+            is_allowed=decision['policy_decision']['is_allowed'],
+            allowed_actions=decision['policy_decision']['allowed_actions'],
+            should_escalate_to_safe_mode=decision['should_escalate_to_safe_mode'],
+            confidence=decision['detection_confidence'],
+            reasoning=decision['reasoning'],
+            recurrence_count=decision['recurrence_info']['count'],
+            timestamp=telemetry.timestamp if telemetry.timestamp else datetime.now()
+        )
+
+        # Store in history
+        anomaly_history.append(response)
+
+        # Store in memory with embedding (simple feature vector)
+        embedding = np.array([
+            telemetry.voltage,
+            telemetry.temperature,
+            abs(telemetry.gyro),
+            telemetry.current or 0.0,
+            telemetry.wheel_speed or 0.0
+        ])
+        memory_store.write(
+            embedding=embedding,
+            metadata={
+                "anomaly_type": anomaly_type,
+                "severity": anomaly_score,
+                "critical": decision['should_escalate_to_safe_mode']
+            },
+            timestamp=telemetry.timestamp
+        )
+
+    else:
+        # No anomaly
+        response = AnomalyResponse(
+            is_anomaly=False,
+            anomaly_score=anomaly_score,
+            anomaly_type="normal",
+            severity_score=0.0,
+            severity_level="LOW",
+            mission_phase=state_machine.get_current_phase().value,
+            recommended_action="NO_ACTION",
+            escalation_level="NO_ACTION",
+            is_allowed=True,
+            allowed_actions=[],
+            should_escalate_to_safe_mode=False,
+            confidence=0.9,
+            reasoning="All telemetry parameters within normal range",
+            recurrence_count=0,
+            timestamp=telemetry.timestamp if telemetry.timestamp else datetime.now()
+        )
+
+    # Record latency in observability (if enabled)
+    if OBSERVABILITY_ENABLED:
+        elapsed_ms = (time.time() - request_start) * 1000
+        DETECTION_LATENCY.observe(elapsed_ms / 1000.0)
+
+    return response
 
 
 @app.post("/api/v1/telemetry/batch", response_model=BatchAnomalyResponse)

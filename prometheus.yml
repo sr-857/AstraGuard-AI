@@ -1,0 +1,163 @@
+# Prometheus Configuration for AstraGuard-AI
+# Production monitoring and alerting rules
+
+global:
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  evaluation_interval: 30s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+# ============================================================================
+# SCRAPE CONFIGURATIONS
+# ============================================================================
+
+scrape_configs:
+  # AstraGuard API Server
+  - job_name: 'astra-guard'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['astra-guard:9090']
+    relabel_configs:
+      - source_labels: [__scheme__, __address__, __metrics_path__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: astra-guard:9090
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # Application Metrics (HTTP, Business Logic, ML)
+  - job_name: 'astra-guard-app-metrics'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['astra-guard:9090']
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'astra_(http|anomaly|detection|accuracy)_.*'
+        action: keep
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'astra-guard-app'
+
+  # Reliability Metrics (#14-19)
+  - job_name: 'astra-guard-reliability'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['astra-guard:9090']
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'astra_(circuit|retry|chaos|recovery|health)_.*'
+        action: keep
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'astra-guard-reliability'
+
+  # Redis
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'redis-cache'
+
+  # Jaeger
+  - job_name: 'jaeger'
+    static_configs:
+      - targets: ['jaeger:14269']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'jaeger-tracing'
+
+  # Node Exporter (Host Metrics)
+  - job_name: 'node'
+    static_configs:
+      - targets: ['localhost:9100']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'docker-host'
+
+# ============================================================================
+# RECORDING RULES
+# ============================================================================
+
+rule_files: []
+  # - 'alert_rules.yml'
+  # - 'recording_rules.yml'
+
+# ============================================================================
+# EXAMPLE ALERT RULES (when enabled)
+# ============================================================================
+
+# alert_rules.yml:
+#
+# groups:
+#   - name: astra-guard
+#     interval: 30s
+#     rules:
+#       # HTTP Error Rate Alert
+#       - alert: HighErrorRate
+#         expr: |
+#           (sum(rate(astra_http_requests_total{status="500"}[5m])) /
+#            sum(rate(astra_http_requests_total[5m]))) > 0.05
+#         for: 5m
+#         annotations:
+#           summary: "High HTTP error rate detected"
+#
+#       # High Latency Alert
+#       - alert: HighLatency
+#         expr: |
+#           histogram_quantile(0.95, 
+#             sum by (le, endpoint) (rate(astra_http_request_duration_seconds_bucket[5m]))
+#           ) > 1.0
+#         for: 5m
+#         annotations:
+#           summary: "P95 latency exceeds 1 second"
+#
+#       # Circuit Breaker Open Alert
+#       - alert: CircuitBreakerOpen
+#         expr: |
+#           astra_circuit_breaker_state{state="OPEN"} > 0
+#         for: 2m
+#         annotations:
+#           summary: "Circuit breaker is open"
+#
+#       # High Anomaly Detection Rate
+#       - alert: AnomalyDetectionSpike
+#         expr: |
+#           rate(astra_anomalies_detected_total[5m]) > 0.1
+#         for: 5m
+#         annotations:
+#           summary: "Unusually high anomaly detection rate"
+#
+#       # Retry Exhaustion Alert
+#       - alert: RetryExhaustion
+#         expr: |
+#           rate(astra_retry_attempts_total{outcome="exhausted"}[5m]) > 0.01
+#         for: 5m
+#         annotations:
+#           summary: "Retry exhaustion detected - possible service issue"
+#
+#       # Recovery Action Failure
+#       - alert: RecoveryActionFailure
+#         expr: |
+#           rate(astra_recovery_actions_total{status="failed"}[5m]) > 0
+#         for: 5m
+#         annotations:
+#           summary: "Recovery action failed"
+#
+#       # Chaos Injection Active
+#       - alert: ChaosInjectionActive
+#         expr: |
+#           increase(astra_chaos_injections_total[5m]) > 0
+#         annotations:
+#           summary: "Chaos experiment injections detected"

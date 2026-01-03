@@ -17,11 +17,23 @@ httpx>=0.28.1,<1.0
 torch>=2.2.0,<3.0
 sentence-transformers==5.1.2
 
-# Observability & monitoring
+# Observability & monitoring (Prometheus, OpenTelemetry, Jaeger, Structured Logging)
 prometheus-client==0.21.0
+opentelemetry-api>=1.20.0,<2.0
+opentelemetry-sdk>=1.20.0,<2.0
+opentelemetry-exporter-jaeger>=1.20.0,<2.0
+opentelemetry-instrumentation-fastapi>=0.41b0,<1.0
+opentelemetry-instrumentation-requests>=0.41b0,<1.0
+opentelemetry-instrumentation-redis>=0.41b0,<1.0
+opentelemetry-instrumentation-sqlalchemy>=0.41b0,<1.0
+structlog>=22.3.0,<24.0
+python-json-logger>=2.0.0,<3.0
+thrift>=0.10.0
+deprecated>=1.2.0
 
 # Infrastructure & coordination
 redis==5.0.1
+sqlalchemy>=2.0.0,<3.0
 
 # Utilities
 python-dateutil==2.8.2
