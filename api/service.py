@@ -84,9 +84,89 @@ def initialize_components():
         memory_store = AdaptiveMemoryStore()
 
 
+def _check_credential_security():
+    """
+    Check and warn about insecure credential configurations at startup.
+
+    Security Checks:
+    1. Warn if METRICS_USER/METRICS_PASSWORD are not set
+    2. Warn if using common/weak credentials
+    3. Set global flag if using defaults
+    """
+    global _USING_DEFAULT_CREDENTIALS
+
+    metrics_user = os.getenv("METRICS_USER")
+    metrics_password = os.getenv("METRICS_PASSWORD")
+
+    # Check if credentials are set
+    if not metrics_user or not metrics_password:
+        print("\n" + "=" * 70)
+        print("⚠️  SECURITY WARNING: Metrics authentication not configured!")
+        print("=" * 70)
+        print("METRICS_USER and METRICS_PASSWORD environment variables are not set.")
+        print("The /metrics endpoint will return HTTP 500 until configured.")
+        print()
+        print("To fix this:")
+        print("  1. Set environment variables:")
+        print("     export METRICS_USER=your_username")
+        print("     export METRICS_PASSWORD=your_secure_password")
+        print("  2. Or add to .env file:")
+        print("     METRICS_USER=your_username")
+        print("     METRICS_PASSWORD=your_secure_password")
+        print("=" * 70 + "\n")
+        return
+
+    # List of weak/common credentials to warn about
+    weak_credentials = [
+        ("admin", "admin"),
+        ("admin", "password"),
+        ("root", "root"),
+        ("admin", "12345"),
+        ("admin", "123456"),
+        ("user", "user"),
+        ("test", "test"),
+    ]
+
+    # Check for weak credentials
+    for weak_user, weak_pass in weak_credentials:
+        if metrics_user == weak_user and metrics_password == weak_pass:
+            _USING_DEFAULT_CREDENTIALS = True
+            print("\n" + "=" * 70)
+            print("🔴 CRITICAL SECURITY WARNING: Using default/weak credentials!")
+            print("=" * 70)
+            print(f"Detected credentials: {metrics_user}/{weak_pass}")
+            print()
+            print("⚠️  THESE CREDENTIALS ARE PUBLICLY KNOWN AND INSECURE!")
+            print()
+            print("IMMEDIATE ACTION REQUIRED:")
+            print("  1. Change credentials before deploying to production")
+            print("  2. Use strong, randomly-generated passwords (20+ characters)")
+            print("  3. Consider using secrets management (Vault, AWS Secrets Manager)")
+            print()
+            print("Generate secure password:")
+            print("  python -c \"import secrets; print(secrets.token_urlsafe(32))\"")
+            print("=" * 70 + "\n")
+            break
+
+    # Check for short passwords
+    if len(metrics_password) < 12:
+        print("\n" + "=" * 70)
+        print("⚠️  WARNING: Weak password detected!")
+        print("=" * 70)
+        print(f"Password length: {len(metrics_password)} characters")
+        print("Recommended minimum: 16 characters")
+        print()
+        print("Consider using a stronger password:")
+        print("  python -c \"import secrets; print(secrets.token_urlsafe(32))\"")
+        print("=" * 70 + "\n")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager."""
+    # Security: Check credentials at startup
+    _check_credential_security()
+
     # Initialize components
     initialize_components()
 
@@ -138,10 +218,38 @@ app.add_middleware(
 
 security = HTTPBasic()
 
+# Credential validation flag (set during startup)
+_USING_DEFAULT_CREDENTIALS = False
+
 def get_current_username(credentials: HTTPBasicCredentials = Depends(security)):
-    """Validate HTTP Basic Auth credentials."""
-    correct_username = os.getenv("METRICS_USER", "admin")
-    correct_password = os.getenv("METRICS_PASSWORD", "admin")
+    """
+    Validate HTTP Basic Auth credentials for metrics endpoint.
+
+    Security Notes:
+    - Credentials MUST be set via METRICS_USER and METRICS_PASSWORD env vars
+    - Default credentials trigger startup warning but are allowed for development
+    - Use secrets.compare_digest for timing-attack resistance
+
+    Args:
+        credentials: HTTP Basic Auth credentials from request
+
+    Returns:
+        Username if valid
+
+    Raises:
+        HTTPException 401: Invalid credentials
+        HTTPException 500: Credentials not configured
+    """
+    correct_username = os.getenv("METRICS_USER")
+    correct_password = os.getenv("METRICS_PASSWORD")
+
+    # Security: Require credentials to be explicitly set
+    if not correct_username or not correct_password:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Metrics authentication not configured. Set METRICS_USER and METRICS_PASSWORD environment variables.",
+            headers={"WWW-Authenticate": "Basic"},
+        )
     
     current_username_bytes = credentials.username.encode("utf8")
     correct_username_bytes = correct_username.encode("utf8")
