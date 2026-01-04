@@ -14,21 +14,27 @@ import logging
 from typing import Optional, Dict, Any
 from datetime import datetime
 
+# Import timeout handling
+from core.timeout_handler import get_timeout_config
+import asyncio
+
 logger = logging.getLogger(__name__)
 
 
 class RedisClient:
     """Redis client for distributed coordination."""
 
-    def __init__(self, redis_url: str = "redis://localhost:6379"):
+    def __init__(self, redis_url: str = "redis://localhost:6379", timeout: float = None):
         """Initialize Redis client.
 
         Args:
             redis_url: Redis connection URL (default: localhost:6379)
+            timeout: Default timeout for operations (uses env config if None)
         """
         self.redis_url = redis_url
         self.redis = None
         self.connected = False
+        self.timeout = timeout or get_timeout_config().redis_timeout
 
     async def connect(self) -> bool:
         """Establish connection to Redis.
@@ -59,7 +65,7 @@ class RedisClient:
                 logger.error(f"Error closing Redis connection: {e}")
 
     async def leader_election(self, instance_id: str, ttl: int = 30) -> bool:
-        """Attempt leader election with TTL-based expiry.
+        """Attempt leader election with TTL-based expiry and timeout protection.
 
         Uses SET with NX (only if not exists) to ensure only one leader.
         TTL ensures automatic failover on instance failure.
@@ -76,17 +82,24 @@ class RedisClient:
             return False
 
         try:
-            result = await self.redis.set(
-                "astra:resilience:leader",
-                instance_id,
-                nx=True,  # Only set if key doesn't exist
-                ex=ttl,  # Set expiry
+            # Wrap Redis operation with timeout
+            result = await asyncio.wait_for(
+                self.redis.set(
+                    "astra:resilience:leader",
+                    instance_id,
+                    nx=True,  # Only set if key doesn't exist
+                    ex=ttl,  # Set expiry
+                ),
+                timeout=self.timeout
             )
             if result:
                 logger.info(f"Instance {instance_id} elected as leader (TTL: {ttl}s)")
             else:
                 logger.debug(f"Instance {instance_id} did not win leader election")
             return result
+        except asyncio.TimeoutError:
+            logger.error(f"Leader election timeout ({self.timeout}s exceeded)")
+            return False
         except Exception as e:
             logger.error(f"Leader election failed: {e}")
             return False
@@ -261,6 +274,9 @@ class RedisClient:
 
             logger.debug(f"Retrieved {len(votes)} votes from cluster")
             return votes
+        except asyncio.TimeoutError:
+            logger.error(f"Get cluster votes timeout ({self.timeout}s exceeded)")
+            return {}
         except Exception as e:
             logger.error(f"Failed to get cluster votes: {e}")
             return {}

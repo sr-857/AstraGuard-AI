@@ -10,6 +10,9 @@ from core.error_handling import (
     ModelLoadError,
     AnomalyEngineError,
 )
+# Import timeout and resource monitoring
+from core.timeout_handler import async_timeout, get_timeout_config, TimeoutError as CustomTimeoutError
+from core.resource_monitor import get_resource_monitor
 from core.component_health import get_health_monitor
 from core.circuit_breaker import (
     CircuitBreaker,
@@ -44,16 +47,18 @@ _model_loader_cb = register_circuit_breaker(
 )
 
 
+@async_timeout(seconds=get_timeout_config().model_load_timeout)
 async def _load_model_impl() -> bool:
     """
     Internal implementation of model loading.
-    Wrapped by retry logic first, then circuit breaker.
+    Wrapped by retry logic first, then circuit breaker and timeout.
 
     Returns:
         True if model loaded successfully, False otherwise
 
     Raises:
         ModelLoadError: If model loading fails
+        TimeoutError: If loading exceeds timeout
     """
     global _MODEL, _MODEL_LOADED, _USING_HEURISTIC_MODE
 
@@ -206,10 +211,12 @@ def _detect_anomaly_heuristic(data: Dict) -> Tuple[bool, float]:
 
 def detect_anomaly(data: Dict) -> Tuple[bool, float]:
     """
-    Detect anomaly in telemetry data with circuit breaker protection.
+    Detect anomaly in telemetry data with resource-aware execution.
 
-    Falls back to heuristic detection if model is unavailable or
-    circuit breaker is open.
+    Falls back to heuristic detection if:
+    - Model is unavailable or circuit breaker is open
+    - Resources are critically low
+    - Operation times out
 
     Args:
         data: Telemetry data dictionary
@@ -221,6 +228,7 @@ def detect_anomaly(data: Dict) -> Tuple[bool, float]:
     """
     global _USING_HEURISTIC_MODE
     health_monitor = get_health_monitor()
+    resource_monitor = get_resource_monitor()
 
     # Track latency
     start_time = time.time()
@@ -228,6 +236,20 @@ def detect_anomaly(data: Dict) -> Tuple[bool, float]:
     try:
         # Always ensure component is registered (safe: idempotent)
         health_monitor.register_component("anomaly_detector")
+        
+        # Check resource availability before heavy operations
+        resource_status = resource_monitor.check_resource_health()
+        if resource_status['overall'] == 'critical':
+            logger.warning(
+                "System resources critical - using lightweight heuristic mode"
+            )
+            health_monitor.mark_degraded(
+                "anomaly_detector",
+                error_msg="Resource constraints - using heuristic mode",
+                fallback_active=True,
+                metadata={"resource_status": resource_status}
+            )
+            return _detect_anomaly_heuristic(data)
 
         # Ensure model is loaded once
         if not _MODEL_LOADED:
