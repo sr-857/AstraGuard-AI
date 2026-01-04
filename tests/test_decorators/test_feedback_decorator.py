@@ -286,3 +286,173 @@ class TestThreadSafety:
 
                 data = json.loads((Path(tmpdir) / "test.json").read_text())
                 assert len(data) == 20
+
+class TestLoadNonListJSON:
+    """Test edge case where JSON file contains non-list data."""
+
+    def test_load_dict_json_returns_empty(self):
+        """_load() returns empty list when JSON is a dict, not list."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "test.json"
+            # Write a dict instead of list to JSON
+            path.write_text('{"key": "value"}')
+            store = ThreadSafeFeedbackStore(path)
+            
+            # When we append, it should treat the file as empty
+            event = FeedbackEvent(
+                fault_id="f1",
+                anomaly_type="test",
+                recovery_action="test_action",
+                mission_phase="NOMINAL_OPS",
+                label=FeedbackLabel.CORRECT,
+            )
+            store.append(event)
+
+            # File should now contain a list with one event
+            data = json.loads(path.read_text())
+            assert isinstance(data, list)
+            assert len(data) == 1
+            assert data[0]["fault_id"] == "f1"
+
+    def test_load_string_json_returns_empty(self):
+        """_load() returns empty list when JSON is a string, not list."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "test.json"
+            # Write a string JSON value
+            path.write_text('"just a string"')
+            store = ThreadSafeFeedbackStore(path)
+            
+            event = FeedbackEvent(
+                fault_id="f2",
+                anomaly_type="test",
+                recovery_action="test_action",
+                mission_phase="NOMINAL_OPS",
+                label=FeedbackLabel.CORRECT,
+            )
+            store.append(event)
+
+            data = json.loads(path.read_text())
+            assert isinstance(data, list)
+            assert len(data) == 1
+
+
+class TestDecoratorExceptionHandling:
+    """Test exception handling paths in decorator."""
+
+    def test_decorator_function_exception_logs_feedback(self):
+        """When decorated function raises, feedback still logged."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            store = ThreadSafeFeedbackStore(Path(tmpdir) / "test.json")
+            with patch("security_engine.decorators._pending_store", store):
+
+                @log_feedback("f_error", "error_type")
+                def raises_runtime_error():
+                    raise RuntimeError("Intentional error")
+
+                with pytest.raises(RuntimeError):
+                    raises_runtime_error()
+
+                # Check that error feedback was logged
+                data = json.loads((Path(tmpdir) / "test.json").read_text())
+                assert len(data) == 1
+                assert data[0]["fault_id"] == "f_error"
+                assert data[0]["label"] == "wrong"
+                assert data[0]["confidence_score"] == 0.0
+
+    def test_decorator_exception_with_mission_phase_attribute(self):
+        """Exception path extracts mission_phase from first arg."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            store = ThreadSafeFeedbackStore(Path(tmpdir) / "test.json")
+            with patch("security_engine.decorators._pending_store", store):
+
+                class MockState:
+                    mission_phase = "PAYLOAD_OPS"
+
+                @log_feedback("f_mission", "test")
+                def error_with_state(state):
+                    raise ValueError("Test")
+
+                with pytest.raises(ValueError):
+                    error_with_state(MockState())
+
+                data = json.loads((Path(tmpdir) / "test.json").read_text())
+                assert len(data) == 1
+                assert data[0]["mission_phase"] == "PAYLOAD_OPS"
+
+    def test_decorator_exception_invalid_mission_phase_defaults(self):
+        """Invalid mission_phase in exception path defaults to NOMINAL_OPS."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            store = ThreadSafeFeedbackStore(Path(tmpdir) / "test.json")
+            with patch("security_engine.decorators._pending_store", store):
+
+                class MockState:
+                    mission_phase = "INVALID_PHASE"
+
+                @log_feedback("f_invalid", "test")
+                def error_with_invalid_state(state):
+                    raise ValueError("Test")
+
+                with pytest.raises(ValueError):
+                    error_with_invalid_state(MockState())
+
+                data = json.loads((Path(tmpdir) / "test.json").read_text())
+                assert data[0]["mission_phase"] == "NOMINAL_OPS"
+
+    def test_decorator_exception_with_nested_error_on_feedback_logging(self):
+        """When exception occurs and feedback logging also fails, exception still propagates."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            store = ThreadSafeFeedbackStore(Path(tmpdir) / "test.json")
+            with patch("security_engine.decorators._pending_store", store):
+                # Make store.append fail to simulate feedback logging error
+                store.append = lambda x: (_ for _ in ()).throw(IOError("Disk full"))
+
+                @log_feedback("f_nested", "test")
+                def raises_then_fails_feedback():
+                    raise ValueError("Original error")
+
+                # Should raise the original ValueError, not the IOError
+                with pytest.raises(ValueError):
+                    raises_then_fails_feedback()
+
+    def test_decorator_with_none_mission_phase_attribute(self):
+        """Mission phase None is handled in exception path."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            store = ThreadSafeFeedbackStore(Path(tmpdir) / "test.json")
+            with patch("security_engine.decorators._pending_store", store):
+
+                class MockState:
+                    mission_phase = None
+
+                @log_feedback("f_none", "test")
+                def error_with_none_phase(state):
+                    raise ValueError("Test")
+
+                with pytest.raises(ValueError):
+                    error_with_none_phase(MockState())
+
+                data = json.loads((Path(tmpdir) / "test.json").read_text())
+                assert data[0]["mission_phase"] == "NOMINAL_OPS"
+
+    def test_decorator_success_with_valid_mission_phases(self):
+        """Success path handles all valid mission phases correctly."""
+        valid_phases = ["LAUNCH", "DEPLOYMENT", "NOMINAL_OPS", "PAYLOAD_OPS", "SAFE_MODE"]
+        
+        with tempfile.TemporaryDirectory() as tmpdir:
+            store = ThreadSafeFeedbackStore(Path(tmpdir) / "test.json")
+            with patch("security_engine.decorators._pending_store", store):
+
+                class MockState:
+                    def __init__(self, phase):
+                        self.mission_phase = phase
+
+                for phase in valid_phases:
+                    @log_feedback("f_phase", "test")
+                    def success_with_phase(state):
+                        return True
+
+                    success_with_phase(MockState(phase))
+
+                data = json.loads((Path(tmpdir) / "test.json").read_text())
+                assert len(data) == len(valid_phases)
+                for i, phase in enumerate(valid_phases):
+                    assert data[i]["mission_phase"] == phase
