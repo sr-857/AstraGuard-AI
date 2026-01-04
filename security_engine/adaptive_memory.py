@@ -1,11 +1,14 @@
 """Operator feedback → high-priority memory pinning + resonance updates."""
 
 import json
+import logging
 from pathlib import Path
 from typing import Dict, Any, Optional
 from datetime import datetime
 
 from models.feedback import FeedbackEvent, FeedbackLabel
+
+logger = logging.getLogger(__name__)
 
 
 class FeedbackPinner:
@@ -74,9 +77,9 @@ class FeedbackPinner:
         try:
             from security_engine.policy_engine import process_policy_updates
             process_policy_updates(self.memory)
-        except Exception:
+        except (ImportError, ModuleNotFoundError, AttributeError) as e:
             # Non-blocking: policy update errors don't block feedback pinning
-            pass
+            logger.debug(f"Policy update failed (non-blocking): {type(e).__name__}: {e}")
 
         return stats
 

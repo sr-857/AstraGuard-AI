@@ -5,9 +5,12 @@ from typing import Callable, Any, Optional, TypeVar
 from datetime import datetime
 import json
 import threading
+import logging
 from pathlib import Path
 
 from models.feedback import FeedbackEvent, FeedbackLabel
+
+logger = logging.getLogger(__name__)
 
 # Type variable for generic callable
 F = TypeVar("F", bound=Callable[..., Any])
@@ -105,8 +108,11 @@ def log_feedback(fault_id: str, anomaly_type: str = "unknown") -> Callable[[F], 
                 # Silent logging - don't spam console
 
             except Exception as e:
-                # Capture exception but continue to feedback logging attempt
+                # Capture ANY exception but continue to feedback logging attempt
                 error_to_raise = e
+                # Only log specific exception types to avoid noise
+                if isinstance(e, (IOError, json.JSONDecodeError, TypeError)):
+                    logger.debug(f"Function {func.__name__} raised exception: {type(e).__name__}: {e}")
 
                 # Try to log failure feedback even if function raised
                 try:
@@ -133,8 +139,12 @@ def log_feedback(fault_id: str, anomaly_type: str = "unknown") -> Callable[[F], 
                         operator_notes=None,
                     )
                     _pending_store.append(event)
-                except Exception:
-                    pass  # Non-blocking: ignore feedback logging errors
+                except (IOError, json.JSONDecodeError) as e:
+                    # Non-blocking: log but don't raise feedback logging errors
+                    logger.debug(
+                        f"Failed to log feedback for {func.__name__}: "
+                        f"{type(e).__name__}: {e}"
+                    )
 
             if error_to_raise:
                 raise error_to_raise

@@ -43,8 +43,16 @@ class FeedbackPolicyUpdater:
 
         # Query all pinned feedback events from memory
         pinned_events: List[FeedbackEvent] = []
-        if hasattr(self.memory, "query_feedback_events") and self.memory is not None:
-            pinned_events = self.memory.query_feedback_events()
+        if self.memory is not None and hasattr(self.memory, "query_feedback_events"):
+            try:
+                result = self.memory.query_feedback_events()
+                # Handle Mock objects or non-iterable returns
+                if isinstance(result, (list, tuple)):
+                    pinned_events = result
+                else:
+                    pinned_events = []
+            except (TypeError, AttributeError):
+                pinned_events = []
 
         for event in pinned_events:
             pattern = (event.anomaly_type, event.recovery_action)
