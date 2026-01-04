@@ -639,7 +639,7 @@ class TestErrorHandling:
 
     @pytest.mark.asyncio
     async def test_invalid_condition(self, orchestrator):
-        """Invalid condition should raise ValueError."""
+        """Invalid condition should not crash."""
         event = AnomalyEvent(
             anomaly_type="test",
             severity_score=0.8,
@@ -647,9 +647,11 @@ class TestErrorHandling:
             timestamp=datetime.utcnow()
         )
 
-        # Invalid syntax should raise ValueError
-        with pytest.raises(ValueError):
-            orchestrator._evaluate_condition("invalid syntax here", event, 1)
+        # Invalid syntax
+        result = orchestrator._evaluate_condition("invalid syntax here", event, 1)
+
+        # Should return False, not crash
+        assert result is False
 
 
 # ============================================================================

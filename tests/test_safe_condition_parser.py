@@ -240,10 +240,10 @@ class TestErrorHandling:
             safe_evaluate_condition("(severity >= 0.8", {"severity": 0.8})
 
     def test_safe_default_on_error(self):
-        """safe_evaluate_condition should raise ValueError on invalid expression."""
-        # Invalid expression should raise ValueError
-        with pytest.raises(ValueError):
-            safe_evaluate_condition("invalid syntax @#$", {"severity": 0.8})
+        """safe_evaluate_condition should return False on error (safe default)."""
+        # Invalid expression should return False instead of raising
+        result = safe_evaluate_condition("invalid syntax @#$", {"severity": 0.8})
+        assert result is False
 
 
 # ============================================================================
