@@ -86,7 +86,16 @@ class StateMachine:
             # Ensure it's marked as HEALTHY (idempotent)
             health_monitor.mark_healthy("state_machine")
         except Exception as e:
-            logger.warning(f"Failed to register state_machine with health monitor: {e}")
+            logger.warning(
+                f"Failed to register state_machine with health monitor: {e}",
+                extra={
+                    "component": "state_machine",
+                    "error_type": type(e).__name__,
+                    "current_state": self.current_state.value,
+                    "current_phase": self.current_phase.value,
+                },
+                exc_info=True,
+            )
 
     def get_current_phase(self) -> MissionPhase:
         """Get the current mission phase."""
@@ -110,6 +119,7 @@ class StateMachine:
             StateTransitionError: If phase transition fails after retry
         """
         health_monitor = get_health_monitor()
+        previous_phase = self.current_phase  # Capture before any validation
 
         try:
             if not isinstance(phase, MissionPhase):
@@ -143,7 +153,6 @@ class StateMachine:
                     },
                 )
 
-            previous_phase = self.current_phase
             self.current_phase = phase
             self.phase_start_time = datetime.now()
             self.phase_history.append((phase, datetime.now()))
@@ -175,7 +184,19 @@ class StateMachine:
                 "message": f"Transitioned from {previous_phase.value} to {phase.value}",
             }
         except StateTransitionError as e:
-            logger.error(f"State transition error: {e.message}")
+            # Extract phase value safely
+            phase_value = phase.value if isinstance(phase, MissionPhase) else str(phase)
+            logger.error(
+                f"State transition error: {e.message}",
+                extra={
+                    "component": "state_machine",
+                    "error_type": "transition_invalid",
+                    "previous_phase": previous_phase.value,
+                    "requested_phase": phase_value,
+                    "current_state": self.current_state.value,
+                },
+                exc_info=False,
+            )
             health_monitor.mark_degraded(
                 "state_machine",
                 error_msg=e.message,
@@ -183,7 +204,19 @@ class StateMachine:
             )
             raise
         except Exception as e:
-            logger.error(f"Unexpected error in set_phase: {e}")
+            # Extract phase value safely
+            phase_value = phase.value if isinstance(phase, MissionPhase) else str(phase)
+            logger.error(
+                f"Unexpected error in set_phase: {e}",
+                extra={
+                    "component": "state_machine",
+                    "error_type": type(e).__name__,
+                    "previous_phase": previous_phase.value,
+                    "requested_phase": phase_value,
+                    "current_state": self.current_state.value,
+                },
+                exc_info=True,
+            )
             health_monitor.mark_degraded(
                 "state_machine", error_msg=str(e), metadata={"error_type": "unexpected"}
             )

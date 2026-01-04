@@ -394,7 +394,15 @@ async def prometheus_metrics():
         metrics_output = generate_latest(REGISTRY)
         return Response(content=metrics_output, media_type=CONTENT_TYPE_LATEST)
     except Exception as e:
-        logger.error(f"Error generating metrics: {e}", exc_info=True)
+        logger.error(
+            f"Error generating metrics: {e}",
+            extra={
+                "component": "health_monitor",
+                "endpoint": "/metrics",
+                "error_type": type(e).__name__,
+            },
+            exc_info=True,
+        )
         raise HTTPException(status_code=500, detail="Failed to generate metrics")
 
 
@@ -420,7 +428,15 @@ async def health_state():
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error getting health state: {e}", exc_info=True)
+        logger.error(
+            f"Error getting health state: {e}",
+            extra={
+                "component": "health_monitor",
+                "endpoint": "/state",
+                "error_type": type(e).__name__,
+            },
+            exc_info=True,
+        )
         raise HTTPException(status_code=500, detail="Failed to get health state")
 
 
@@ -440,7 +456,15 @@ async def trigger_cascade():
             "timestamp": datetime.utcnow().isoformat(),
         }
     except Exception as e:
-        logger.error(f"Error during cascade: {e}", exc_info=True)
+        logger.error(
+            f"Error during cascade: {e}",
+            extra={
+                "component": "health_monitor",
+                "endpoint": "/cascade",
+                "error_type": type(e).__name__,
+            },
+            exc_info=True,
+        )
         raise HTTPException(status_code=500, detail="Failed to evaluate cascade")
 
 
