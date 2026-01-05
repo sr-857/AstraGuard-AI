@@ -71,3 +71,33 @@ AstraGuard now operates with **mission-phase awareness**. Before contributing, u
 Be respectful, constructive, and inclusive. We are all here to learn and build something awesome together.
 
 Happy Coding! 🚀
+
+## ECWoC 2026 Contribution Guidelines
+
+For participants in the **Elite Coders Winter of Code (ECWoC) 2026** event:
+
+### PR Requirements for ECWoC Scoring
+
+To ensure your contribution is eligible for ECWoC scoring, your pull request **MUST**:
+
+1. **Include the ECWoC26 Label**: All PRs must be labeled with `ECWoC26` for automatic tracking and scoring
+2. **Reference an Issue**: Link your PR to an existing issue (e.g., "Closes #20")
+3. **Clear Description**: Provide a detailed description of changes, motivation, and testing approach
+4. **Follow Code Standards**: Adhere to project style guides and maintain code quality
+5. **Pass All Checks**: Ensure CI/CD pipelines pass before submission
+
+### ECWoC Scoring Criteria
+
+- **Code Quality**: Well-written, tested, and maintainable code
+- **Documentation**: Clear commit messages and PR descriptions
+- **Testing**: Comprehensive test coverage for new features
+- **Impact**: Meaningful contributions that address open issues or add value
+- **Community**: Respectful collaboration and adherence to Code of Conduct
+
+### Resources
+
+- [ECWoC Official Website](https://code.elitecoders.xyz/)
+- [AstraGuard-AI Issues](https://github.com/sr-857/AstraGuard-AI/issues)
+- [Project Documentation](../docs/)
+
+Good luck with your contributions! We're excited to see what you build. 🚀
