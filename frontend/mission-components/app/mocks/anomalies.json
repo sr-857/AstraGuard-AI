@@ -1,0 +1,13 @@
+{
+  "templates": [
+    {"satellite": "LEO-1", "severity": "Warning", "metric": "High Latency", "value": "187ms"},
+    {"satellite": "LEO-5", "severity": "Critical", "metric": "Signal Loss", "value": "0%"},
+    {"satellite": "LEO-3", "severity": "Info", "metric": "Orbit Adjust", "value": "Complete"},
+    {"satellite": "LEO-2", "severity": "Warning", "metric": "Thermal High", "value": "78°C"},
+    {"satellite": "LEO-4", "severity": "Critical", "metric": "Battery Low", "value": "12%"},
+    {"satellite": "LEO-6", "severity": "Info", "metric": "TLE Update", "value": "Applied"},
+    {"satellite": "LEO-1", "severity": "Warning", "metric": "Doppler Drift", "value": "+2.3kHz"},
+    {"satellite": "LEO-3", "severity": "Warning", "metric": "Data Rate", "value": "4.2 Mbps"},
+    {"satellite": "LEO-2", "severity": "Info", "metric": "Gyro Stable", "value": "0.01°/s"}
+  ]
+}

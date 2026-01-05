@@ -2,9 +2,13 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Satellite, MissionPhase } from '../../types/mission';
+import { AnomalyEvent } from '../../types/anomalies';
 import missionData from '../../mocks/mission.json';
+import anomalyData from '../../mocks/anomalies.json';
 import { SatelliteCard } from './SatelliteCard';
 import { PhaseTimeline } from './PhaseTimeline';
+import { OrbitMap } from './OrbitMap';
+import { AnomalyFeed } from './AnomalyFeed';
 
 const cycleTasks: Record<string, string[]> = {
   'sat-001': ['Data Dump', 'Status Check', 'Calibration'],
@@ -19,9 +23,12 @@ export const MissionPanel: React.FC<{ onSelectSatellite?: (satId: string) => voi
   const [satellites, setSatellites] = useState<Satellite[]>(missionData.satellites as Satellite[]);
   const [phases, setPhases] = useState<MissionPhase[]>(missionData.phases as MissionPhase[]);
   const [selectedSatId, setSelectedSatId] = useState<string | null>(null);
+  const [anomalies, setAnomalies] = useState<AnomalyEvent[]>([]);
+  const [selectedAnomaly, setSelectedAnomaly] = useState<AnomalyEvent | null>(null);
   const taskIndicesRef = useRef<Record<string, number>>({});
 
   const selectedSat = satellites.find((s) => s.id === selectedSatId) || null;
+  const anomalyTemplates = anomalyData.templates;
 
   useEffect(() => {
     missionData.satellites.forEach((sat) => {
@@ -59,8 +66,36 @@ export const MissionPanel: React.FC<{ onSelectSatellite?: (satId: string) => voi
     return () => clearInterval(interval);
   }, []);
 
+  // 15s anomaly generator
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const template = anomalyTemplates[Math.floor(Math.random() * anomalyTemplates.length)];
+      setAnomalies((prev) => [
+        {
+          id: `evt-${Date.now()}`,
+          satellite: template.satellite,
+          severity: template.severity as 'Critical' | 'Warning' | 'Info',
+          metric: template.metric,
+          value: template.value,
+          timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          acknowledged: false,
+        },
+        ...prev.slice(0, 19),
+      ]);
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, [anomalyTemplates]);
+
+  const handleAcknowledgeAnomaly = (id: string) => {
+    setAnomalies((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, acknowledged: true } : a))
+    );
+  };
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
+      {/* Top: Satellite Tracker from #87 */}
       <section className="glow-teal/50">
         <h2 className="text-2xl font-bold mb-6 text-teal-400 glow-teal flex items-center">
           Satellite Status{' '}
@@ -83,27 +118,54 @@ export const MissionPanel: React.FC<{ onSelectSatellite?: (satId: string) => voi
         </div>
       </section>
 
-      {selectedSat && (
-        <div className="p-6 bg-black/50 backdrop-blur-xl rounded-2xl border border-teal-500/30 glow-teal">
-          <h3 className="text-xl font-bold text-teal-400 mb-4">Selected: {selectedSat.orbitSlot}</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+      {/* 3-Column Layout: Map (2x) + Feed (1x) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Map Section (2x width) */}
+        <section className="lg:col-span-2 glow-teal rounded-2xl border border-teal-500/30 p-4 bg-black/50 backdrop-blur-xl">
+          <h3 className="text-lg font-bold text-teal-400 mb-4 glow-teal">Orbit Visualization</h3>
+          <OrbitMap
+            satellites={satellites}
+            selectedSat={selectedSat}
+            onSatClick={(sat) => {
+              setSelectedSatId(sat.id);
+              onSelectSatellite?.(sat.orbitSlot);
+            }}
+            anomalies={anomalies.filter((a) => !a.acknowledged)}
+          />
+        </section>
+
+        {/* Anomaly Feed (1x width) */}
+        <section className="glow-magenta rounded-2xl border border-magenta-500/30 p-0">
+          <AnomalyFeed
+            anomalies={anomalies}
+            onAcknowledge={handleAcknowledgeAnomaly}
+            onSelect={setSelectedAnomaly}
+            selectedSat={selectedSat?.orbitSlot || null}
+          />
+        </section>
+      </div>
+
+      {/* Selected Items Debug Panel */}
+      {(selectedSat || selectedAnomaly) && (
+        <div className="p-4 bg-black/70 backdrop-blur-xl rounded-xl border border-teal-500/50 glow-teal grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          {selectedSat && (
             <div>
-              <span className="opacity-75">Status:</span>
-              <div className="font-mono text-teal-400">{selectedSat.status}</div>
+              <h4 className="font-bold text-teal-400 mb-2">Selected Satellite</h4>
+              <div className="space-y-1 font-mono text-gray-300">
+                <div>LEO-{selectedSat.orbitSlot} · {selectedSat.status}</div>
+                <div className="text-xs opacity-75">{selectedSat.task} · {Math.round(selectedSat.latency)}ms</div>
+              </div>
             </div>
+          )}
+          {selectedAnomaly && (
             <div>
-              <span className="opacity-75">Latency:</span>
-              <div className="font-mono text-teal-400">{Math.round(selectedSat.latency)}ms</div>
+              <h4 className="font-bold text-magenta-400 mb-2">Selected Anomaly</h4>
+              <div className="space-y-1 font-mono text-gray-300">
+                <div>{selectedAnomaly.satellite}</div>
+                <div className="text-xs opacity-75">{selectedAnomaly.metric} · {selectedAnomaly.value}</div>
+              </div>
             </div>
-            <div>
-              <span className="opacity-75">Task:</span>
-              <div className="font-mono text-teal-400">{selectedSat.task}</div>
-            </div>
-            <div>
-              <span className="opacity-75">Signal:</span>
-              <div className="font-mono text-teal-400">{selectedSat.signal}%</div>
-            </div>
-          </div>
+          )}
         </div>
       )}
 
