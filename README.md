@@ -35,6 +35,28 @@
 
 ---
 
+## 🏆 Our Amazing Contributors
+
+A huge thank you to all the talented developers who have contributed to OpenPlayground! 
+
+<div >
+
+### 🌟 Hall of Fame
+
+<a href="https://github.com/sr-857/AstraGuard-AI/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=sr-857/AstraGuard-AI&max=300" />
+</a>
+
+
+# _Want to see your avatar here? [Make your first contribution today!](CONTRIBUTING.md)_
+
+<!--line-->
+<img src="https://www.animatedimages.org/data/media/562/animated-line-image-0184.gif" width="1920" />
+
+
+
+---
+
 ## 📋 Table of Contents
 
 - [🚀 About the Project](#-about-the-project)
