@@ -1,11 +1,6 @@
 {
-  "app": {
-    "[project]/app/dashboard/page": [
-      "static/media/Geist_Variable-s.p.f19e4721.woff2",
-      "static/media/GeistMono_Variable.p.73882635.woff2"
-    ]
-  },
-  "appUsingSizeAdjust": true,
+  "app": {},
+  "appUsingSizeAdjust": false,
   "pages": {},
   "pagesUsingSizeAdjust": false
 }
