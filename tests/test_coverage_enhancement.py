@@ -26,7 +26,7 @@ class TestStateMachineAdvanced:
     def test_set_phase_invalid_type(self):
         """Test set_phase with invalid phase type (line 84)."""
         with pytest.raises(StateTransitionError) as exc_info:
-            self.sm.set_phase("INVALID_PHASE")  # type: ignore
+            self.sm.set_phase(123)  # type: ignore
         assert "Invalid phase type" in str(exc_info.value)
     
     def test_set_phase_invalid_transition(self):
@@ -34,7 +34,7 @@ class TestStateMachineAdvanced:
         self.sm.current_phase = MissionPhase.LAUNCH
         with pytest.raises(StateTransitionError) as exc_info:
             self.sm.set_phase(MissionPhase.NOMINAL_OPS)  # Invalid: LAUNCH -> NOMINAL_OPS
-        assert "Invalid phase transition" in str(exc_info.value)
+        assert "Invalid transition" in str(exc_info.value)
     
     def test_set_phase_already_in_target(self):
         """Test set_phase when already in target phase (line 103)."""

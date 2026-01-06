@@ -204,16 +204,17 @@ class MissionPhaseValidator:
     
     VALID_PHASES = {
         'LAUNCH', 'DEPLOYMENT', 'NOMINAL_OPS', 'DEGRADED_MODE',
-        'SAFE_MODE', 'RECOVERY_OPS'
+        'SAFE_MODE', 'RECOVERY_OPS', 'PAYLOAD_OPS'
     }
     
     VALID_TRANSITIONS = {
         'LAUNCH': {'DEPLOYMENT', 'SAFE_MODE'},
         'DEPLOYMENT': {'NOMINAL_OPS', 'SAFE_MODE'},
-        'NOMINAL_OPS': {'DEGRADED_MODE', 'SAFE_MODE', 'RECOVERY_OPS'},
+        'NOMINAL_OPS': {'DEGRADED_MODE', 'SAFE_MODE', 'RECOVERY_OPS', 'PAYLOAD_OPS'},
         'DEGRADED_MODE': {'NOMINAL_OPS', 'SAFE_MODE', 'RECOVERY_OPS'},
         'SAFE_MODE': {'NOMINAL_OPS', 'RECOVERY_OPS'},
-        'RECOVERY_OPS': {'NOMINAL_OPS', 'SAFE_MODE'}
+        'RECOVERY_OPS': {'NOMINAL_OPS', 'SAFE_MODE'},
+        'PAYLOAD_OPS': {'NOMINAL_OPS', 'SAFE_MODE'}
     }
     
     @staticmethod
