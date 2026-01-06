@@ -22,7 +22,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "recharts": "^3.6.0",
-    "ws": "^8.18.3"
+    "ws": "^8.19.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
@@ -38,7 +38,7 @@
     "typescript": "^5.7.2",
     "cypress": "^13.6.4",
     "start-server-and-test": "^2.0.3",
-    "@lhci/cli": "^0.13.0",
+    "@lhci/cli": "^0.15.1",
     "cypress-axe": "^1.5.0",
     "axe-core": "^4.8.4"
   }
