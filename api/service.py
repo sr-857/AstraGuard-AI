@@ -15,6 +15,8 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi import FastAPI, HTTPException, status, Depends
 from contextlib import asynccontextmanager
 import secrets
+from pydantic import BaseModel
+
 
 from api.models import (
     TelemetryInput,
@@ -68,7 +70,13 @@ phase_aware_handler = None
 memory_store = None
 latest_telemetry_data = None # Store latest telemetry for dashboard
 anomaly_history = deque(maxlen=MAX_ANOMALY_HISTORY_SIZE)  # Bounded deque prevents memory exhaustion
+active_faults = {} # Stores active chaos experiments: {fault_type: expiration_timestamp}
 start_time = time.time()
+
+class ChaosRequest(BaseModel):
+    fault_type: str
+    duration_seconds: int
+
 
 
 def initialize_components():
@@ -336,6 +344,24 @@ async def submit_telemetry(telemetry: TelemetryInput):
     """
     request_start = time.time()
     
+    # CHAROS INJECTION HOOK
+    # 1. Network Latency Injection
+    if "network_latency" in active_faults:
+        if time.time() < active_faults["network_latency"]:
+            time.sleep(2.0) # Simulate 2s latency
+        else:
+            del active_faults["network_latency"] # Expired
+
+    # 2. Model Loader Failure Injection
+    if "model_loader" in active_faults:
+        if time.time() < active_faults["model_loader"]:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Chaos Injection: Model Loader Failed"
+            )
+        else:
+            del active_faults["model_loader"] # Expired
+    
     try:
         if OBSERVABILITY_ENABLED:
             with track_request("anomaly_detection"):
@@ -506,6 +532,16 @@ async def get_status():
     health_monitor = get_health_monitor()
     components = health_monitor.get_all_health()
 
+    # CHAROS INJECTION HOOK: Redis Failure
+    if "redis_failure" in active_faults:
+        if time.time() < active_faults["redis_failure"]:
+            # Simulate Redis being down/degraded
+            if "memory_store" in components:
+                components["memory_store"]["status"] = "DEGRADED"
+                components["memory_store"]["details"] = "ConnectionRefusedError: Chaos Injection"
+        else:
+            del active_faults["redis_failure"] # Expired
+
     return SystemStatus(
         status="healthy" if all(
             c.get("status") == "HEALTHY" for c in components.values()
@@ -609,6 +645,29 @@ async def get_anomaly_history(
     )
 
 
+@app.post("/api/v1/chaos/inject")
+async def inject_fault(request: ChaosRequest):
+    """Trigger a chaos experiment."""
+    expiration = time.time() + request.duration_seconds
+    active_faults[request.fault_type] = expiration
+    return {"status": "injected", "fault": request.fault_type, "expires_at": expiration}
+
+
+@app.get("/api/v1/chaos/status")
+async def get_chaos_status():
+    """Get active chaos experiments."""
+    # Clean up expired faults
+    current_time = time.time()
+    expired = [k for k, v in active_faults.items() if current_time > v]
+    for k in expired:
+        del active_faults[k]
+        
+    return {
+        "active_faults": list(active_faults.keys()),
+        "details": active_faults
+    }
+
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8001)

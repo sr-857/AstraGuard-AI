@@ -94,15 +94,15 @@ export const useDashboardWebSocket = () => {
     const pollBackend = useCallback(async () => {
         try {
             // Fetch Status (Phase & Health)
-            const statusRes = await fetch('http://localhost:8000/api/v1/status');
+            const statusRes = await fetch('http://localhost:8001/api/v1/status');
             const statusData = await statusRes.json();
 
             // Fetch Latest Telemetry
-            const telemetryRes = await fetch('http://localhost:8000/api/v1/telemetry/latest');
+            const telemetryRes = await fetch('http://localhost:8001/api/v1/telemetry/latest');
             const telemetryDataRaw = await telemetryRes.json();
 
             // Fetch Anomalies
-            const historyRes = await fetch('http://localhost:8000/api/v1/history/anomalies?limit=10');
+            const historyRes = await fetch('http://localhost:8001/api/v1/history/anomalies?limit=10');
             const historyData = await historyRes.json();
 
             setConnected(true);

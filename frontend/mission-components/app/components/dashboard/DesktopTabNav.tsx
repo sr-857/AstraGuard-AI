@@ -1,8 +1,8 @@
 import React from 'react';
 
 interface DesktopTabNavProps {
-    activeTab: 'mission' | 'systems';
-    onTabChange: (tab: 'mission' | 'systems') => void;
+    activeTab: 'mission' | 'systems' | 'chaos';
+    onTabChange: (tab: 'mission' | 'systems' | 'chaos') => void;
 }
 
 export const DesktopTabNav: React.FC<DesktopTabNavProps> = ({ activeTab, onTabChange }) => {
@@ -30,6 +30,18 @@ export const DesktopTabNav: React.FC<DesktopTabNavProps> = ({ activeTab, onTabCh
                 onClick={() => onTabChange('systems')}
             >
                 Systems
+            </button>
+
+            <button
+                id="chaos-tab"
+                data-tab="chaos"
+                className={`ml-2 px-6 py-3 rounded-t-lg font-mono text-lg font-semibold transition-all duration-300 ${activeTab === 'chaos'
+                    ? 'tab-active-amber bg-amber-500/10 border-b-2 border-amber-400 text-amber-300 glow-amber'
+                    : 'text-gray-400 hover:text-amber-300 hover:bg-amber-500/5'
+                    }`}
+                onClick={() => onTabChange('chaos')}
+            >
+                Chaos
             </button>
         </div>
     );

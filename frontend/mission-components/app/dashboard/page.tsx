@@ -7,6 +7,7 @@ import { MissionPanel } from '../components/mission/MissionPanel';
 import dashboardData from '../mocks/dashboard.json';
 
 import { SystemsPanel } from '../components/systems/SystemsPanel';
+import { ChaosPanel } from '../components/chaos/ChaosPanel';
 
 import { DashboardProvider, useDashboard } from '../context/DashboardContext';
 import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
@@ -15,7 +16,7 @@ import { MobileNavHamburger } from '../components/ui/MobileNavHamburger';
 import { DesktopTabNav } from '../components/dashboard/DesktopTabNav';
 
 const DashboardContent: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'mission' | 'systems'>('mission');
+  const [activeTab, setActiveTab] = useState<'mission' | 'systems' | 'chaos'>('mission');
   const { isConnected } = useDashboard();
   const mission = dashboardData.mission as MissionState;
 
@@ -46,6 +47,11 @@ const DashboardContent: React.FC = () => {
               {activeTab === 'systems' && (
                 <TransitionWrapper isActive={activeTab === 'systems'}>
                   <SystemsPanel />
+                </TransitionWrapper>
+              )}
+              {activeTab === 'chaos' && (
+                <TransitionWrapper isActive={activeTab === 'chaos'}>
+                  <ChaosPanel className="max-w-4xl mx-auto mt-4" />
                 </TransitionWrapper>
               )}
             </>

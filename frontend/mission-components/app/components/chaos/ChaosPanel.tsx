@@ -1,0 +1,143 @@
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { Bot, Zap, WifiOff, ServerCrash, Activity } from 'lucide-react';
+
+interface ChaosPanelProps {
+    className?: string;
+}
+
+export const ChaosPanel: React.FC<ChaosPanelProps> = ({ className = "" }) => {
+    const [activeFaults, setActiveFaults] = useState<Record<string, number>>({});
+    const [loading, setLoading] = useState<string | null>(null);
+
+    const fetchStatus = async () => {
+        try {
+            const res = await fetch('http://localhost:8001/api/v1/chaos/status');
+            if (res.ok) {
+                const data = await res.json();
+                setActiveFaults(data.details || {});
+            }
+        } catch (e) {
+            console.error("Failed to fetch chaos status", e);
+        }
+    };
+
+    useEffect(() => {
+        fetchStatus();
+        const interval = setInterval(fetchStatus, 2000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const injectFault = async (faultType: string, duration: number) => {
+        setLoading(faultType);
+        try {
+            await fetch('http://localhost:8001/api/v1/chaos/inject', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fault_type: faultType, duration_seconds: duration })
+            });
+            await fetchStatus();
+        } catch (e) {
+            console.error("Failed to inject fault", e);
+        } finally {
+            setLoading(null);
+        }
+    };
+
+    return (
+        <div className={`backdrop-blur-md bg-slate-900/40 border border-slate-700/50 rounded-xl p-6 flex flex-col gap-4 ${className}`}>
+            <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20">
+                    <Bot className="w-5 h-5 text-red-400" />
+                </div>
+                <div>
+                    <h2 className="text-lg font-semibold text-white">Chaos Engineering</h2>
+                    <p className="text-xs text-slate-400">Resilience Testing & Fault Injection</p>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Network Latency */}
+                <button
+                    onClick={() => injectFault('network_latency', 10)}
+                    disabled={!!activeFaults['network_latency']}
+                    className={`relative group p-4 rounded-lg border transition-all duration-300 flex flex-col items-center gap-2
+            ${activeFaults['network_latency']
+                            ? 'bg-amber-500/10 border-amber-500/30 cursor-not-allowed'
+                            : 'bg-slate-800/50 border-slate-700 hover:border-amber-500/50 hover:bg-slate-800'}`}
+                >
+                    <WifiOff className={`w-6 h-6 ${activeFaults['network_latency'] ? 'text-amber-400 animate-pulse' : 'text-slate-400 group-hover:text-amber-400'}`} />
+                    <span className="text-sm font-medium text-slate-200">Inject Latency</span>
+                    <span className="text-xs text-slate-500">Duration: 10s</span>
+                    {activeFaults['network_latency'] && (
+                        <span className="absolute top-2 right-2 flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                        </span>
+                    )}
+                </button>
+
+                {/* Model Failure */}
+                <button
+                    onClick={() => injectFault('model_loader', 15)}
+                    disabled={!!activeFaults['model_loader']}
+                    className={`relative group p-4 rounded-lg border transition-all duration-300 flex flex-col items-center gap-2
+            ${activeFaults['model_loader']
+                            ? 'bg-red-500/10 border-red-500/30 cursor-not-allowed'
+                            : 'bg-slate-800/50 border-slate-700 hover:border-red-500/50 hover:bg-slate-800'}`}
+                >
+                    <Activity className={`w-6 h-6 ${activeFaults['model_loader'] ? 'text-red-400 animate-bounce' : 'text-slate-400 group-hover:text-red-400'}`} />
+                    <span className="text-sm font-medium text-slate-200">Fail AI Model</span>
+                    <span className="text-xs text-slate-500">Duration: 15s</span>
+                    {activeFaults['model_loader'] && (
+                        <span className="absolute top-2 right-2 flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                        </span>
+                    )}
+                </button>
+
+                {/* Redis Failure */}
+                <button
+                    onClick={() => injectFault('redis_failure', 20)}
+                    disabled={!!activeFaults['redis_failure']}
+                    className={`relative group p-4 rounded-lg border transition-all duration-300 flex flex-col items-center gap-2
+            ${activeFaults['redis_failure']
+                            ? 'bg-purple-500/10 border-purple-500/30 cursor-not-allowed'
+                            : 'bg-slate-800/50 border-slate-700 hover:border-purple-500/50 hover:bg-slate-800'}`}
+                >
+                    <ServerCrash className={`w-6 h-6 ${activeFaults['redis_failure'] ? 'text-purple-400 animate-pulse' : 'text-slate-400 group-hover:text-purple-400'}`} />
+                    <span className="text-sm font-medium text-slate-200">Kill Redis</span>
+                    <span className="text-xs text-slate-500">Duration: 20s</span>
+                    {activeFaults['redis_failure'] && (
+                        <span className="absolute top-2 right-2 flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+                        </span>
+                    )}
+                </button>
+            </div>
+
+            {/* Resilience Metrics Visualization */}
+            <div className="mt-2 bg-slate-900/50 rounded-lg p-3 border border-slate-800">
+                <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs font-semibold text-slate-400 flex items-center gap-2">
+                        <Zap className="w-3 h-3" />
+                        SYSTEM RECOVERY TIME
+                    </span>
+                    <span className="text-xs text-emerald-400 font-mono">145ms avg</span>
+                </div>
+                <div className="h-16 flex items-end gap-1">
+                    {[40, 65, 30, 80, 45, 60, 20, 90, 55, 35, 70, 50, 25, 65, 40].map((h, i) => (
+                        <div
+                            key={i}
+                            className={`flex-1 rounded-sm transition-all duration-500 ${h > 75 ? 'bg-amber-500/50' : 'bg-emerald-500/30'}`}
+                            style={{ height: `${h}%` }}
+                        ></div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
