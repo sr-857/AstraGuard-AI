@@ -1,0 +1,168 @@
+name: CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*.*.*' ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Install Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: v3.12.0
+
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.28.0'
+
+    - name: Configure kubectl
+      run: |
+        aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.EKS_CLUSTER_NAME }}
+
+    - name: Verify cluster connection
+      run: kubectl cluster-info
+
+    - name: Create namespace if not exists
+      run: |
+        kubectl create namespace astraguard --dry-run=client -o yaml | kubectl apply -f -
+
+    - name: Add Helm repositories
+      run: |
+        helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+        helm repo add grafana https://grafana.github.io/helm-charts
+        helm repo update
+
+    - name: Deploy AstraGuard using Helm
+      run: |
+        helm upgrade --install astraguard ./helm/astraguard \
+          --namespace astraguard \
+          --values helm/astraguard/values.yaml \
+          --set astraGuard.image.tag=${{ github.sha }} \
+          --wait \
+          --timeout 10m
+
+    - name: Run post-deployment tests
+      run: |
+        # Wait for pods to be ready
+        kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=astra-guard --namespace astraguard --timeout=300s
+
+        # Run smoke tests
+        kubectl run smoke-test --image=curlimages/curl --rm -i --restart=Never -- curl -f http://astra-guard.astraguard.svc.cluster.local:8000/health/live
+
+    - name: Notify deployment status
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: "Deployment to ${{ github.event.inputs.environment || 'staging' }} completed"
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  blue-green-deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    if: github.event.inputs.environment == 'production' || contains(github.ref, 'tags/v')
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.28.0'
+
+    - name: Configure kubectl
+      run: |
+        aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.EKS_CLUSTER_NAME }}
+
+    - name: Determine target color
+      id: color
+      run: |
+        # Get current active color from service selector
+        CURRENT_COLOR=$(kubectl get service astra-guard -n astraguard -o jsonpath='{.spec.selector.color}' 2>/dev/null || echo "blue")
+        if [ "$CURRENT_COLOR" = "blue" ]; then
+          echo "color=green" >> $GITHUB_OUTPUT
+        else
+          echo "color=blue" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Deploy to inactive color
+      run: |
+        helm upgrade --install astraguard-${{ steps.color.outputs.color }} ./helm/astraguard \
+          --namespace astraguard \
+          --values helm/astraguard/values.yaml \
+          --set blueGreen.enabled=true \
+          --set blueGreen.activeColor=${{ steps.color.outputs.color }} \
+          --set astraGuard.image.tag=${{ github.sha }} \
+          --wait \
+          --timeout 10m
+
+    - name: Run health checks on new deployment
+      run: |
+        # Wait for new pods to be ready
+        kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=astra-guard,color=${{ steps.color.outputs.color }} --namespace astraguard --timeout=300s
+
+        # Run comprehensive health checks
+        kubectl run health-check --image=curlimages/curl --rm -i --restart=Never -- curl -f http://astra-guard-${{ steps.color.outputs.color }}.astraguard.svc.cluster.local:8000/health/live
+
+    - name: Switch traffic to new deployment
+      run: |
+        kubectl patch service astra-guard -n astraguard --type='json' -p='[{"op": "replace", "path": "/spec/selector/color", "value": "${{ steps.color.outputs.color }}"}]'
+
+    - name: Monitor deployment for 5 minutes
+      run: |
+        echo "Monitoring deployment for 5 minutes..."
+        sleep 300
+
+        # Check if new deployment is handling traffic
+        NEW_POD_COUNT=$(kubectl get pods -l app.kubernetes.io/name=astra-guard,color=${{ steps.color.outputs.color }} -n astraguard --no-headers | wc -l)
+        if [ "$NEW_POD_COUNT" -gt 0 ]; then
+          echo "✅ Blue-green deployment successful"
+        else
+          echo "❌ Blue-green deployment failed"
+          exit 1
+        fi
+
+    - name: Cleanup old deployment
+      if: success()
+      run: |
+        OLD_COLOR=${{ steps.color.outputs.color == 'blue' && 'green' || 'blue' }}
+        helm uninstall astraguard-$OLD_COLOR --namespace astraguard || true
+
+    - name: Rollback on failure
+      if: failure()
+      run: |
+        echo "Deployment failed, rolling back..."
+        kubectl patch service astra-guard -n astraguard --type='json' -p='[{"op": "replace", "path": "/spec/selector/color", "value": "${{ steps.color.outputs.color == 'blue' && 'green' || 'blue }}"}]'
