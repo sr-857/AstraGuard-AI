@@ -1822,7 +1822,42 @@ We've organized issues by skill level:
 
 ---
 
-## 📂 Project Structure
+## � Intelligent API Rate Limiting
+
+AstraGuard AI features an advanced, adaptive rate limiting system that protects against abuse while ensuring optimal user experience:
+
+### Key Features
+
+- **🧠 Adaptive Rate Limiting**: Automatically adjusts limits based on real-time system health metrics
+- **📊 System Health Integration**: Monitors CPU, memory, active connections, and anomaly scores
+- **🎯 Intelligent Queuing**: Prioritizes critical requests during high load periods
+- **👤 User Feedback**: Provides clear notifications and graceful degradation
+- **🔄 Auto-Retry Logic**: Smart retry mechanisms with exponential backoff
+- **⚡ Real-time Monitoring**: Live system health indicators and request queue status
+
+### How It Works
+
+1. **Health Monitoring**: Continuously monitors backend system health via `/health/state` endpoint
+2. **Dynamic Adjustment**: Reduces rate limits when system health degrades (healthy → degraded → critical)
+3. **Request Queuing**: Queues requests intelligently when limits are reached
+4. **User Notifications**: Shows real-time feedback about rate limiting and system status
+5. **Graceful Degradation**: Maintains functionality while protecting system stability
+
+### Configuration
+
+```bash
+# Environment Variables
+LOG_LEVEL=INFO                    # Backend logging level
+NEXT_PUBLIC_LOG_LEVEL=INFO        # Frontend logging level
+```
+
+### Demo
+
+Try the interactive API rate limiting demo in the frontend to see the system in action!
+
+---
+
+## �📂 Project Structure
 
 ```
 AstraGuard-AI/

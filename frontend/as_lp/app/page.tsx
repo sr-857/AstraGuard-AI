@@ -7,6 +7,7 @@ import { Footer } from "@/components/footer"
 import { CustomCursor } from "@/components/custom-cursor"
 import { SmoothScroll } from "@/components/smooth-scroll"
 import { SectionBlend } from "@/components/section-blend"
+import { ApiDemo } from "@/components/api-demo"
 import { FederatedLearningDashboard } from "@/components/federated-learning-dashboard"
 import { FederatedLearningVisualization } from "@/components/federated-learning-visualization"
 import { FederatedLearningDemo } from "@/components/federated-learning-demo"
@@ -22,6 +23,7 @@ export default function Home() {
         <SectionBlend />
         <About />
         <Works />
+        <ApiDemo />
 
         {/* Federated Learning Section */}
         <section id="federated-learning" className="py-20 bg-gray-50 dark:bg-gray-900">
