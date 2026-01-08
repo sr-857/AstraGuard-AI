@@ -119,10 +119,13 @@ class TestFeedbackEpic:
         stats = pinner.pin_all_feedback()
         assert isinstance(stats, dict), "Should handle empty feedback gracefully"
         
-        # Test 2: Malformed JSON recovery
+        # Test 2: Malformed JSON recovery - now properly raises informative error
         Path("feedback_processed.json").write_text("invalid json")
-        stats = pinner.pin_all_feedback()
-        assert stats.get("pinned", 0) == 0, "Should gracefully skip malformed data"
+        from security_engine.error_handling import FeedbackValidationError
+        with pytest.raises(FeedbackValidationError) as exc_info:
+            pinner.pin_all_feedback()
+        assert "Corrupted feedback file" in str(exc_info.value), "Should provide actionable error message"
+        assert "feedback_processed.json" in str(exc_info.value), "Should identify the problematic file"
         
         print(f"\n🛡️ PIPELINE RESILIENCE TEST")
         print(f"   Empty feedback: ✅ OK")

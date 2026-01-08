@@ -23,7 +23,7 @@ class FeedbackEvent(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     anomaly_type: str = Field(..., min_length=1, max_length=64)
     recovery_action: str = Field(..., min_length=1, max_length=128)
-    label: FeedbackLabel
+    label: Optional[FeedbackLabel] = None
     operator_notes: Optional[str] = Field(None, max_length=500)
     mission_phase: str = Field(
         ..., pattern=r"^(LAUNCH|DEPLOYMENT|NOMINAL_OPS|PAYLOAD_OPS|SAFE_MODE)$"

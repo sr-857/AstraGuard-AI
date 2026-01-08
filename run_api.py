@@ -12,6 +12,7 @@ Usage:
 
 import argparse
 import uvicorn
+import os
 
 
 def main():
@@ -43,6 +44,9 @@ def main():
 
     args = parser.parse_args()
 
+    # Get log level from environment variable, default to "info"
+    log_level = os.getenv("LOG_LEVEL", "info").lower()
+
     print(f"""
     ╔═══════════════════════════════════════════════════════════╗
     ║          AstraGuard AI REST API Server                    ║
@@ -53,6 +57,7 @@ def main():
     🔌 Port: {args.port}
     📚 Docs: http://{args.host if args.host != '0.0.0.0' else 'localhost'}:{args.port}/docs
     🔄 Reload: {args.reload}
+    📝 Log Level: {log_level}
 
     Press CTRL+C to stop
     """)
@@ -63,7 +68,7 @@ def main():
         port=args.port,
         reload=args.reload,
         workers=args.workers if not args.reload else 1,
-        log_level="info"
+        log_level=log_level
     )
 
 

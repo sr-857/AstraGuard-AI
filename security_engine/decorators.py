@@ -10,6 +10,7 @@ from pathlib import Path
 import signal
 
 from models.feedback import FeedbackEvent, FeedbackLabel
+from .error_handling import handle_file_operation_error
 
 logger = logging.getLogger(__name__)
 

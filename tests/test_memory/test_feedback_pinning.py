@@ -348,24 +348,33 @@ class TestInvalidInput:
     def test_invalid_json_returns_empty(
         self, tmp_path: Path, mock_memory: MagicMock
     ) -> None:
-        """Corrupted JSON returns empty stats."""
+        """Corrupted JSON now raises informative error with actionable suggestions."""
         processed = tmp_path / "feedback_processed.json"
         processed.write_text("invalid json {")
 
         pinner = FeedbackPinner(memory=mock_memory, processed_path=processed)
-        stats = pinner.pin_all_feedback()
 
-        assert stats == {"pinned": 0, "correct": 0, "insufficient": 0, "wrong": 0}
+        from security_engine.error_handling import FeedbackValidationError
+        with pytest.raises(FeedbackValidationError) as exc_info:
+            pinner.pin_all_feedback()
+
+        assert "Corrupted feedback file" in str(exc_info.value)
+        assert "feedback_processed.json" in str(exc_info.value)
         mock_memory.pin_event.assert_not_called()
 
     def test_non_list_json_returns_empty(
         self, tmp_path: Path, mock_memory: MagicMock
     ) -> None:
-        """Non-list JSON returns empty stats."""
+        """Non-list JSON now raises informative error with actionable suggestions."""
         processed = tmp_path / "feedback_processed.json"
         processed.write_text(json.dumps({"not": "list"}))
 
         pinner = FeedbackPinner(memory=mock_memory, processed_path=processed)
-        stats = pinner.pin_all_feedback()
 
-        assert stats == {"pinned": 0, "correct": 0, "insufficient": 0, "wrong": 0}
+        from security_engine.error_handling import FeedbackValidationError
+        with pytest.raises(FeedbackValidationError) as exc_info:
+            pinner.pin_all_feedback()
+
+        assert "Feedback format validation failed" in str(exc_info.value)
+        assert "Expected list of feedback events" in str(exc_info.value)
+        mock_memory.pin_event.assert_not_called()

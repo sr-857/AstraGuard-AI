@@ -5,7 +5,15 @@ interface DesktopTabNavProps {
     onTabChange: (tab: 'mission' | 'systems' | 'chaos' | 'uplink') => void;
 }
 
+import { useSoundEffects } from '../../hooks/useSoundEffects';
+
 export const DesktopTabNav: React.FC<DesktopTabNavProps> = ({ activeTab, onTabChange }) => {
+    const { playClick } = useSoundEffects();
+
+    const handleTabClick = (tabId: string) => {
+        playClick();
+        onTabChange(tabId as any);
+    };
     return (
         <div className="hidden md:flex gap-2 pt-4">
             <button
@@ -51,7 +59,7 @@ export const DesktopTabNav: React.FC<DesktopTabNavProps> = ({ activeTab, onTabCh
                     ? 'tab-active-green bg-green-500/10 border-b-2 border-green-400 text-green-300 glow-green'
                     : 'text-gray-400 hover:text-green-300 hover:bg-green-500/5'
                     }`}
-                onClick={() => onTabChange('uplink')}
+                onClick={() => handleTabClick('uplink')}
             >
                 Uplink
             </button>

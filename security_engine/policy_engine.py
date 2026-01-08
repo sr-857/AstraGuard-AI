@@ -5,6 +5,11 @@ from typing import Dict, List, Optional, Tuple
 
 from models.feedback import FeedbackEvent, FeedbackLabel
 from core.input_validation import PolicyDecision, ValidationError
+from .error_handling import (
+    handle_memory_operation_error,
+    handle_policy_update_error,
+    MemoryOperationError
+)
 
 
 class FeedbackPolicyUpdater:
@@ -52,8 +57,18 @@ class FeedbackPolicyUpdater:
                     pinned_events = result
                 else:
                     pinned_events = []
-            except (TypeError, AttributeError):
-                pinned_events = []
+            except Exception as e:
+                raise handle_memory_operation_error(
+                    e, "Failed to query feedback events from memory",
+                    context={"operation": "query_feedback_events", "memory_available": True}
+                )
+        else:
+            raise MemoryOperationError(
+                "Memory backend not available or missing query_feedback_events method",
+                memory_type="adaptive_memory",
+                missing_method="query_feedback_events",
+                context={"memory_available": self.memory is not None, "has_method": hasattr(self.memory, "query_feedback_events") if self.memory else False}
+            )
 
         for event in pinned_events:
             pattern = (event.anomaly_type, event.recovery_action)
@@ -91,35 +106,58 @@ class FeedbackPolicyUpdater:
         if not self.memory:
             return
 
-        # Threshold tuning (anomaly_detector integration)
-        if rate > self.SUCCESS_RATE_HIGH:
-            # Less sensitive for proven patterns
-            self._adjust_threshold(anomaly_type, phase, self.THRESHOLD_ADJUSTMENT)
-            stats["boosted"] += 1
+        try:
+            # Threshold tuning (anomaly_detector integration)
+            if rate > self.SUCCESS_RATE_HIGH:
+                # Less sensitive for proven patterns
+                self._adjust_threshold(anomaly_type, phase, self.THRESHOLD_ADJUSTMENT)
+                stats["boosted"] += 1
 
-        elif rate < self.SUCCESS_RATE_LOW:
-            # More sensitive for failure-prone
-            self._adjust_threshold(anomaly_type, phase, -self.THRESHOLD_ADJUSTMENT)
-            if hasattr(self.memory, "suppress_action") and self.memory is not None:
-                self.memory.suppress_action(action, phase)
-            stats["suppressed"] += 1
+            elif rate < self.SUCCESS_RATE_LOW:
+                # More sensitive for failure-prone
+                self._adjust_threshold(anomaly_type, phase, -self.THRESHOLD_ADJUSTMENT)
+                if hasattr(self.memory, "suppress_action") and self.memory is not None:
+                    self.memory.suppress_action(action, phase)
+                stats["suppressed"] += 1
 
-        # Playbook preference (always update)
-        preference_weight = min(rate, 1.0)  # 0-1 normalized
-        if hasattr(self.memory, "set_action_preference") and self.memory is not None:
-            self.memory.set_action_preference(action, preference_weight, phase)
+            # Playbook preference (always update)
+            preference_weight = min(rate, 1.0)  # 0-1 normalized
+            if hasattr(self.memory, "set_action_preference") and self.memory is not None:
+                self.memory.set_action_preference(action, preference_weight, phase)
 
-        stats["updated"] += 1
+            stats["updated"] += 1
+        except Exception as e:
+            raise handle_policy_update_error(
+                e, f"Failed to update policy for anomaly type '{anomaly_type}' and action '{action}'",
+                context={
+                    "anomaly_type": anomaly_type,
+                    "action": action,
+                    "success_rate": rate,
+                    "phase": phase,
+                    "operation": "update_policy"
+                }
+            )
 
     def _adjust_threshold(self, anomaly_type: str, phase: str, delta: float) -> None:
         """Safe bounded threshold adjustment."""
         if not self.memory or not hasattr(self.memory, "get_threshold"):
             return
 
-        current: float = self.memory.get_threshold(anomaly_type, phase)
-        new_threshold = max(0.1, min(2.0, current * (1 + delta)))  # Safe 0.1-2.0
-        if hasattr(self.memory, "set_threshold"):
-            self.memory.set_threshold(anomaly_type, phase, new_threshold)
+        try:
+            current: float = self.memory.get_threshold(anomaly_type, phase)
+            new_threshold = max(0.1, min(2.0, current * (1 + delta)))  # Safe 0.1-2.0
+            if hasattr(self.memory, "set_threshold"):
+                self.memory.set_threshold(anomaly_type, phase, new_threshold)
+        except Exception as e:
+            raise handle_memory_operation_error(
+                e, f"Failed to adjust threshold for anomaly type '{anomaly_type}' in phase '{phase}'",
+                context={
+                    "anomaly_type": anomaly_type,
+                    "phase": phase,
+                    "delta": delta,
+                    "operation": "adjust_threshold"
+                }
+            )
 
 
 def process_policy_updates(memory: Optional[object]) -> Dict[str, int]:

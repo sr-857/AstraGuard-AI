@@ -1,67 +1,68 @@
-# Deployment Automation Implementation Plan
+# Testing Suite Expansion Plan
 
-## Phase 1: Kubernetes Manifests ✅ COMPLETED
-- [x] Create k8s/ directory structure
-- [x] Create namespace manifest
-- [x] Create ConfigMaps for application configuration
-- [x] Create Secrets for sensitive data
-- [x] Create Deployment for astra-guard (main API)
-- [x] Create Deployment for Redis
-- [x] Create Deployment for Prometheus
-- [x] Create Deployment for Grafana
-- [x] Create Deployment for Jaeger
-- [x] Create Deployment for Redis Exporter
-- [x] Create Deployment for Node Exporter
-- [x] Create Services for all deployments
-- [x] Create Ingress for external access
-- [x] Create PersistentVolumeClaims for data persistence
+## Phase 1: Environment Setup ✅ COMPLETED
+- [x] Install test dependencies (pytest-cov, pytest-asyncio, etc.)
+- [x] Verify test environment is ready
 
-## Phase 2: Helm Charts ✅ PARTIALLY COMPLETED
-- [x] Create helm/astraguard/ directory structure
-- [x] Create Chart.yaml
-- [x] Create values.yaml with default configurations
-- [x] Create templates/ directory
-- [x] Create _helpers.tpl for template functions
-- [x] Create AstraGuard deployment template
-- [ ] Convert remaining base manifests to Helm templates
-- [ ] Add helper templates for common patterns
+## Phase 2: Review Current Test Coverage
+- [ ] Run pytest with coverage to identify untested modules and lines
+- [ ] Analyze coverage report to prioritize areas needing tests
+- [ ] Document current coverage percentage
 
-## Phase 3: Monitoring Stack Adaptation ✅ COMPLETED
-- [x] Update prometheus.yml for Kubernetes service discovery
-- [x] Create Grafana ConfigMaps for dashboards and datasources
-- [x] Create ServiceMonitors for Prometheus operator
-- [x] Add custom metrics collection for application
+## Phase 3: Add Missing Unit Tests for Core Modules
+- [x] Add unit tests for core/circuit_breaker.py
+- [x] Add unit tests for core/error_handling.py
+- [ ] Add unit tests for core/component_health.py
+- [ ] Add unit tests for core/error_handling.py
+- [ ] Add unit tests for core/input_validation.py
+- [ ] Add unit tests for core/metrics.py
+- [ ] Add unit tests for core/resource_monitor.py
+- [ ] Add unit tests for core/retry.py
+- [ ] Add unit tests for core/timeout_handler.py
 
-## Phase 4: CI/CD Pipeline ✅ COMPLETED
-- [x] Create .github/workflows/ directory
-- [x] Create CI workflow for testing
-- [x] Create CD workflow for deployment
-- [x] Add automated testing steps
-- [x] Add security scanning
-- [x] Add container image building and pushing
+## Phase 4: Add Unit Tests for Backend Modules
+- [ ] Add unit tests for backend/distributed_coordinator.py
+- [ ] Add unit tests for backend/fallback_manager.py
+- [ ] Add unit tests for backend/health_monitor.py
+- [ ] Add unit tests for backend/recovery_orchestrator_enhanced.py
+- [ ] Add unit tests for backend/redis_client.py
+- [ ] Add unit tests for backend/safe_condition_parser.py
 
-## Phase 5: Blue-Green Deployment ✅ COMPLETED
-- [x] Create blue-green deployment manifests
-- [x] Implement service switching logic
-- [x] Add health checks for blue-green validation
-- [x] Create rollback procedures
+## Phase 5: Enhance Existing Module Tests
+- [ ] Enhance unit tests for anomaly/anomaly_detector.py
+- [ ] Add unit tests for state_machine/state_engine.py
+- [ ] Add unit tests for security_engine/policy_engine.py
+- [ ] Add unit tests for classifier/fault_classifier.py
+- [ ] Add unit tests for config/mission_phase_policy_loader.py
+- [ ] Add unit tests for memory_engine components
 
-## Phase 6: Auto-Scaling Configuration ✅ COMPLETED
-- [x] Create HorizontalPodAutoscaler for main application
-- [x] Configure custom metrics for scaling
-- [x] Set up Cluster Autoscaler if needed
-- [x] Add scaling policies for different components
+## Phase 6: Implement Integration Tests for API Endpoints
+- [ ] Expand test_api.py with additional integration scenarios
+- [ ] Add end-to-end tests for complete workflows (telemetry → anomaly → recovery)
+- [ ] Test API under load and failure conditions
+- [ ] Add tests for batch operations and edge cases
 
-## Phase 7: Testing and Validation ✅ COMPLETED
-- [x] Create local testing scripts with minikube/kind
-- [x] Test blue-green deployment switching
-- [x] Validate auto-scaling behavior
-- [x] Test monitoring stack functionality
-- [x] Create deployment verification scripts
+## Phase 7: Add Chaos Engineering Tests for Resilience
+- [ ] Enhance existing chaos tests with more fault injection scenarios
+- [ ] Add network partition tests
+- [ ] Add database failure simulations
+- [ ] Add service degradation tests
+- [ ] Implement chaos tests for distributed components
 
-## Additional Deliverables ✅ COMPLETED
-- [x] Create deployment automation script (deploy.sh)
-- [x] Create comprehensive deployment documentation
-- [x] Set up monitoring dashboards
-- [x] Configure ingress and external access
-- [x] Implement security best practices
+## Phase 8: Increase Test Coverage to 80%+
+- [ ] Identify and test uncovered code paths
+- [ ] Add edge case and error condition tests
+- [ ] Ensure all branches and conditions are tested
+- [ ] Verify coverage reaches 80%+
+
+## Phase 9: Add Performance Benchmarking Tests
+- [ ] Expand benchmark tests with additional performance metrics
+- [ ] Add memory usage benchmarks
+- [ ] Add throughput and latency benchmarks
+- [ ] Add scalability tests
+
+## Phase 10: Validation and Cleanup
+- [ ] Run full test suite with coverage
+- [ ] Validate chaos and performance tests
+- [ ] Update CI/CD to include new tests
+- [ ] Document test coverage improvements

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { AnomalyEvent } from '../../types/dashboard';
 
 
@@ -10,7 +10,20 @@ interface Props {
   selectedSat?: string | null;
 }
 
+import { useSoundEffects } from '../../hooks/useSoundEffects';
+
 export const AnomalyFeed: React.FC<Props> = ({ anomalies, onAcknowledge, onSelect, onInvestigate, selectedSat }) => {
+  const { playAlert } = useSoundEffects();
+  const prevCount = useRef(anomalies.length);
+
+  useEffect(() => {
+    if (anomalies.length > prevCount.current) {
+      const newest = anomalies[anomalies.length - 1];
+      playAlert(newest.severity === 'Critical' ? 'high' : 'low');
+    }
+    prevCount.current = anomalies.length;
+  }, [anomalies, playAlert]);
+
   // ... (keep existing severityConfig and sort logic - omitting for brevity in tool call if possible, but replace_file_content needs context)
   // Actually, replace_file_content replaces a block. I should target the Props definition first, then the specific button area.
   // Let's do it in one go if possible, or two.

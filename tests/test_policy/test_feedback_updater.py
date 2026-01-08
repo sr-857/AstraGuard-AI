@@ -316,10 +316,13 @@ class TestErrorResilience:
         assert stats["updated"] == 0
 
     def test_missing_memory_methods(self, mock_memory: MagicMock) -> None:
-        """Gracefully handles missing memory methods."""
+        """Now raises informative error for missing memory methods."""
         memory = MagicMock(spec=[])  # Empty spec = no methods
         updater = FeedbackPolicyUpdater(memory)
 
-        # Should not raise
-        stats = updater.update_from_feedback()
-        assert "updated" in stats
+        from security_engine.error_handling import MemoryOperationError
+        with pytest.raises(MemoryOperationError) as exc_info:
+            updater.update_from_feedback()
+
+        assert "Memory backend not available" in str(exc_info.value)
+        assert "query_feedback_events" in str(exc_info.value)

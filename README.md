@@ -37,18 +37,18 @@
 
 ## 🏆 Our Amazing Contributors
 
-A huge thank you to all the talented developers who have contributed to AstraGuard AI
+### A huge thank you to all the talented developers who have contributed to AstraGuard AI
 
 <div >
 
-### 🌟 Hall of Fame
+## 🌟 Hall of Fame
 
-<a href="https://github.com/sr-857/AstraGuard-AI/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=sr-857/AstraGuard-AI&max=300" />
+
+  <img src="https://contrib.rocks/image?repo=sr-857/AstraGuard-AI" />
 </a>
 
 
-# _Want to see your avatar here? [Make your first contribution today!](CONTRIBUTING.md)_
+## _Want to see your avatar here? [Make your first contribution today!](CONTRIBUTING.md)_
 
 
 
@@ -1084,7 +1084,8 @@ analysis = analyzer.analyze_attack_surface(scan_results)
 | **⚡ Real-Time Streaming** | High-performance telemetry processing with sub-second latency | Pathway |
 | **🧠 Adaptive Memory** | Context-aware decision making based on historical anomaly patterns | Vector embeddings |
 | **🎯 Smart Prioritization** | Intelligent target selection based on exploitability and mission impact | AI reasoning |
-| **📈 Health Monitoring** | Component-level degradation tracking with automated failover | Centralized error handling |
+| **� Explainable Anomaly Insights** | Per-anomaly explanations including feature importances, SHAP values, and confidence scores to increase operator trust and transparency | React + visualization components |
+| **�📈 Health Monitoring** | Component-level degradation tracking with automated failover | Centralized error handling |
 
 ---
 

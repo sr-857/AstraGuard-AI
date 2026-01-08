@@ -20,6 +20,18 @@ const os = require('os');
 const isWindows = os.platform() === 'win32';
 const isLinux = os.platform() === 'linux';
 
+// Get log level from environment variable
+const LOG_LEVEL = (process.env.LOG_LEVEL || 'INFO').toUpperCase();
+const LOG_LEVELS = { 'NONE': 0, 'ERROR': 1, 'WARNING': 2, 'INFO': 3, 'DEBUG': 4 };
+const currentLogLevel = LOG_LEVELS[LOG_LEVEL] || LOG_LEVELS.INFO;
+
+// Simple logger function
+function log(level, message) {
+  if (LOG_LEVELS[level] <= currentLogLevel) {
+    console.log(`[${level}] ${message}`);
+  }
+}
+
 let apiProcess = null;
 let appProcess = null;
 
@@ -28,6 +40,8 @@ console.log(`
 ║    AstraGuard AI - Complete Stack Startup                 ║
 ╚═══════════════════════════════════════════════════════════╝
 `);
+
+log('INFO', 'Starting AstraGuard AI stack...');
 
 /**
  * Wait for a server to be ready
@@ -39,7 +53,7 @@ function waitForServer(port, maxAttempts = 30) {
     const check = () => {
       attempts++;
       const req = http.get(`http://localhost:${port}`, (res) => {
-        console.log(`✅ Server on port ${port} is ready!`);
+        log('INFO', `Server on port ${port} is ready!`);
         resolve(true);
       });
 
@@ -69,7 +83,7 @@ function openBrowser(url) {
  * Start backend API
  */
 async function startBackend() {
-  console.log('📡 Starting Backend API Server...');
+  log('INFO', 'Starting Backend API Server...');
 
   return new Promise((resolve) => {
     const python = isWindows ? 'python' : 'python3';
@@ -81,8 +95,8 @@ async function startBackend() {
     apiProcess.stdout.on('data', (data) => {
       const output = data.toString();
       if (output.includes('Application startup complete')) {
-        console.log('✅ Backend API Server is running on http://localhost:8000');
-        console.log('📚 API Docs: http://localhost:8000/docs');
+        log('INFO', 'Backend API Server is running on http://localhost:8000');
+        log('INFO', 'API Docs: http://localhost:8000/docs');
         resolve(true);
       }
     });
@@ -99,19 +113,19 @@ async function startBackend() {
  * Start frontend app
  */
 async function startFrontend() {
-  console.log('🎨 Starting Frontend App (Next.js)...');
+  log('INFO', 'Starting Frontend App (Next.js)...');
 
   return new Promise((resolve) => {
     const cmd = isWindows ? 'npm.cmd' : 'npm';
     appProcess = spawn(cmd, ['run', 'dev'], {
-      cwd: path.join(__dirname, 'frontend', 'astraguard-ai.site'),
+      cwd: path.join(__dirname, 'frontend', 'as_lp'),
       stdio: 'pipe',
     });
 
     appProcess.stdout.on('data', (data) => {
       const output = data.toString();
       if (output.includes('ready - started server') || output.includes('compiled')) {
-        console.log('✅ Frontend App is running on http://localhost:3000');
+        log('INFO', 'Frontend App is running on http://localhost:3000');
         resolve(true);
       }
     });

@@ -42,8 +42,9 @@ from core.circuit_breaker import get_all_circuit_breakers
 import anomaly.anomaly_detector  # noqa: F401
 
 # Configure logging
+log_level = os.getenv("LOG_LEVEL", "INFO").upper()
 logging.basicConfig(
-    level=logging.INFO,
+    level=getattr(logging, log_level),
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
@@ -315,6 +316,10 @@ def create_app() -> FastAPI:
 
     # Health monitor routes (Issue #16)
     app.include_router(health_router)
+
+    # External monitoring integrations (Issue #183)
+    from backend.monitoring_integrations import router as monitoring_router
+    app.include_router(monitoring_router)
 
     # Root endpoint
     @app.get("/")

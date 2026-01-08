@@ -16,6 +16,9 @@ import logging
 from typing import Dict, Any, Optional, Tuple
 from dataclasses import asdict
 from datetime import datetime, timedelta
+import json
+from pathlib import Path
+from models.feedback import FeedbackEvent
 
 from state_machine.state_engine import StateMachine, MissionPhase
 from state_machine.mission_phase_policy_engine import (
@@ -179,6 +182,9 @@ class PhaseAwareAnomalyHandler:
         # If escalation is needed, trigger it
         if should_escalate:
             self._execute_escalation(decision)
+
+        # Record for feedback loop
+        self._record_anomaly_for_reporting(decision, anomaly_metadata)
         
         return decision
     
@@ -260,6 +266,50 @@ class PhaseAwareAnomalyHandler:
             
         except Exception as e:
             logger.error(f"Failed to execute escalation: {e}", exc_info=True)
+
+    def _record_anomaly_for_reporting(
+        self, 
+        decision: Dict[str, Any], 
+        anomaly_metadata: Dict[str, Any]
+    ):
+        """
+        Record anomaly decision for operator feedback loop.
+        
+        Saves the event to a pending file for review via CLI.
+        """
+        try:
+            event = FeedbackEvent(
+                fault_id=decision['decision_id'],
+                anomaly_type=decision['anomaly_type'],
+                recovery_action=decision['recommended_action'],
+                mission_phase=decision['mission_phase'],
+                timestamp=decision['timestamp'],
+                confidence_score=decision['detection_confidence'],
+                # label is None by default for pending events
+            )
+            
+            pending_file = Path("feedback_pending.json")
+            events = []
+            
+            if pending_file.exists():
+                try:
+                    content = pending_file.read_text()
+                    if content.strip():
+                        # Load existing events
+                        raw_events = json.loads(content)
+                        # We don't need to validate all existing ones strictly here, just append
+                        events = raw_events
+                except json.JSONDecodeError:
+                    logger.warning("Corrupt pending feedback file, starting fresh.")
+            
+            # Append new event
+            events.append(event.model_dump(mode='json'))
+            
+            # Write back
+            pending_file.write_text(json.dumps(events, indent=2))
+            
+        except Exception as e:
+            logger.error(f"Failed to record anomaly for reporting: {e}")
     
     def _log_decision(self, decision: Dict[str, Any]):
         """Log the anomaly decision for audit and analysis."""
@@ -278,6 +328,12 @@ class PhaseAwareAnomalyHandler:
         }
         
         logger.info(f"Anomaly decision: {log_entry}")
+    
+    def _record_anomaly_for_reporting(self, decision: Dict[str, Any], anomaly_metadata: Dict[str, Any]):
+        """Record anomaly for reporting and analytics purposes."""
+        # This method could store anomalies in a database, send to monitoring systems, etc.
+        # For now, we'll just log that recording occurred
+        logger.debug(f"Recorded anomaly for reporting: {decision['decision_id']}")
     
     def _generate_decision_id(self) -> str:
         """Generate a unique decision identifier."""
