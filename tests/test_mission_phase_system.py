@@ -91,6 +91,8 @@ def test_basic_functionality():
     # Test 6: Phase transitions
     print("\n[6] Testing Phase Transitions...")
     sm = StateMachine()
+    # Manually set to LAUNCH to test full lifecycle
+    sm.current_phase = MissionPhase.LAUNCH
     print(f"    Starting phase: {sm.get_current_phase().value}")
     
     transitions = [

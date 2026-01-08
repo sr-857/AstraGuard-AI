@@ -271,7 +271,7 @@ class TestHandleComponentError:
         with patch('core.error_handling.logger') as mock_logger:
             result = failing_func()
             assert result == "fallback"
-            mock_logger.error.assert_called_once()
+            mock_logger.warning.assert_called_once()
 
     def test_decorator_custom_severity(self):
         """Test decorator with custom severity"""
@@ -324,7 +324,7 @@ class TestSafeExecute:
         with patch('core.error_handling.logger') as mock_logger:
             result = safe_execute(failing_func, component="test", fallback_value="fallback")
             assert result == "fallback"
-            mock_logger.error.assert_called_once()
+            mock_logger.warning.assert_called_once()
 
     def test_safe_execute_with_context(self):
         """Test safe_execute with additional context"""
@@ -358,7 +358,7 @@ class TestErrorContextContextManager:
             assert ctx.error_ctx is not None
             assert ctx.error_ctx.error_type == "ValueError"
             assert ctx.error_ctx.component == "test_component"
-            mock_logger.error.assert_called_once()
+            mock_logger.warning.assert_called_once()
 
     def test_context_manager_exception_reraised(self):
         """Test context manager that reraises exceptions"""
@@ -368,7 +368,7 @@ class TestErrorContextContextManager:
                     raise ValueError("Test error")
 
             assert ctx.error_ctx is not None
-            mock_logger.error.assert_called_once()
+            mock_logger.warning.assert_called_once()
 
     def test_context_manager_on_error_callback(self):
         """Test context manager with on_error callback"""

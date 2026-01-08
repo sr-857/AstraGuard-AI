@@ -22,10 +22,26 @@ def mock_psutil(monkeypatch):
 
 
 
+from api.auth import get_api_key, APIKey
+
 @pytest.fixture
 def client():
-    """Create test client."""
-    return TestClient(app)
+    """Create test client with auth override."""
+    # Mock valid API key
+    async def mock_get_api_key():
+        return APIKey(
+            key="test-key",
+            name="Test Key",
+            created_at=datetime.now(),
+            permissions={"read", "write", "admin"},
+            rate_limit=10000
+        )
+    
+    app.dependency_overrides[get_api_key] = mock_get_api_key
+    with TestClient(app) as c:
+        yield c
+    # Clean up
+    app.dependency_overrides = {}
 
 
 class TestHealthEndpoints:

@@ -71,12 +71,24 @@ class MemoryEngineError(AstraGuardException):
 # Error Classification & Handling
 # ============================================================================
 
+@functools.total_ordering
 class ErrorSeverity(Enum):
     """Severity levels for errors."""
     CRITICAL = "critical"      # System-level failure
     HIGH = "high"              # Component failure, fallback needed
     MEDIUM = "medium"          # Operation failure, retry recommended
     LOW = "low"                # Non-critical warning
+
+    def __lt__(self, other):
+        if self.__class__ is other.__class__:
+            order = {
+                ErrorSeverity.LOW: 0,
+                ErrorSeverity.MEDIUM: 1,
+                ErrorSeverity.HIGH: 2,
+                ErrorSeverity.CRITICAL: 3
+            }
+            return order[self] < order[other]
+        return NotImplemented
 
 
 @dataclass
@@ -192,7 +204,7 @@ FallbackT = TypeVar('FallbackT')
 def handle_component_error(
     component: str,
     fallback_value: Optional[Any] = None,
-    severity: ErrorSeverity = ErrorSeverity.HIGH,
+    severity: Optional[ErrorSeverity] = None,
     log_traceback: bool = True,
 ) -> Callable[[Callable[..., T]], Callable[..., Union[T, Any]]]:
     """
@@ -221,6 +233,9 @@ def handle_component_error(
                 # Already an AstraGuard exception
                 e.component = component
                 error_ctx = classify_error(e, component)
+                # Apply severity override from decorator if cleaner than map
+                if severity is not None:
+                     error_ctx.severity = severity
                 log_error(error_ctx)
                 if log_traceback:
                     logger.debug(f"Traceback:\n{traceback.format_exc()}")
@@ -228,6 +243,9 @@ def handle_component_error(
             except Exception as e:
                 # Wrap other exceptions
                 error_ctx = classify_error(e, component, {"function": func.__name__})
+                # Apply severity override from decorator
+                if severity is not None:
+                     error_ctx.severity = severity
                 log_error(error_ctx)
                 if log_traceback:
                     logger.debug(f"Traceback:\n{traceback.format_exc()}")
