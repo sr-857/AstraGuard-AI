@@ -3,7 +3,7 @@
 import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { TelemetryState, WSMessage } from '../types/websocket';
 import { useDashboardWebSocket } from '../hooks/useDashboardWebSocket';
-import { GroundStation, RemediationScript, RemediationStep } from '../types/dashboard';
+import { GroundStation, RemediationScript, RemediationStep, AICognitiveState } from '../types/dashboard';
 
 export interface Annotation {
     id: string;
@@ -45,6 +45,8 @@ interface ContextValue {
     cancelRemediation: () => void;
     // Ground Stations
     groundStations: GroundStation[];
+    // AI Health
+    aiHealth: AICognitiveState;
 }
 
 const DashboardContext = createContext<ContextValue | undefined>(undefined);
@@ -65,6 +67,26 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
         { id: 'gs-3', name: 'Canberra-Deep', lat: -35.28, lng: 149.13, weather: 'Clear', signalQuality: 0.95, connectedSatelliteId: 'SAT-03' },
         { id: 'gs-4', name: 'Haruna-Station', lat: 36.47, lng: 138.92, weather: 'Storm', signalQuality: 0.42, connectedSatelliteId: 'SAT-01' },
     ]);
+    const [aiHealth, setAiHealth] = useState<AICognitiveState>({
+        load: 12,
+        synapticThroughput: 1450,
+        attentionFocus: 'Orbit Optimization',
+        confidence: 0.99,
+        activeNeurons: 4200
+    });
+
+    // Simulate AI Cognitive Fluctuations
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setAiHealth((prev: AICognitiveState) => ({
+                ...prev,
+                load: Math.max(10, Math.min(95, prev.load + (Math.random() - 0.5) * 5)),
+                synapticThroughput: 1400 + Math.floor(Math.random() * 200),
+                confidence: 0.95 + Math.random() * 0.05
+            }));
+        }, 3000);
+        return () => clearInterval(interval);
+    }, []);
 
     // Add Annotation
     const addAnnotation = (note: Omit<Annotation, 'id' | 'timestamp'>) => {
@@ -161,7 +183,8 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
         proposeRemediation,
         authorizeRemediation,
         cancelRemediation,
-        groundStations
+        groundStations,
+        aiHealth
     };
 
     return (

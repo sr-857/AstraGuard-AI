@@ -8,6 +8,8 @@ import { PredictiveAnalysis } from './PredictiveAnalysis';
 import { useDashboard } from '../../context/DashboardContext';
 import { usePredictiveData } from '../../hooks/usePredictiveData';
 
+import { NeuralHealthMonitor } from './NeuralHealthMonitor';
+
 export const SystemsPanel: React.FC = () => {
     const { state } = useDashboard();
     const { kpis, breakers, charts, health } = state.systems;
@@ -16,6 +18,11 @@ export const SystemsPanel: React.FC = () => {
     // Render logic remains similar, but data comes from context
     return (
         <div className="space-y-12 max-w-7xl mx-auto">
+            {/* AI Health Overview - Neural Monitor */}
+            <section className="animate-slide-up">
+                <NeuralHealthMonitor />
+            </section>
+
             {/* KPI Row */}
             <section className="panel-holo rounded-2xl p-6 animate-slide-up delay-100">
                 <h2 className="text-2xl font-bold mb-8 text-magenta-400 glow-magenta flex items-center tracking-widest uppercase">

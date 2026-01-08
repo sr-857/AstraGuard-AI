@@ -57,6 +57,14 @@ export interface GroundStation {
   connectedSatelliteId?: string;
 }
 
+export interface AICognitiveState {
+  load: number; // 0-100
+  synapticThroughput: number; // nodes/sec
+  attentionFocus: string; // current subsystem being analyzed
+  confidence: number; // 0-1
+  activeNeurons: number;
+}
+
 export interface MissionState {
   name: string;
   phase: string;
@@ -67,4 +75,5 @@ export interface MissionState {
   phases: MissionPhase[];
   anomalies: AnomalyEvent[];
   groundStations: GroundStation[];
+  aiHealth: AICognitiveState;
 }
