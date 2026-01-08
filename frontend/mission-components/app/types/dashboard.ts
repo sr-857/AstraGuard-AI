@@ -57,6 +57,14 @@ export interface GroundStation {
   connectedSatelliteId?: string;
 }
 
+export interface HistoricalAnomaly {
+  lat: number;
+  lng: number;
+  intensity: number; // 0-1 based on frequency
+  count: number;
+  type: string;
+}
+
 export interface AICognitiveState {
   load: number; // 0-100
   synapticThroughput: number; // nodes/sec

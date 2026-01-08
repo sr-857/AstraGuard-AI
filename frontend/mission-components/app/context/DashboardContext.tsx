@@ -3,7 +3,7 @@
 import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { TelemetryState, WSMessage } from '../types/websocket';
 import { useDashboardWebSocket } from '../hooks/useDashboardWebSocket';
-import { GroundStation, RemediationScript, RemediationStep, AICognitiveState } from '../types/dashboard';
+import { GroundStation, RemediationScript, RemediationStep, AICognitiveState, HistoricalAnomaly } from '../types/dashboard';
 
 export interface Annotation {
     id: string;
@@ -47,6 +47,8 @@ interface ContextValue {
     groundStations: GroundStation[];
     // AI Health
     aiHealth: AICognitiveState;
+    // Historical Intelligence
+    historicalAnomalies: HistoricalAnomaly[];
 }
 
 const DashboardContext = createContext<ContextValue | undefined>(undefined);
@@ -74,6 +76,18 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
         confidence: 0.99,
         activeNeurons: 4200
     });
+    const [historicalAnomalies] = useState<HistoricalAnomaly[]>([
+        // South Atlantic Anomaly (Radiation Zone)
+        { lat: -30, lng: -45, intensity: 0.9, count: 124, type: 'Radiation' },
+        { lat: -28, lng: -47, intensity: 0.7, count: 89, type: 'Radiation' },
+        { lat: -32, lng: -43, intensity: 0.85, count: 112, type: 'Radiation' },
+        // High Latitude Signal Drop (Ionospheric Interference)
+        { lat: 70, lng: 20, intensity: 0.6, count: 45, type: 'Signal Loss' },
+        { lat: 72, lng: 15, intensity: 0.5, count: 32, type: 'Signal Loss' },
+        // Equatorial Debris Belt
+        { lat: 0, lng: 120, intensity: 0.75, count: 67, type: 'Debris Potential' },
+        { lat: 2, lng: 118, intensity: 0.4, count: 21, type: 'Debris Potential' },
+    ]);
 
     // Simulate AI Cognitive Fluctuations
     useEffect(() => {
@@ -184,7 +198,8 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
         authorizeRemediation,
         cancelRemediation,
         groundStations,
-        aiHealth
+        aiHealth,
+        historicalAnomalies
     };
 
     return (

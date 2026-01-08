@@ -16,9 +16,10 @@ interface Props {
 
 export const OrbitMap: React.FC<Props> = ({ satellites, selectedSat, onSatClick, anomalies }) => {
   const globeEl = useRef<any>(null);
-  const { groundStations } = useDashboard();
+  const { groundStations, historicalAnomalies } = useDashboard();
   const [points, setPoints] = useState<any[]>([]);
   const [arcs, setArcs] = useState<any[]>([]);
+  const [showHeatmap, setShowHeatmap] = useState(false);
 
   // Calculate satellite positions (animation loop)
   useEffect(() => {
@@ -80,10 +81,10 @@ export const OrbitMap: React.FC<Props> = ({ satellites, selectedSat, onSatClick,
   // Auto-rotate
   useEffect(() => {
     if (globeEl.current) {
-      globeEl.current.controls().autoRotate = true;
+      globeEl.current.controls().autoRotate = !showHeatmap; // Pause rotate during heatmap analysis
       globeEl.current.controls().autoRotateSpeed = 0.5;
     }
-  }, []);
+  }, [showHeatmap]);
 
   const ringsData = useMemo(() => {
     // Anomaly Rings
@@ -135,10 +136,10 @@ export const OrbitMap: React.FC<Props> = ({ satellites, selectedSat, onSatClick,
         bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
         backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
 
-        atmosphereColor="#3b82f6"
+        atmosphereColor={showHeatmap ? "#ef4444" : "#3b82f6"}
         atmosphereAltitude={0.15}
 
-        pointsData={points}
+        pointsData={showHeatmap ? [] : points}
         pointAltitude="alt"
         pointColor="color"
         pointRadius={(d: any) => d.type === 'STATION' ? 0.8 : 0.5}
@@ -162,7 +163,7 @@ export const OrbitMap: React.FC<Props> = ({ satellites, selectedSat, onSatClick,
           }
         }}
 
-        arcsData={arcs}
+        arcsData={showHeatmap ? [] : arcs}
         arcColor={(d: any) => d.color}
         arcDashLength={(d: any) => d.dashLength}
         arcDashGap={(d: any) => d.dashGap}
@@ -170,13 +171,13 @@ export const OrbitMap: React.FC<Props> = ({ satellites, selectedSat, onSatClick,
         arcStroke={(d: any) => d.stroke}
         arcAltitudeAutoScale={0.2}
 
-        ringsData={ringsData}
+        ringsData={showHeatmap ? [] : ringsData}
         ringColor={(d: any) => d.color}
         ringMaxRadius="maxR"
         ringPropagationSpeed="propagationSpeed"
         ringRepeatPeriod="repeatPeriod"
 
-        labelsData={groundStations}
+        labelsData={showHeatmap ? [] : groundStations}
         labelLat="lat"
         labelLng="lng"
         labelText="name"
@@ -184,21 +185,70 @@ export const OrbitMap: React.FC<Props> = ({ satellites, selectedSat, onSatClick,
         labelDotRadius={0.4}
         labelColor={(d: any) => d.weather === 'Storm' ? '#f59e0b' : '#06b6d4'}
         labelResolution={2}
+
+        hexBinPointsData={showHeatmap ? historicalAnomalies : []}
+        hexBinPointWeight="intensity"
+        hexAltitude={(d: any) => d.sumWeight * 0.1 + 0.05}
+        hexBinResolution={4}
+        hexTopColor={(d: any) => `rgba(239, 68, 68, ${d.sumWeight * 0.8 + 0.2})`}
+        hexSideColor={(d: any) => `rgba(239, 68, 68, ${d.sumWeight * 0.4})`}
+        hexLabel={(d: any) => `
+            <div style="background: rgba(15, 23, 42, 0.9); padding: 12px; border: 1px solid #ef4444; border-radius: 8px; color: white; backdrop-filter: blur(8px);">
+                <div style="font-weight: bold; color: #ef4444; font-size: 14px; margin-bottom: 4px;">ORBITAL_DANGER_ZONE</div>
+                <div style="font-size: 11px; opacity: 0.8;">HISTORICAL_HEATMAP (30D)</div>
+                <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(239, 68, 68, 0.2);">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Density:</span>
+                        <span style="font-mono; color: #ef4444;">${Math.round(d.sumWeight * 100)}%</span>
+                    </div>
+                </div>
+            </div>
+        `}
       />
 
       {/* Overlay UI */}
+      <div className="absolute top-4 left-4 flex flex-col gap-2">
+        <button
+          onClick={() => setShowHeatmap(!showHeatmap)}
+          className={`px-4 py-2 rounded border text-[10px] font-bold uppercase tracking-widest transition-all ${showHeatmap
+              ? 'bg-red-600 border-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]'
+              : 'bg-slate-900/80 border-slate-700 text-slate-400 hover:border-slate-500'
+            }`}
+        >
+          {showHeatmap ? '⚠️ Heatmap Active' : '🗺️ View Heatmap'}
+        </button>
+      </div>
+
       <div className="absolute bottom-4 left-4 bg-slate-900/80 backdrop-blur border border-slate-700 p-3 rounded text-[10px] text-slate-400 font-mono space-y-2 uppercase tracking-tight">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-green-500" />
-          <span>Signal Clear</span>
-        </div>
-        <div className="flex items-center gap-2 text-amber-500">
-          <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-          <span>Weather Interference</span>
-        </div>
-        <div className="pt-2 border-t border-slate-800">
-          Stations: {groundStations.length} // Online
-        </div>
+        {!showHeatmap ? (
+          <>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-green-500" />
+              <span>Signal Clear</span>
+            </div>
+            <div className="flex items-center gap-2 text-amber-500">
+              <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              <span>Weather Interference</span>
+            </div>
+            <div className="pt-2 border-t border-slate-800">
+              Stations: {groundStations.length} // Online
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex items-center gap-2 text-red-500">
+              <div className="w-2 h-2 rounded-full bg-red-500" />
+              <span>Radiation Anomaly Cluster</span>
+            </div>
+            <div className="flex items-center gap-2 text-red-300">
+              <div className="w-2 h-2 rounded-full bg-red-300 opacity-50" />
+              <span>Signal Interference Hotspot</span>
+            </div>
+            <div className="pt-2 border-t border-slate-800">
+              Temporal Window: 30D Historical
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
