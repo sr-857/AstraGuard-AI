@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 const navLinks = [
   { label: "About", href: "#about" },
   { label: "Works", href: "#works" },
+  { label: "Policy Builder", href: "/policy-builder" },
   { label: "Contact", href: "#contact" },
 ]
 
@@ -23,9 +24,15 @@ export function Navbar() {
 
   const scrollToSection = (href: string) => {
     setIsMenuOpen(false)
-    const element = document.querySelector(href)
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" })
+    if (href.startsWith('/')) {
+      // External route
+      window.location.href = href
+    } else {
+      // Internal section
+      const element = document.querySelector(href)
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" })
+      }
     }
   }
 

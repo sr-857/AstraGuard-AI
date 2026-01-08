@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { Playfair_Display, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
+import { Toaster } from "sonner"
 import "./globals.css"
 
 const playfair = Playfair_Display({
@@ -49,6 +50,7 @@ export default function RootLayout({
       <body className="font-sans antialiased overflow-x-hidden">
         <div className="noise-overlay" />
         {children}
+        <Toaster />
         <Analytics />
       </body>
     </html>

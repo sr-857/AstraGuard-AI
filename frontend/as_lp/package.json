@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",
+    "@hello-pangea/dnd": "^18.0.1",
     "@hookform/resolvers": "^3.10.0",
     "@nuxt/kit": "latest",
     "@radix-ui/react-accordion": "1.2.2",
@@ -65,7 +66,7 @@
     "react-resizable-panels": "^2.1.7",
     "recharts": "^2.15.4",
     "sonner": "^1.7.4",
-    "tailwind-merge": "^3.3.1",
+    "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
     "three": "0.181.2",
     "vaul": "^1.1.2",
