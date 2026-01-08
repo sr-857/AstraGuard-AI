@@ -361,6 +361,100 @@
                 transform: scale(1);
             }
         }
+
+        /* Chatbot */
+#chatbot-toggle {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  background: linear-gradient(135deg, #00d4ff, #0099cc);
+  color: #0a0e27;
+  font-size: 24px;
+  padding: 14px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(0,212,255,0.5);
+  z-index: 2000;
+}
+
+#chatbot {
+  position: fixed;
+  bottom: 90px;
+  right: 25px;
+  width: 320px;
+  background: #1a1f3a;
+  border-radius: 12px;
+  box-shadow: 0 0 30px rgba(0,212,255,0.3);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 2000;
+}
+
+.chat-header {
+  background: linear-gradient(135deg, #00d4ff, #0099cc);
+  color: #0a0e27;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+}
+
+.chat-header button {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.chat-body {
+  padding: 12px;
+  height: 260px;
+  overflow-y: auto;
+  font-size: 14px;
+}
+
+.bot-msg,
+.user-msg {
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  max-width: 85%;
+}
+
+.bot-msg {
+  background: rgba(0,212,255,0.1);
+  color: #e0e6ff;
+}
+
+.user-msg {
+  background: #00d4ff;
+  color: #0a0e27;
+  margin-left: auto;
+}
+
+.chat-input {
+  display: flex;
+  border-top: 1px solid rgba(100,200,255,0.2);
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  outline: none;
+  background: #0a0e27;
+  color: #fff;
+}
+
+.chat-input button {
+  padding: 10px 14px;
+  border: none;
+  background: #00d4ff;
+  color: #0a0e27;
+  cursor: pointer;
+}
+
     </style>
 </head>
 <body>
@@ -509,5 +603,82 @@
             <p>&copy; 2026 AstraGuard AI. All rights reserved. | Built by <a href="https://github.com/purvanshjoshi/AstraGuard-AI">Elite Coders</a></p>
         </div>
     </footer>
+
+    <!-- AI Chatbot -->
+<div id="chatbot-toggle">🤖</div>
+
+<div id="chatbot">
+  <div class="chat-header">
+    <span>ASTRAGUARD AI Assistant</span>
+    <button onclick="toggleChat()">✖</button>
+  </div>
+
+  <div class="chat-body" id="chatBody">
+    <div class="bot-msg">Hello 👋 I'm AstraGuard AI. How can I help you?</div>
+  </div>
+
+  <div class="chat-input">
+    <input type="text" id="userInput" placeholder="Ask me something..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<script>
+const chatbot = document.getElementById("chatbot");
+const toggleBtn = document.getElementById("chatbot-toggle");
+const chatBody = document.getElementById("chatBody");
+
+toggleBtn.onclick = toggleChat;
+
+function toggleChat() {
+  chatbot.style.display =
+    chatbot.style.display === "flex" ? "none" : "flex";
+}
+
+function sendMessage() {
+  const input = document.getElementById("userInput");
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  addMessage(msg, "user");
+  input.value = "";
+
+  setTimeout(() => {
+    addMessage(botReply(msg), "bot");
+  }, 600);
+}
+
+function addMessage(text, sender) {
+  const div = document.createElement("div");
+  div.className = sender === "user" ? "user-msg" : "bot-msg";
+  div.innerText = text;
+  chatBody.appendChild(div);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+function botReply(message) {
+  message = message.toLowerCase();
+
+  if (message.includes("pricing")) {
+    return "We offer Starter, Professional, and Enterprise plans. Pricing starts at $999/month.";
+  }
+  if (message.includes("features")) {
+    return "Our features include AI anomaly detection, auto recovery, smart analytics, and real-time dashboards.";
+  }
+  if (message.includes("trial")) {
+    return "Yes! You can start a free trial from the Professional plan.";
+  }
+  if (message.includes("satellite")) {
+    return "AstraGuard AI supports LEO, MEO, and GEO satellite monitoring.";
+  }
+  if (message.includes("contact")) {
+    return "You can contact our sales team using the Contact Sales button.";
+  }
+
+  return "I'm here to help! Ask me about pricing, features, satellites, or trials.";
+}
+</script>
+
+
 </body>
 </html>
