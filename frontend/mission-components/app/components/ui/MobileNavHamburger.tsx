@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 
 interface Props {
-    activeTab: 'mission' | 'systems' | 'chaos' | 'uplink' | 'vault';
-    onTabChange: (tab: 'mission' | 'systems' | 'chaos' | 'uplink' | 'vault') => void;
+    activeTab: 'mission' | 'systems' | 'chaos' | 'uplink' | 'vault' | 'diagnostics';
+    onTabChange: (tab: 'mission' | 'systems' | 'chaos' | 'uplink' | 'vault' | 'diagnostics') => void;
 }
 
 export const MobileNavHamburger: React.FC<Props> = ({ activeTab, onTabChange }) => {
@@ -100,6 +100,19 @@ export const MobileNavHamburger: React.FC<Props> = ({ activeTab, onTabChange }) 
                             }`}
                     >
                         🏆 Vault
+                    </button>
+                    <button
+                        data-mobile-tab="diagnostics"
+                        onClick={() => {
+                            onTabChange('diagnostics');
+                            setIsOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-3 rounded-xl border flex items-center gap-3 transition-all font-mono font-bold ${activeTab === 'diagnostics'
+                            ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-300 shadow-[0_0_20px_rgba(6,182,212,0.2)]'
+                            : 'bg-black/40 border-white/10 text-gray-400'
+                            }`}
+                    >
+                        🔬 Diagnostics
                     </button>
                 </div>
             </div>

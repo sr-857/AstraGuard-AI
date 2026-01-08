@@ -1,8 +1,8 @@
 import React from 'react';
 
 interface DesktopTabNavProps {
-    activeTab: 'mission' | 'systems' | 'chaos' | 'uplink' | 'vault';
-    onTabChange: (tab: 'mission' | 'systems' | 'chaos' | 'uplink' | 'vault') => void;
+    activeTab: 'mission' | 'systems' | 'chaos' | 'uplink' | 'vault' | 'diagnostics';
+    onTabChange: (tab: 'mission' | 'systems' | 'chaos' | 'uplink' | 'vault' | 'diagnostics') => void;
 }
 
 import { useSoundEffects } from '../../hooks/useSoundEffects';
@@ -74,6 +74,17 @@ export const DesktopTabNav: React.FC<DesktopTabNavProps> = ({ activeTab, onTabCh
                 onClick={() => handleTabClick('vault')}
             >
                 Vault
+            </button>
+            <button
+                id="diagnostics-tab"
+                data-tab="diagnostics"
+                className={`ml-2 px-6 py-3 rounded-t-lg font-mono text-lg font-semibold transition-all duration-300 ${activeTab === 'diagnostics'
+                    ? 'tab-active-teal bg-cyan-500/10 border-b-2 border-cyan-400 text-cyan-300 glow-teal'
+                    : 'text-gray-400 hover:text-cyan-300 hover:bg-cyan-500/5'
+                    }`}
+                onClick={() => handleTabClick('diagnostics')}
+            >
+                Diagnostics
             </button>
         </div>
     );

@@ -29,9 +29,10 @@ import { CommandHUD } from '../components/ui/CommandHUD';
 import { RemediationDrawer } from '../components/mission/RemediationDrawer';
 import { AchievementToast } from '../components/ui/AchievementToast';
 import { AchievementPanel } from '../components/dashboard/AchievementPanel';
+import { DiagnosticsPanel } from '../components/dashboard/DiagnosticsPanel';
 
 const DashboardContent: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'mission' | 'systems' | 'chaos' | 'uplink' | 'vault'>('mission');
+  const [activeTab, setActiveTab] = useState<'mission' | 'systems' | 'chaos' | 'uplink' | 'vault' | 'diagnostics'>('mission');
   const [selectedAnomalyForAnalysis, setSelectedAnomalyForAnalysis] = useState<AnomalyEvent | null>(null);
   const { isConnected, togglePlay, isReplayMode, isBattleMode, setBattleMode } = useDashboard();
   const mission = { ...dashboardData.mission, aiHealth: (dashboardData as any).aiHealth, achievements: (dashboardData as any).achievements } as MissionState;
@@ -188,6 +189,11 @@ const DashboardContent: React.FC = () => {
                   {activeTab === 'vault' && (
                     <TransitionWrapper isActive={activeTab === 'vault'}>
                       <AchievementPanel />
+                    </TransitionWrapper>
+                  )}
+                  {activeTab === 'diagnostics' && (
+                    <TransitionWrapper isActive={activeTab === 'diagnostics'}>
+                      <DiagnosticsPanel />
                     </TransitionWrapper>
                   )}
                 </>
