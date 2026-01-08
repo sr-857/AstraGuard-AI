@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MissionState } from '../types/dashboard';
 import { DashboardHeader } from '../components/dashboard/DashboardHeader';
 import { MissionPanel } from '../components/mission/MissionPanel';
@@ -33,11 +33,14 @@ import { DiagnosticsPanel } from '../components/dashboard/DiagnosticsPanel';
 import { TimelineScrubber } from '../components/replay/TimelineScrubber';
 import { ReplayOverlay } from '../components/replay/ReplayOverlay';
 import { EncryptionSpectrogram } from '../components/security/EncryptionSpectrogram';
+import { GlitchOverlay } from '../components/effects/GlitchOverlay';
+import { SpaceWeatherAlert } from '../components/effects/SpaceWeatherAlert';
 
 const DashboardContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'mission' | 'systems' | 'chaos' | 'uplink' | 'vault' | 'diagnostics'>('mission');
   const [selectedAnomalyForAnalysis, setSelectedAnomalyForAnalysis] = useState<AnomalyEvent | null>(null);
-  const { isConnected, togglePlay, isReplayMode, isBattleMode, setBattleMode } = useDashboard();
+  const { isConnected, togglePlay, isReplayMode, isBattleMode, setBattleMode, spaceWeather, distortionIntensity, isGeomagneticStorm } = useDashboard();
+  const [showSpaceWeatherAlert, setShowSpaceWeatherAlert] = useState(false);
   const mission = { ...dashboardData.mission, aiHealth: (dashboardData as any).aiHealth, achievements: (dashboardData as any).achievements } as MissionState;
   const [showPalette, setShowPalette] = useState(false);
 
@@ -113,11 +116,26 @@ const DashboardContent: React.FC = () => {
     isReplayMode
   });
 
+  // Show space weather alert when geomagnetic storm begins
+  React.useEffect(() => {
+    if (isGeomagneticStorm && !showSpaceWeatherAlert) {
+      setShowSpaceWeatherAlert(true);
+    }
+  }, [isGeomagneticStorm, showSpaceWeatherAlert]);
+
   return (
     <div className="dashboard-container min-h-screen text-white font-mono antialiased">
       <CommandHUD />
       <AchievementToast />
       <ReplayOverlay />
+      <GlitchOverlay intensity={distortionIntensity} isActive={distortionIntensity > 0.3} />
+      {showSpaceWeatherAlert && (
+        <SpaceWeatherAlert
+          level={spaceWeather.geomagneticStorm}
+          solarFlux={spaceWeather.solarFlux}
+          onDismiss={() => setShowSpaceWeatherAlert(false)}
+        />
+      )}
       <CommandPalette
         isOpen={showPalette}
         onClose={() => setShowPalette(false)}

@@ -6,6 +6,8 @@ import { useDashboardWebSocket } from '../hooks/useDashboardWebSocket';
 import { useStateBuffer } from '../hooks/useStateBuffer';
 import { GroundStation, RemediationScript, RemediationStep, AICognitiveState, HistoricalAnomaly, Achievement } from '../types/dashboard';
 import { EncryptionMetrics } from '../types/security';
+import { SpaceWeatherData } from '../types/spaceWeather';
+import { useSpaceWeather } from '../hooks/useSpaceWeather';
 
 export interface Annotation {
     id: string;
@@ -68,6 +70,10 @@ interface ContextValue {
     // Encryption Security
     encryptionMetrics: EncryptionMetrics;
     updateEncryptionMetrics: (metrics: Partial<EncryptionMetrics>) => void;
+    // Space Weather
+    spaceWeather: SpaceWeatherData;
+    distortionIntensity: number;
+    isGeomagneticStorm: boolean;
 }
 
 const DashboardContext = createContext<ContextValue | undefined>(undefined);
@@ -75,6 +81,7 @@ const DashboardContext = createContext<ContextValue | undefined>(undefined);
 export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const ws = useDashboardWebSocket();
     const stateBuffer = useStateBuffer();
+    const { spaceWeather, distortionIntensity, isGeomagneticStorm } = useSpaceWeather();
     const [isBattleMode, setBattleMode] = useState(false);
     const [annotations, setAnnotations] = useState<Annotation[]>([]);
     const [presence] = useState<Operator[]>([
@@ -370,6 +377,9 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
         chaosCount,
         encryptionMetrics,
         updateEncryptionMetrics,
+        spaceWeather,
+        distortionIntensity,
+        isGeomagneticStorm,
     };
 
     return (
