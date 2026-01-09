@@ -25,6 +25,13 @@ class AstraGuardException(Exception):
     
     def __init__(self, message: str, component: str = "unknown", 
                  context: Optional[Dict[str, Any]] = None):
+        """Initialize AstraGuard exception with metadata.
+        
+        Args:
+            message: Error message
+            component: Component where error occurred
+            context: Additional context data
+        """
         self.message = message
         self.component = component
         self.context = context or {}
@@ -108,6 +115,7 @@ class ErrorContext:
     timestamp: datetime = None
     
     def __post_init__(self):
+        """Initialize default values for ErrorContext."""
         if self.context_data is None:
             self.context_data = {}
         if self.timestamp is None:
@@ -351,9 +359,20 @@ class ErrorContext_ContextManager:
         self.error_ctx: Optional[ErrorContext] = None
     
     def __enter__(self):
+        """Enter the error context manager."""
         return self
     
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """Exit the error context manager, handling any exceptions.
+        
+        Args:
+            exc_type: Exception type
+            exc_val: Exception value
+            exc_tb: Exception traceback
+            
+        Returns:
+            bool: True to suppress exception, False to propagate
+        """
         if exc_type is None:
             return False  # No exception
         
