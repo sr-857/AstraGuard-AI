@@ -183,5 +183,4 @@ class TestAnomalyDetector:
         # Should fall back to heuristic despite validation error
         is_anomalous, score = await detect_anomaly(data)
         assert isinstance(is_anomalous, bool)
-        assert isinstance(score, float)</content>
-<parameter name="filePath">c:\Users\Gupta\Downloads\AstraGuard-AI\tests\test_anomaly_detector.py
+        assert isinstance(score, float)
