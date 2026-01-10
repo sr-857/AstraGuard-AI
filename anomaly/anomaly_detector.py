@@ -183,16 +183,21 @@ def _detect_anomaly_heuristic(data: Dict) -> Tuple[bool, float]:
     score = 0.0
 
     # Conservative thresholds for heuristic mode
-    voltage = data.get("voltage", 8.0)
-    temperature = data.get("temperature", 25.0)
-    gyro = abs(data.get("gyro", 0.0))
+    try:
+        voltage = float(data.get("voltage", 8.0))
+        temperature = float(data.get("temperature", 25.0))
+        gyro = abs(float(data.get("gyro", 0.0)))
 
-    if voltage < 7.0 or voltage > 9.0:
-        score += 0.4
-    if temperature > 40.0:
-        score += 0.3
-    if gyro > 0.1:
-        score += 0.3
+        if voltage < 7.0 or voltage > 9.0:
+            score += 0.4
+        if temperature > 40.0:
+            score += 0.3
+        if gyro > 0.1:
+            score += 0.3
+    except (ValueError, TypeError):
+        # invalid data types in heuristic -> treat as anomalous
+        logger.warning(f"Heuristic mode encountered invalid data types: {data}")
+        score += 0.5
 
     # Add small random noise for simulation realism
     score += random.uniform(0, 0.1)

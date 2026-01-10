@@ -14,6 +14,12 @@ from anomaly.anomaly_detector import (
 )
 
 
+
+# Mock model for pickling tests
+class MockModelForPickle:
+    def predict(self, X): return [0]
+
+
 class TestAnomalyDetector:
     """Unit tests for anomaly detector module."""
 
@@ -78,7 +84,10 @@ class TestAnomalyDetector:
         data = {
             "voltage": 8.0,
             "temperature": 25.0,
-            "gyro": 0.0
+            "gyro": 0.0,
+            "current": 5.0,
+            "wheel_speed": 10.0,
+            "battery_level": 80.0
         }
         is_anomalous, score = await detect_anomaly(data)
         assert isinstance(is_anomalous, bool)
@@ -98,13 +107,21 @@ class TestAnomalyDetector:
         data = {
             "voltage": 8.0,
             "temperature": 25.0,
-            "gyro": 0.0
+            "gyro": 0.0,
+            "current": 5.0,
+            "wheel_speed": 10.0,
+            "battery_level": 80.0
         }
 
         with patch('anomaly.anomaly_detector._MODEL', mock_model):
-            is_anomalous, score = await detect_anomaly(data)
-            assert is_anomalous
-            assert score == 0.8
+            with patch('anomaly.anomaly_detector.get_resource_monitor') as mock_rm_get:
+                mock_monitor = MagicMock()
+                mock_monitor.check_resource_health.return_value = {'overall': 'healthy'}
+                mock_rm_get.return_value = mock_monitor
+                
+                is_anomalous, score = await detect_anomaly(data)
+                assert is_anomalous
+                assert score == 0.8
 
     @pytest.mark.asyncio
     async def test_detect_anomaly_resource_critical(self):
@@ -112,7 +129,10 @@ class TestAnomalyDetector:
         data = {
             "voltage": 8.0,
             "temperature": 25.0,
-            "gyro": 0.0
+            "gyro": 0.0,
+            "current": 5.0,
+            "wheel_speed": 10.0,
+            "battery_level": 80.0
         }
 
         with patch('anomaly.anomaly_detector.get_resource_monitor') as mock_rm:
@@ -129,8 +149,7 @@ class TestAnomalyDetector:
         """Test successful model loading."""
         # Create a temporary model file
         with tempfile.NamedTemporaryFile(delete=False, suffix='.pkl') as f:
-            # Create a simple mock model
-            mock_model = MagicMock()
+            mock_model = MockModelForPickle()
             pickle.dump(mock_model, f)
             temp_path = f.name
 
