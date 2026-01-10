@@ -26,7 +26,7 @@ export const DragMetricsPanel: React.FC<DragMetricsPanelProps> = ({ physics, onR
         <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className={`fixed right-6 top-24 z-50 w-64 bg-black/80 backdrop-blur-xl border-2 rounded-xl overflow-hidden ${getStatusColor(physics.status)}`}
+            className={`w-64 bg-black/80 backdrop-blur-xl border-2 rounded-xl overflow-hidden ${getStatusColor(physics.status)}`}
         >
             {/* Header */}
             <div className="p-3 border-b border-white/10 bg-gradient-to-r from-red-500/10 to-orange-500/10 flex items-center justify-between">

@@ -18,6 +18,12 @@ export interface GroundStation {
     latency: number;        // Milliseconds
     status: StationStatus;
     isActive: boolean;
+    // Legacy Support for OrbitMap
+    lat?: number;
+    lng?: number;
+    weather?: 'Clear' | 'Rain' | 'Storm';
+    connectedSatelliteId?: string;
+    signalQuality?: number;
 }
 
 export interface UplinkBeam {

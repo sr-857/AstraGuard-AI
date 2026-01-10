@@ -4,7 +4,7 @@ import { createContext, useContext, ReactNode, useState, useEffect } from 'react
 import { TelemetryState, WSMessage } from '../types/websocket';
 import { useDashboardWebSocket } from '../hooks/useDashboardWebSocket';
 import { useStateBuffer } from '../hooks/useStateBuffer';
-import { GroundStation, RemediationScript, RemediationStep, AICognitiveState, HistoricalAnomaly, Achievement } from '../types/dashboard';
+import { RemediationScript, RemediationStep, AICognitiveState, HistoricalAnomaly, Achievement } from '../types/dashboard';
 import { EncryptionMetrics } from '../types/security';
 import { SpaceWeatherData } from '../types/spaceWeather';
 import { useSpaceWeather } from '../hooks/useSpaceWeather';
@@ -15,6 +15,8 @@ import { BiometricData } from '../types/biometric';
 import { useBiometricTracking } from '../hooks/useBiometricTracking';
 import { GroundStation } from '../types/groundStation';
 import { useGroundStations } from '../hooks/useGroundStations';
+import { DragPhysics } from '../types/physics';
+import { useAtmosphericDrag } from '../hooks/useAtmosphericDrag';
 
 export interface Annotation {
     id: string;
@@ -123,12 +125,12 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
         { id: '3', name: 'KAPPA', avatar: 'K', activePanel: 'Chaos Engine' },
     ]);
     const [activeRemediation, setActiveRemediation] = useState<RemediationScript | null>(null);
-    const [groundStations] = useState<GroundStation[]>([
-        { id: 'gs-1', name: 'Svalbard-A', lat: 78.22, lng: 15.65, weather: 'Clear', signalQuality: 0.98, connectedSatelliteId: 'SAT-01' },
-        { id: 'gs-2', name: 'Kourou-Prime', lat: 5.16, lng: -52.64, weather: 'Rain', signalQuality: 0.65, connectedSatelliteId: 'SAT-02' },
-        { id: 'gs-3', name: 'Canberra-Deep', lat: -35.28, lng: 149.13, weather: 'Clear', signalQuality: 0.95, connectedSatelliteId: 'SAT-03' },
-        { id: 'gs-4', name: 'Haruna-Station', lat: 36.47, lng: 138.92, weather: 'Storm', signalQuality: 0.42, connectedSatelliteId: 'SAT-01' },
-    ]);
+
+    /* 
+       Legacy groundStations state removed.
+       Now using useGroundStations hook below.
+    */
+
     const [aiHealth, setAiHealth] = useState<AICognitiveState>({
         load: 12,
         synapticThroughput: 1450,
@@ -136,6 +138,7 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
         confidence: 0.99,
         activeNeurons: 4200
     });
+
     const [historicalAnomalies] = useState<HistoricalAnomaly[]>([
         // South Atlantic Anomaly (Radiation Zone)
         { lat: -30, lng: -45, intensity: 0.9, count: 124, type: 'Radiation' },

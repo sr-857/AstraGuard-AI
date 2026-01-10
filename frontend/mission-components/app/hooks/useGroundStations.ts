@@ -116,6 +116,12 @@ export const useGroundStations = (): UseGroundStationsReturn => {
                         bandwidth: Math.round(newBandwidth),
                         latency: Math.round(newLatency),
                         status: newStatus,
+                        // Legacy Mappings
+                        lat: station.coordinates.lat,
+                        lng: station.coordinates.lon,
+                        weather: newStatus === StationStatus.SATURATED ? 'Storm' : newStatus === StationStatus.OFFLINE ? 'Rain' : 'Clear',
+                        signalQuality: Math.max(0, 1 - (newLatency / 150)),
+                        connectedSatelliteId: station.isActive ? 'SAT-01' : undefined
                     };
                 })
             );

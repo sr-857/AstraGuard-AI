@@ -153,7 +153,7 @@ export const OrbitMap: React.FC<Props> = ({ satellites, selectedSat, onSatClick,
         maxR: 15 * intensity,
         propagationSpeed: 20 * intensity,
         repeatPeriod: 200, // Fast shimmer
-        color: () => t => `rgba(255, ${Math.round(100 - (intensity * 100))}, 0, ${1 - t})` // Orange/Red fade
+        color: (t: any) => `rgba(255, ${Math.round(100 - (intensity * 100))}, 0, ${1 - t})` // Orange/Red fade
       }];
     })();
 
