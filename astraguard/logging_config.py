@@ -11,6 +11,7 @@ from datetime import datetime
 from typing import Any, Dict, Optional
 import structlog
 from pythonjsonlogger import jsonlogger
+from core.secrets import get_secret
 
 # ============================================================================
 # STRUCTURED LOGGING CONFIGURATION
@@ -19,7 +20,7 @@ from pythonjsonlogger import jsonlogger
 def setup_json_logging(
     log_level: str = "INFO",
     service_name: str = "astra-guard",
-    environment: str = os.getenv("ENVIRONMENT", "development")
+    environment: str = get_secret("environment", "development")
 ):
     """
     Setup JSON structured logging for production environments
@@ -66,7 +67,7 @@ def setup_json_logging(
     structlog.contextvars.bind_contextvars(
         service=service_name,
         environment=environment,
-        version=os.getenv("APP_VERSION", "1.0.0")
+        version=get_secret("app_version", "1.0.0")
     )
 
 
@@ -340,5 +341,5 @@ def unbind_context(*keys):
 # ============================================================================
 
 # Initialize on import
-if os.getenv("ENABLE_JSON_LOGGING", "false").lower() == "true":
+if get_secret("enable_json_logging", False):
     setup_json_logging()

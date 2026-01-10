@@ -21,6 +21,9 @@ from typing import Dict, List, Optional
 from datetime import datetime, timedelta
 from enum import Enum
 
+# Import centralized secrets management
+from core.secrets import get_secret
+
 logger = logging.getLogger(__name__)
 
 
@@ -360,13 +363,13 @@ def get_resource_monitor() -> ResourceMonitor:
         
         # Load configuration from environment
         thresholds = ResourceThresholds(
-            cpu_warning=float(os.getenv('RESOURCE_CPU_WARNING', '70.0')),
-            cpu_critical=float(os.getenv('RESOURCE_CPU_CRITICAL', '90.0')),
-            memory_warning=float(os.getenv('RESOURCE_MEMORY_WARNING', '75.0')),
-            memory_critical=float(os.getenv('RESOURCE_MEMORY_CRITICAL', '90.0')),
+            cpu_warning=get_secret('resource_cpu_warning'),
+            cpu_critical=get_secret('resource_cpu_critical'),
+            memory_warning=get_secret('resource_memory_warning'),
+            memory_critical=get_secret('resource_memory_critical'),
         )
         
-        monitoring_enabled = os.getenv('RESOURCE_MONITORING_ENABLED', 'true').lower() == 'true'
+        monitoring_enabled = get_secret('resource_monitoring_enabled')
         
         _resource_monitor = ResourceMonitor(
             thresholds=thresholds,

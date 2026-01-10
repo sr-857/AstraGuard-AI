@@ -14,6 +14,9 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 import redis.asyncio as aioredis
 
+# Import centralized secrets management
+from core.secrets import get_secret
+
 # Prometheus metrics
 try:
     from prometheus_client import Counter, Histogram
@@ -242,8 +245,8 @@ def get_rate_limit_config() -> Dict[str, tuple[float, int]]:
     Returns:
         Dict with 'telemetry' and 'api' rate configurations
     """
-    telemetry_rate_str = os.getenv("RATE_LIMIT_TELEMETRY", "1000/hour")
-    api_rate_str = os.getenv("RATE_LIMIT_API", "500/hour")
+    telemetry_rate_str = get_secret("rate_limit_telemetry")
+    api_rate_str = get_secret("rate_limit_api")
 
     return {
         "telemetry": parse_rate_limit_config(telemetry_rate_str),

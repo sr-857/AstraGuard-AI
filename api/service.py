@@ -17,6 +17,9 @@ from contextlib import asynccontextmanager
 import secrets
 from pydantic import BaseModel
 
+# Import centralized secrets management
+from core.secrets import get_secret, get_secret_masked
+
 
 from api.models import (
     TelemetryInput,
@@ -115,8 +118,8 @@ def _check_credential_security():
     """
     global _USING_DEFAULT_CREDENTIALS
 
-    metrics_user = os.getenv("METRICS_USER")
-    metrics_password = os.getenv("METRICS_PASSWORD")
+    metrics_user = get_secret("metrics_user")
+    metrics_password = get_secret("metrics_password")
 
     # Check if credentials are set
     if not metrics_user or not metrics_password:
@@ -154,7 +157,7 @@ def _check_credential_security():
             print("\n" + "=" * 70)
             print("🔴 CRITICAL SECURITY WARNING: Using default/weak credentials!")
             print("=" * 70)
-            print(f"Detected credentials: {metrics_user}/{weak_pass}")
+            print(f"Detected credentials: {get_secret_masked('metrics_user')}/{get_secret_masked('metrics_password')}")
             print()
             print("⚠️  THESE CREDENTIALS ARE PUBLICLY KNOWN AND INSECURE!")
             print()
@@ -197,7 +200,8 @@ async def lifespan(app: FastAPI):
 
     # Initialize rate limiting
     try:
-        redis_client = RedisClient()
+        redis_url = get_secret("redis_url")
+        redis_client = RedisClient(redis_url=redis_url)
         await redis_client.connect()
 
         # Get rate limit configurations
@@ -230,7 +234,7 @@ async def lifespan(app: FastAPI):
     if OBSERVABILITY_ENABLED:
         try:
             logger = get_logger(__name__)
-            setup_json_logging(log_level=os.getenv("LOG_LEVEL", "INFO"))
+            setup_json_logging(log_level=get_secret("log_level", "INFO"))
             initialize_tracing()
             setup_auto_instrumentation()
             instrument_fastapi(app)
@@ -260,10 +264,7 @@ app = FastAPI(
 
 # CORS configuration from environment variables
 # Security: Never use allow_origins=["*"] with allow_credentials=True in production
-ALLOWED_ORIGINS = os.getenv(
-    "ALLOWED_ORIGINS",
-    "http://localhost:3000,http://localhost:8080,http://127.0.0.1:3000"
-).split(",")
+ALLOWED_ORIGINS = get_secret("allowed_origins").split(",")
 
 # CORS middleware
 app.add_middleware(
@@ -300,8 +301,8 @@ def get_current_username(credentials: HTTPBasicCredentials = Depends(security)):
         HTTPException 401: Invalid credentials
         HTTPException 500: Credentials not configured
     """
-    correct_username = os.getenv("METRICS_USER")
-    correct_password = os.getenv("METRICS_PASSWORD")
+    correct_username = get_secret("metrics_user")
+    correct_password = get_secret("metrics_password")
 
     # Security: Require credentials to be explicitly set
     if not correct_username or not correct_password:

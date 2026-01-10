@@ -19,6 +19,9 @@ import logging
 from typing import Callable, Any, Optional, TypeVar, cast
 from datetime import datetime
 
+# Import centralized secrets management
+from core.secrets import get_secret
+
 logger = logging.getLogger(__name__)
 
 # Type variable for generic function returns
@@ -220,18 +223,10 @@ class TimeoutConfig:
         import os
         
         # Load from environment or use defaults
-        self.model_load_timeout = float(
-            os.getenv('OPERATION_TIMEOUT_MODEL_LOAD', '5.0')
-        )
-        self.inference_timeout = float(
-            os.getenv('OPERATION_TIMEOUT_INFERENCE', '2.0')
-        )
-        self.redis_timeout = float(
-            os.getenv('OPERATION_TIMEOUT_REDIS', '5.0')
-        )
-        self.file_io_timeout = float(
-            os.getenv('OPERATION_TIMEOUT_FILE_IO', '10.0')
-        )
+        self.model_load_timeout = get_secret('timeout_model_load')
+        self.inference_timeout = get_secret('timeout_inference')
+        self.redis_timeout = get_secret('timeout_redis')
+        self.file_io_timeout = get_secret('timeout_file_io')
         
         logger.info(
             f"Timeout config loaded: model={self.model_load_timeout}s, "

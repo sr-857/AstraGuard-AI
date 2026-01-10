@@ -13,6 +13,7 @@ from typing import Dict, List, Optional, Set
 from pydantic import BaseModel
 import json
 import logging
+from core.secrets import get_secret
 
 logger = logging.getLogger(__name__)
 
@@ -322,7 +323,7 @@ def get_api_key_manager() -> APIKeyManager:
 # Initialize API keys from environment variable (optional)
 def initialize_from_env():
     """Initialize API keys from environment variables."""
-    api_keys_env = os.getenv("API_KEYS")
+    api_keys_env = get_secret("api_keys")
     if api_keys_env:
         try:
             # Expected format: name1:key1,name2:key2

@@ -20,6 +20,9 @@ import json
 import sys
 import os
 
+# Import centralized secrets management
+from core.secrets import get_secret
+
 # Configure page
 st.set_page_config(
     page_title="🛡️ AstraGuard Health Monitor",
@@ -32,7 +35,7 @@ st.set_page_config(
 # CONFIG & CONSTANTS
 # ============================================================================
 
-BACKEND_URL = os.getenv("ASTRAGUARD_BACKEND_URL", "http://localhost:8000")
+BACKEND_URL = get_secret("backend_url")
 HEALTH_ENDPOINT = f"{BACKEND_URL}/health/state"
 REFRESH_INTERVAL = 2  # seconds
 MAX_HISTORY = 100

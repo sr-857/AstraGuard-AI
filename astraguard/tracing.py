@@ -16,6 +16,7 @@ from contextlib import contextmanager
 import logging
 import os
 from typing import Optional, Any
+from core.secrets import get_secret
 
 logger = logging.getLogger(__name__)
 
@@ -25,8 +26,8 @@ logger = logging.getLogger(__name__)
 
 def initialize_tracing(
     service_name: str = "astra-guard",
-    jaeger_host: str = os.getenv("JAEGER_HOST", "localhost"),
-    jaeger_port: int = int(os.getenv("JAEGER_PORT", "6831")),
+    jaeger_host: str = get_secret("jaeger_host", "localhost"),
+    jaeger_port: int = get_secret("jaeger_port", 6831),
     enabled: bool = True
 ) -> TracerProvider:
     """
@@ -55,8 +56,8 @@ def initialize_tracing(
         # Create tracer provider with service resource
         resource = Resource.create({
             SERVICE_NAME: service_name,
-            "environment": os.getenv("ENVIRONMENT", "development"),
-            "version": os.getenv("APP_VERSION", "1.0.0"),
+            "environment": get_secret("environment", "development"),
+            "version": get_secret("app_version", "1.0.0"),
         })
         
         provider = TracerProvider(resource=resource)

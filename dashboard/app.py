@@ -13,6 +13,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from state_machine.state_engine import StateMachine, MissionPhase
 from state_machine.mission_policy import PolicyManager
 from state_machine.mission_phase_policy_engine import MissionPhasePolicyEngine
+
+# Import centralized secrets management
+from core.secrets import get_secret
 from config.mission_phase_policy_loader import MissionPhasePolicyLoader
 from anomaly_agent.phase_aware_handler import PhaseAwareAnomalyHandler
 
@@ -92,7 +95,7 @@ if "decision_logs" not in st.session_state:
 if "mission_phase" not in st.session_state:
     st.session_state.mission_phase = MissionPhase.NOMINAL_OPS.value
 if "simulation_mode" not in st.session_state:
-    st.session_state.simulation_mode = os.getenv("ASTRAGUARD_SIMULATION_MODE", "").lower() == "true"
+    st.session_state.simulation_mode = get_secret("simulation_mode")
 if "anomaly_history" not in st.session_state:
     st.session_state.anomaly_history = deque(maxlen=100)
 if "anomaly_trend_data" not in st.session_state:

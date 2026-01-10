@@ -13,6 +13,7 @@ from fastapi import HTTPException, status, Request, Depends
 from fastapi.security import APIKeyHeader
 import logging
 from core.auth import APIKey, APIKeyManager, get_api_key_manager
+from core.secrets import get_secret
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +92,7 @@ def require_permission(permission: str):
 # Initialize API keys from environment variable (optional)
 def initialize_from_env():
     """Initialize API keys from environment variables."""
-    api_keys_env = os.getenv("API_KEYS")
+    api_keys_env = get_secret("api_keys")
     if api_keys_env:
         try:
             # Expected format: name1:key1,name2:key2

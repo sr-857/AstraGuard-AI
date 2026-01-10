@@ -13,6 +13,7 @@ Usage:
 import argparse
 import uvicorn
 import os
+from core.secrets import get_secret
 
 
 def main():
@@ -45,7 +46,7 @@ def main():
     args = parser.parse_args()
 
     # Get log level from environment variable, default to "info"
-    log_level = os.getenv("LOG_LEVEL", "info").lower()
+    log_level = get_secret("log_level", "info").lower()
 
     print(f"""
     ╔═══════════════════════════════════════════════════════════╗
