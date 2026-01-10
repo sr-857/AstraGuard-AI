@@ -51,7 +51,7 @@ import { LayerControl } from '../components/mission/LayerControl';
 const DashboardContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'mission' | 'systems' | 'chaos' | 'uplink' | 'vault' | 'diagnostics'>('mission');
   const [selectedAnomalyForAnalysis, setSelectedAnomalyForAnalysis] = useState<AnomalyEvent | null>(null);
-  const { isConnected, togglePlay, isReplayMode, isBattleMode, setBattleMode, spaceWeather, distortionIntensity, isGeomagneticStorm, executeSystemReset, debrisObjects, closestDebris, proximityLevel, activePlaybook, setActivePlaybook, biometricData, incrementMissedAlerts, resetMissedAlerts, isAutoPilotActive, enableAutoPilot, disableAutoPilot, groundStations, activeStation, switchStation, dragPhysics, executeReboost } = useDashboard();
+  const { isConnected, togglePlay, isReplayMode, toggleReplayMode, isBattleMode, setBattleMode, spaceWeather, distortionIntensity, isGeomagneticStorm, executeSystemReset, debrisObjects, closestDebris, proximityLevel, activePlaybook, setActivePlaybook, biometricData, incrementMissedAlerts, resetMissedAlerts, isAutoPilotActive, enableAutoPilot, disableAutoPilot, groundStations, activeStation, switchStation, dragPhysics, executeReboost } = useDashboard();
   const [showSpaceWeatherAlert, setShowSpaceWeatherAlert] = useState(false);
   const [isRedPhoneCoverOpen, setIsRedPhoneCoverOpen] = useState(false);
   const [showProximityAlert, setShowProximityAlert] = useState(true);
@@ -61,9 +61,9 @@ const DashboardContent: React.FC = () => {
   const [showPalette, setShowPalette] = useState(false);
 
   // Layer Visibility State
-  const [showGroundStations, setShowGroundStations] = useState(true);
-  const [showDragMetrics, setShowDragMetrics] = useState(true);
-  const [showBiometrics, setShowBiometrics] = useState(true);
+  const [showGroundStations, setShowGroundStations] = useState(false);
+  const [showDragMetrics, setShowDragMetrics] = useState(false);
+  const [showBiometrics, setShowBiometrics] = useState(false);
 
   // Audio Engine Integration
   const [activeAudio, setActiveAudio] = useState(false);
@@ -200,7 +200,7 @@ const DashboardContent: React.FC = () => {
       <DashboardHeader data={mission} />
 
       {/* Red Phone Reset Button */}
-      <div className="fixed top-6 right-6 z-50">
+      <div className="fixed bottom-6 right-6 z-50">
         <RedPhoneReset onResetConfirm={executeSystemReset} />
       </div>
 
@@ -232,6 +232,10 @@ const DashboardContent: React.FC = () => {
         onToggleDragMetrics={() => setShowDragMetrics(!showDragMetrics)}
         showBiometrics={showBiometrics}
         onToggleBiometrics={() => setShowBiometrics(!showBiometrics)}
+        showProximityAlert={showProximityAlert}
+        onToggleProximityAlert={() => setShowProximityAlert(!showProximityAlert)}
+        isReplayMode={isReplayMode}
+        onToggleReplayMode={toggleReplayMode}
       />
 
       {/* Ground Station Panel */}

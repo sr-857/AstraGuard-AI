@@ -144,7 +144,7 @@ export const RedPhoneReset: React.FC<RedPhoneResetProps> = ({ onResetConfirm }) 
                 {/* Cover */}
                 <motion.div
                     drag={!isCoverOpen ? 'y' : false}
-                    dragConstraints={{ top: -100, bottom: 0 }}
+                    dragConstraints={{ top: -60, bottom: 0 }}
                     dragElastic={0.1}
                     onDragEnd={handleCoverDragEnd}
                     style={{
@@ -153,23 +153,21 @@ export const RedPhoneReset: React.FC<RedPhoneResetProps> = ({ onResetConfirm }) 
                         transformOrigin: 'top center',
                         transformStyle: 'preserve-3d',
                     }}
-                    className="absolute inset-0 bg-gradient-to-b from-red-900 to-red-950 border-2 border-red-700 rounded-lg cursor-grab active:cursor-grabbing z-10"
+                    className="absolute inset-0 bg-gradient-to-b from-red-900 to-red-950 border-2 border-red-700 rounded-lg cursor-grab active:cursor-grabbing z-10 w-14 h-14"
                 >
                     <div className="flex items-center justify-center h-full">
-                        <AlertTriangle className="w-8 h-8 text-red-400" />
+                        <AlertTriangle className="w-6 h-6 text-red-400" />
                     </div>
-                    {!isCoverOpen && (
-                        <div className="absolute bottom-2 left-0 right-0 text-center text-[10px] text-red-400 uppercase tracking-widest">
-                            Drag to Open
-                        </div>
-                    )}
                 </motion.div>
 
                 {/* Reset Button */}
-                <div className="relative w-32 h-32 bg-black border-4 border-red-900 rounded-lg overflow-hidden">
+                <div className="relative w-14 h-14 bg-black border-2 border-red-900 rounded-lg overflow-hidden">
                     {isCoverOpen && (
                         <motion.button
-                            {...longPress}
+                            {...(() => {
+                                const { isPressed, progress, ...handlers } = longPress;
+                                return handlers;
+                            })()}
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             className="relative w-full h-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center group"
@@ -183,7 +181,7 @@ export const RedPhoneReset: React.FC<RedPhoneResetProps> = ({ onResetConfirm }) 
                                         r="45%"
                                         fill="none"
                                         stroke="rgba(255, 255, 255, 0.3)"
-                                        strokeWidth="4"
+                                        strokeWidth="2"
                                     />
                                     <motion.circle
                                         cx="50%"
@@ -191,7 +189,7 @@ export const RedPhoneReset: React.FC<RedPhoneResetProps> = ({ onResetConfirm }) 
                                         r="45%"
                                         fill="none"
                                         stroke="#fff"
-                                        strokeWidth="4"
+                                        strokeWidth="2"
                                         strokeDasharray="283"
                                         strokeDashoffset={283 - (283 * longPress.progress) / 100}
                                         strokeLinecap="round"
@@ -201,7 +199,7 @@ export const RedPhoneReset: React.FC<RedPhoneResetProps> = ({ onResetConfirm }) 
 
                             {/* Button Icon */}
                             <Power
-                                className={`w-12 h-12 text-white transition-all ${longPress.isPressed ? 'scale-110' : 'group-hover:scale-105'
+                                className={`w-6 h-6 text-white transition-all ${longPress.isPressed ? 'scale-110' : 'group-hover:scale-105'
                                     }`}
                             />
 
@@ -216,9 +214,9 @@ export const RedPhoneReset: React.FC<RedPhoneResetProps> = ({ onResetConfirm }) 
                     {isCoverOpen && (
                         <button
                             onClick={handleCloseCover}
-                            className="absolute top-2 right-2 text-xs text-red-400 hover:text-red-300 uppercase tracking-wider"
+                            className="absolute -top-1 -right-1 p-1 text-[10px] text-red-400 hover:text-red-300"
                         >
-                            Close
+                            ✕
                         </button>
                     )}
                 </div>

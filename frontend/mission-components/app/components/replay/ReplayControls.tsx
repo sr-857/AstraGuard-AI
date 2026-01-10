@@ -22,14 +22,7 @@ export const ReplayControls: React.FC = () => {
     }, [isReplayMode, isPlaying, setReplayProgress]);
 
     if (!isReplayMode) {
-        return (
-            <button
-                onClick={toggleReplayMode}
-                className="px-3 py-1 bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white text-xs font-mono rounded border border-slate-700 transition-colors uppercase tracking-wider flex items-center gap-2"
-            >
-                <span>↺</span> Enter Replay Mode
-            </button>
-        );
+        return null;
     }
 
     return (
