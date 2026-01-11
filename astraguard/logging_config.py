@@ -9,6 +9,7 @@ import sys
 import os
 from datetime import datetime
 from typing import Any, Dict, Optional
+from logging.handlers import RotatingFileHandler
 import structlog
 from pythonjsonlogger import jsonlogger
 from core.secrets import get_secret
@@ -20,7 +21,11 @@ from core.secrets import get_secret
 def setup_json_logging(
     log_level: str = "INFO",
     service_name: str = "astra-guard",
-    environment: str = get_secret("environment", "development")
+    environment: str = get_secret("environment", "development"),
+    log_to_file: bool = True,
+    log_file: str = "logs/application.log",
+    max_bytes: int = 10*1024*1024,  # 10MB
+    backup_count: int = 5
 ):
     """
     Setup JSON structured logging for production environments
@@ -30,6 +35,10 @@ def setup_json_logging(
         log_level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
         service_name: Name of the service
         environment: Environment name (development, staging, production)
+        log_to_file: Whether to write logs to file
+        log_file: Path to log file
+        max_bytes: Maximum size of log file before rotation
+        backup_count: Number of backup files to keep
     """
     
     # Configure structlog for structured output
@@ -48,19 +57,32 @@ def setup_json_logging(
         cache_logger_on_first_use=True,
     )
     
-    # Configure root logger with JSON handler
+    # Configure root logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(getattr(logging, log_level))
+    root_logger.handlers.clear()
+    
+    # Console handler for stdout
     json_handler = logging.StreamHandler(sys.stdout)
     json_formatter = jsonlogger.JsonFormatter(
         fmt='%(timestamp)s %(level)s %(name)s %(message)s',
         timestamp=True
     )
     json_handler.setFormatter(json_formatter)
-    
-    # Configure Python logging
-    root_logger = logging.getLogger()
-    root_logger.setLevel(getattr(logging, log_level))
-    root_logger.handlers.clear()
     root_logger.addHandler(json_handler)
+    
+    # File handler with rotation (if enabled)
+    if log_to_file:
+        # Ensure logs directory exists
+        os.makedirs(os.path.dirname(log_file), exist_ok=True)
+        
+        file_handler = RotatingFileHandler(
+            log_file,
+            maxBytes=max_bytes,
+            backupCount=backup_count
+        )
+        file_handler.setFormatter(json_formatter)
+        root_logger.addHandler(file_handler)
     
     # Add global context
     structlog.contextvars.clear_contextvars()
