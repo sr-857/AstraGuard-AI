@@ -9,10 +9,9 @@ import time
 from datetime import datetime, timedelta
 from typing import List
 from collections import deque
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
-from fastapi import FastAPI, HTTPException, status, Depends
 from contextlib import asynccontextmanager
 import secrets
 from pydantic import BaseModel
@@ -33,8 +32,24 @@ from api.models import (
     AnomalyHistoryQuery,
     AnomalyHistoryResponse,
     HealthCheckResponse,
+    UserCreateRequest,
+    UserResponse,
+    APIKeyCreateRequest,
+    APIKeyResponse,
+    APIKeyCreateResponse,
+    LoginRequest,
+    TokenResponse,
 )
-from api.auth import get_api_key, require_permission, APIKey
+from core.auth import (
+    get_auth_manager,
+    get_current_user,
+    require_admin,
+    require_operator,
+    require_analyst,
+    UserRole,
+    Permission,
+    User,
+)
 from state_machine.state_engine import StateMachine, MissionPhase
 from config.mission_phase_policy_loader import MissionPhasePolicyLoader
 from anomaly_agent.phase_aware_handler import PhaseAwareAnomalyHandler
@@ -465,7 +480,7 @@ async def metrics(username: str = Depends(get_current_username)):
 
 
 @app.post("/api/v1/telemetry", response_model=AnomalyResponse, status_code=status.HTTP_200_OK)
-async def submit_telemetry(telemetry: TelemetryInput, api_key: APIKey = Depends(get_api_key)):
+async def submit_telemetry(telemetry: TelemetryInput, current_user: User = Depends(require_operator)):
     """
     Submit single telemetry point for anomaly detection.
 
@@ -668,7 +683,7 @@ async def get_latest_telemetry(api_key: APIKey = Depends(get_api_key)):
 
 
 @app.post("/api/v1/telemetry/batch", response_model=BatchAnomalyResponse)
-async def submit_telemetry_batch(batch: TelemetryBatch, api_key: APIKey = Depends(get_api_key)):
+async def submit_telemetry_batch(batch: TelemetryBatch, current_user: User = Depends(require_operator)):
     """
     Submit batch of telemetry points for anomaly detection.
 
@@ -739,11 +754,8 @@ async def get_phase(api_key: APIKey = Depends(get_api_key)):
 
 
 @app.post("/api/v1/phase", response_model=PhaseUpdateResponse)
-async def update_phase(request: PhaseUpdateRequest, api_key: APIKey = Depends(require_permission("write"))):
-    """Update mission phase.
-
-    Requires API key authentication with 'write' permission.
-    """
+async def update_phase(request: PhaseUpdateRequest, current_user: User = Depends(require_admin)):
+    """Update mission phase."""
     try:
         target_phase = MissionPhase(request.phase.value)
 
@@ -822,269 +834,91 @@ async def get_anomaly_history(
     )
 
 
-class ChaosRequest(BaseModel):
-    fault_type: str
-    duration_seconds: int
+# Authentication endpoints
+@app.post("/api/v1/auth/login", response_model=TokenResponse)
+async def login(request: LoginRequest):
+    """Authenticate user and return JWT token."""
+    auth_manager = get_auth_manager()
+    token = auth_manager.authenticate_user(request.username, request.password)
+    return TokenResponse(access_token=token, token_type="bearer")
 
 
-@app.post("/api/v1/chaos/inject")
-async def inject_fault(request: ChaosRequest, api_key: APIKey = Depends(require_permission("admin"))):
-    """Trigger a chaos experiment."""
-    return inject_chaos_fault(request.fault_type, request.duration_seconds)
-
-
-
-class AnalysisRequest(BaseModel):
-    anomaly_id: str
-    context: dict = {}
-
-class AnalysisResponse(BaseModel):
-    anomaly_id: str
-    analysis: str
-    recommendation: str
-    confidence: float
-
-
-class UplinkCommand(BaseModel):
-    target_id: str
-    command: str
-    params: dict = {}
-
-class UplinkResponse(BaseModel):
-    status: str
-    ack_id: str
-    message: str
-    timestamp: datetime
-
-@app.post("/api/v1/uplink", response_model=UplinkResponse)
-async def send_uplink_command(cmd: UplinkCommand, api_key: APIKey = Depends(require_permission("write"))):
-    """
-    Send a command to a specific satellite or system.
-    """
-    # Simulate transmission delay
-    time.sleep(0.8)
-
-    ack_id = secrets.token_hex(4).upper()
-    
-    # Simple logic to generate response based on command
-    if cmd.command.upper() == "REBOOT":
-        msg = f"Reboot sequence initiated for {cmd.target_id}. Estimated downtime: 45s."
-    elif cmd.command.upper() == "DIAGNOSTICS":
-        msg = f"Diagnostics running on {cmd.target_id}. Report will be downlinked in T+120s."
-    elif cmd.command.upper() == "DEPLOY":
-        msg = f"Actuator deployment command acknowledged for {cmd.target_id}. Monitoring telemetry."
-    else:
-        msg = f"Command '{cmd.command}' queued for uplink to {cmd.target_id}."
-
-    return UplinkResponse(
-        status="sent",
-        ack_id=ack_id,
-        message=msg,
-        timestamp=datetime.now()
+@app.post("/api/v1/auth/users", response_model=UserResponse)
+async def create_user(request: UserCreateRequest, current_user: User = Depends(require_admin)):
+    """Create a new user (admin only)."""
+    auth_manager = get_auth_manager()
+    user = await auth_manager.create_user(
+        username=request.username,
+        password=request.password,
+        role=request.role,
+        email=request.email
+    )
+    return UserResponse(
+        id=user.id,
+        username=user.username,
+        role=user.role.value,
+        email=user.email,
+        created_at=user.created_at,
+        is_active=user.is_active
     )
 
-@app.post("/api/v1/analysis/investigate", response_model=AnalysisResponse)
-async def investigate_anomaly(request: AnalysisRequest, api_key: APIKey = Depends(get_api_key)):
-    """
-    AI-powered anomaly investigation (Mocked for MVP).
-    Analyzes telemetry context to provide explanations and recommendations.
-    """
-    # Simulate processing delay (AI thinking)
-    time.sleep(1.5)
-    
-    context = request.context
-    metric = context.get('metric', 'Unknown')
-    value = context.get('value', 'N/A')
-    
-    # Heuristic-based "Generative" responses
-    if "Temp" in metric:
-        analysis = f"Thermal analysis indicates a rapid temperature excursion to {value}. This pattern is consistent with obstructed radiator flow or sensor bias drift."
-        recommendation = "1. Verify radiator louver positions. \n2. Check thermal sensor redundancy. \n3. Initiate cooling cycle if temp > 85°C."
-        confidence = 0.92
-    elif "Voltage" in metric or "Current" in metric:
-        analysis = f"Power subsystem detected instability ({value}). The fluctuations suggest a potential short-circuit on the secondary bus or battery cell degradation."
-        recommendation = "1. Isolate non-essential loads. \n2. Switch to backup battery logic. \n3. Monitor bus voltage for impedance changes."
-        confidence = 0.88
-    elif "Gyro" in metric:
-        analysis = "Attitude control system (ACS) reporting gyroscopic drift beyond nominal bounds. Likely caused by reaction wheel saturation or solar pressure torque."
-        recommendation = "1. Momentum dumping maneuver required. \n2. recalibrate star trackers. \n3. Switch to magnetorquer-only control temporarily."
-        confidence = 0.85
-    else:
-        analysis = f"Unusual pattern detected in {metric} ({value}). Correlation with historical anomalies suggests a transient single-event upset (SEU) in the telemetry encoder."
-        recommendation = "1. Acknowledge and monitor for recurrence. \n2. Perform soft reset of telemetry unit if persists > 5min."
-        confidence = 0.75
 
-    return AnalysisResponse(
-        anomaly_id=request.anomaly_id,
-        analysis=analysis,
-        recommendation=recommendation,
-        confidence=confidence
+@app.get("/api/v1/auth/users/me", response_model=UserResponse)
+async def get_current_user_info(current_user: User = Depends(get_current_user)):
+    """Get current user information."""
+    return UserResponse(
+        id=current_user.id,
+        username=current_user.username,
+        role=current_user.role.value,
+        email=current_user.email,
+        created_at=current_user.created_at,
+        is_active=current_user.is_active
     )
 
-@app.get("/api/v1/chaos/status")
-async def get_chaos_status(api_key: APIKey = Depends(get_api_key)):
-    """Get active chaos experiments."""
-    cleanup_expired_faults()
-    return create_response("success", {
-        "active_faults": list(active_faults.keys()),
-        "details": active_faults
-    })
+
+@app.post("/api/v1/auth/apikeys", response_model=APIKeyCreateResponse)
+async def create_api_key(request: APIKeyCreateRequest, current_user: User = Depends(get_current_user)):
+    """Create a new API key for the current user."""
+    auth_manager = get_auth_manager()
+    api_key = await auth_manager.create_api_key(
+        user_id=current_user.id,
+        name=request.name,
+        permissions=request.permissions
+    )
+    return APIKeyCreateResponse(
+        id=api_key.id,
+        name=api_key.name,
+        key=api_key.key,
+        permissions=api_key.permissions,
+        created_at=api_key.created_at,
+        expires_at=api_key.expires_at
+    )
 
 
-
-@app.get("/api/v1/replay/session")
-async def get_replay_session(incident_type: str = "VOLTAGE_SPIKE", api_key: APIKey = Depends(get_api_key)):
-    """
-    Generate a synthetic replay session (60 seconds) for a given incident type.
-    """
-    # Generate 60 points (1 per second)
-    replay_data = []
-    base_time = datetime.now() - timedelta(minutes=5)
-    
-    for i in range(60):
-        t = base_time + timedelta(seconds=i)
-        
-        # Default nominal values
-        voltage = 3.6
-        temp = 45.0
-        gyro = 0.001
-        
-        # Inject anomalies based on scenario and time (peak at 30s)
-        progress = i / 60.0
-        
-        if incident_type == "VOLTAGE_SPIKE":
-            if 20 < i < 40:
-                voltage += 1.5 * np.sin((i - 20) * 0.3) # Spike usage
-        elif incident_type == "THERMAL_RUNAWAY":
-             if i > 15:
-                 temp += (i - 15) * 1.5 # Linear increase
-        elif incident_type == "GYRO_DRIFT":
-             if i > 10:
-                 gyro += (i - 10) * 0.05
-        
-        replay_data.append({
-            "timestamp": t.isoformat(),
-            "voltage": float(voltage),
-            "temperature": float(temp),
-            "gyro": float(gyro),
-            "current": 2.1,
-            "wheel_speed": 4500.0,
-            "anomaly_score": 0.8 if (20 < i < 40) else 0.1 # Mock score
-        })
-        
-    return create_response("success", {
-        "incident": incident_type,
-        "frames": replay_data
-    })
-
-
-# ============================================================================
-# Predictive Maintenance Endpoints
-# ============================================================================
-
-@app.post("/api/v1/predictive/train")
-async def train_predictive_models(api_key: APIKey = Depends(require_permission("admin"))):
-    """
-    Train predictive maintenance models using collected telemetry data.
-    """
-    if not predictive_engine:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Predictive maintenance engine not initialized"
+@app.get("/api/v1/auth/apikeys", response_model=List[APIKeyResponse])
+async def list_api_keys(current_user: User = Depends(get_current_user)):
+    """List API keys for the current user."""
+    auth_manager = get_auth_manager()
+    api_keys = await auth_manager.get_user_api_keys(current_user.id)
+    return [
+        APIKeyResponse(
+            id=key.id,
+            name=key.name,
+            permissions=key.permissions,
+            created_at=key.created_at,
+            expires_at=key.expires_at,
+            last_used=key.last_used
         )
+        for key in api_keys
+    ]
 
-    try:
-        # Train models
-        metrics = await predictive_engine.train_models()
 
-        return create_response("training_completed", {
-            "metrics": metrics
-        })
-
-    except Exception as e:
-        logger.error(f"Model training failed: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Model training failed: {str(e)}"
-        )
-
-@app.get("/api/v1/predictive/status")
-async def get_predictive_status(api_key: APIKey = Depends(get_api_key)):
-    """
-    Get the status of the predictive maintenance system.
-    """
-    if not predictive_engine:
-        return create_response("not_initialized", {
-            "message": "Predictive maintenance engine not available"
-        })
-
-    try:
-        # Get basic stats
-        training_data_count = len(predictive_engine.training_data)
-
-        return create_response("active", {
-            "training_data_points": training_data_count,
-            "models_trained": len(predictive_engine.models),
-            "last_prediction": getattr(predictive_engine, '_last_prediction_time', None)
-        })
-
-    except Exception as e:
-        logger.error(f"Status check failed: {e}")
-        return create_response("error", {
-            "message": str(e)
-        })
-
-@app.post("/api/v1/predictive/predict")
-async def get_predictions(telemetry: TelemetryInput, api_key: APIKey = Depends(get_api_key)):
-    """
-    Get failure predictions for current telemetry data.
-    """
-    if not predictive_engine:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Predictive maintenance engine not initialized"
-        )
-
-    try:
-        # Create time-series data
-        ts_data = TimeSeriesData(
-            timestamp=datetime.now(),
-            cpu_usage=telemetry.cpu_usage or 0.0,
-            memory_usage=telemetry.memory_usage or 0.0,
-            network_latency=telemetry.network_latency or 0.0,
-            disk_io=telemetry.disk_io or 0.0,
-            error_rate=telemetry.error_rate or 0.0,
-            response_time=telemetry.response_time or 0.0,
-            active_connections=telemetry.active_connections or 0,
-            failure_occurred=False  # We're predicting, not reporting actual failure
-        )
-
-        # Get predictions
-        predictions = await predictive_engine.predict_failures(ts_data)
-
-        # Convert to serializable format
-        prediction_data = []
-        for pred in predictions:
-            prediction_data.append({
-                "failure_type": pred.failure_type.value,
-                "probability": pred.probability,
-                "predicted_time": pred.predicted_time.isoformat(),
-                "confidence": pred.confidence,
-                "features_used": pred.features_used,
-                "model_used": pred.model_used.value,
-                "preventive_actions": pred.preventive_actions
-            })
-
-        return create_response("success", {
-            "predictions": prediction_data
-        })
-
-    except Exception as e:
-        logger.error(f"Prediction failed: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Prediction failed: {str(e)}"
-        )
+@app.delete("/api/v1/auth/apikeys/{key_id}")
+async def revoke_api_key(key_id: str, current_user: User = Depends(get_current_user)):
+    """Revoke an API key."""
+    auth_manager = get_auth_manager()
+    auth_manager.revoke_api_key(key_id, current_user.id)
+    return {"message": "API key revoked successfully"}
 
 
 if __name__ == "__main__":

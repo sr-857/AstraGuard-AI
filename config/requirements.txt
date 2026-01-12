@@ -35,6 +35,11 @@ deprecated>=1.2.0
 redis[hiredis]==5.1.0  # hiredis provides async support for redis.asyncio module
 sqlalchemy>=2.0.0,<3.0
 
+# Authentication & Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+cryptography==42.0.5
+
 # Utilities
 python-dateutil==2.9.0
 pytz==2024.2

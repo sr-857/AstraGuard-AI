@@ -8,6 +8,13 @@ from datetime import datetime
 from enum import Enum
 
 
+class UserRole(str, Enum):
+    """User roles with hierarchical permissions."""
+    ADMIN = "admin"      # Full system access including user management
+    OPERATOR = "operator"  # Full operational access (telemetry, phase changes)
+    ANALYST = "analyst"   # Read-only access (status, history, monitoring)
+
+
 class MissionPhaseEnum(str, Enum):
     """Mission phase enumeration."""
     LAUNCH = "LAUNCH"
@@ -130,3 +137,61 @@ class HealthCheckResponse(BaseModel):
     status: str
     version: str
     timestamp: datetime
+
+
+# Authentication Models
+class UserCreateRequest(BaseModel):
+    """Request to create a new user."""
+    username: str = Field(..., min_length=3, max_length=50)
+    email: str = Field(..., pattern=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+    role: UserRole
+    password: Optional[str] = Field(None, min_length=8)
+
+
+class UserResponse(BaseModel):
+    """User information response."""
+    id: str
+    username: str
+    email: str
+    role: UserRole
+    created_at: datetime
+    last_login: Optional[datetime]
+    is_active: bool
+
+
+class APIKeyCreateRequest(BaseModel):
+    """Request to create a new API key."""
+    name: str = Field(..., min_length=1, max_length=100)
+    expiration_days: Optional[int] = Field(None, ge=1, le=365*2)
+    rate_limit: Optional[int] = Field(None, ge=1, le=10000)
+
+
+class APIKeyResponse(BaseModel):
+    """API key information response."""
+    id: str
+    name: str
+    created_at: datetime
+    expires_at: Optional[datetime]
+    last_used: Optional[datetime]
+    is_active: bool
+    rate_limit: Optional[int]
+
+
+class APIKeyCreateResponse(BaseModel):
+    """Response when creating a new API key."""
+    key: str
+    key_info: APIKeyResponse
+
+
+class LoginRequest(BaseModel):
+    """Login request for JWT token."""
+    username: str
+    password: str
+
+
+class TokenResponse(BaseModel):
+    """JWT token response."""
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int  # seconds
+    user: UserResponse

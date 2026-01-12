@@ -4,12 +4,20 @@ Adaptive Memory Store with Temporal Weighting
 Self-updating memory that prioritizes recent and recurring events.
 """
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:
+    np = None
+
+import math
 from datetime import datetime, timedelta
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Tuple, Optional, Union, Any, TYPE_CHECKING
 import pickle
 import os
 import logging
+
+if TYPE_CHECKING:
+    import numpy as np
 
 
 logger = logging.getLogger(__name__)
@@ -22,7 +30,7 @@ MEMORY_STORE_BASE_DIR = os.path.abspath("memory_engine")
 class MemoryEvent:
     """Represents a stored memory event."""
 
-    def __init__(self, embedding: np.ndarray, metadata: Dict, timestamp: datetime):
+    def __init__(self, embedding: Union[List[float], "np.ndarray"], metadata: Dict, timestamp: datetime):
         self.embedding = embedding
         self.metadata = metadata
         self.timestamp = timestamp
@@ -61,7 +69,7 @@ class AdaptiveMemoryStore:
 
     def write(
         self,
-        embedding: np.ndarray,
+        embedding: Union[List[float], "np.ndarray"],
         metadata: Dict,
         timestamp: Optional[datetime] = None,
     ) -> None:
@@ -93,7 +101,7 @@ class AdaptiveMemoryStore:
             self.prune(keep_critical=True)
 
     def retrieve(
-        self, query_embedding: np.ndarray, top_k: int = 5
+        self, query_embedding: Union[List[float], "np.ndarray"], top_k: int = 5
     ) -> List[Tuple[float, Dict, datetime]]:
         """
         Retrieve similar events with temporal weighting.
@@ -117,7 +125,7 @@ class AdaptiveMemoryStore:
             temporal_weight = self._temporal_weight(event)
 
             # Apply recurrence boost
-            recurrence_boost = 1 + 0.3 * np.log(1 + event.recurrence_count)
+            recurrence_boost = 1 + 0.3 * (np.log(1 + event.recurrence_count) if np is not None else math.log(1 + event.recurrence_count))
 
             # Combined weighted score
             weighted_score = similarity * (
@@ -169,15 +177,18 @@ class AdaptiveMemoryStore:
         Returns:
             List of event metadata in chronological order
         """
-        events = [
-            event.metadata
+        # Filter events in time range and sort by timestamp
+        filtered_events = [
+            event
             for event in self.memory
             if start_time <= event.timestamp <= end_time
         ]
 
-        # Sort chronologically
-        events.sort(key=lambda x: x.get("timestamp", 0))
-        return events
+        # Sort chronologically by event timestamp
+        filtered_events.sort(key=lambda event: event.timestamp)
+
+        # Extract metadata
+        return [event.metadata for event in filtered_events]
 
     def save(self) -> None:
         """Persist memory to disk with path validation."""
@@ -241,7 +252,7 @@ class AdaptiveMemoryStore:
         return {
             "total_events": len(self.memory),
             "critical_events": sum(1 for e in self.memory if e.is_critical),
-            "avg_age_hours": np.mean(ages),
+            "avg_age_hours": np.mean(ages) if np is not None else sum(ages) / len(ages) if ages else 0,
             "max_recurrence": max(e.recurrence_count for e in self.memory),
         }
 
@@ -250,20 +261,21 @@ class AdaptiveMemoryStore:
     def _temporal_weight(self, event: MemoryEvent) -> float:
         """Calculate temporal weight using exponential decay."""
         age_hours = event.age_seconds() / 3600
-        return np.exp(-self.decay_lambda * age_hours)
+        return math.exp(-self.decay_lambda * age_hours) if np is None else np.exp(-self.decay_lambda * age_hours)
 
-    def _cosine_similarity(self, a: np.ndarray, b: np.ndarray) -> float:
+    def _cosine_similarity(self, a: Union[List[float], "np.ndarray"], b: Union[List[float], "np.ndarray"]) -> float:
         """Calculate cosine similarity between vectors."""
-        # Handle dimension mismatch gracefully
-        if a.shape != b.shape:
-            # Log warning only once per mismatch pattern to avoid spam
-            # logger.warning(f"Embedding dimension mismatch: {a.shape} vs {b.shape}")
-            return 0.0
-            
-        return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-10)
+        if np is not None:
+            return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-10)
+        else:
+            # Manual calculation for lists
+            dot_product = sum(x * y for x, y in zip(a, b))
+            norm_a = math.sqrt(sum(x * x for x in a))
+            norm_b = math.sqrt(sum(x * x for x in b))
+            return dot_product / (norm_a * norm_b + 1e-10)
 
     def _find_similar(
-        self, embedding: np.ndarray, threshold: float = 0.85
+        self, embedding: Union[List[float], "np.ndarray"], threshold: float = 0.85
     ) -> Optional[MemoryEvent]:
         """Find similar event in memory."""
         for event in self.memory:
