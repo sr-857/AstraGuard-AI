@@ -32,6 +32,7 @@ from astraguard.swarm.health_broadcaster import HealthBroadcaster, BroadcastMetr
 from astraguard.swarm.intent_broadcaster import IntentBroadcaster, IntentStats
 from astraguard.swarm.reliable_delivery import ReliableDelivery, SentMsg, DeliveryStats, AckStatus
 from astraguard.swarm.bandwidth_governor import BandwidthGovernor, TokenBucket, MessagePriority, BandwidthStats
+from astraguard.swarm.leader_election import LeaderElection, ElectionState, ElectionMetrics
 
 __all__ = [
     # Models (Issue #397)
@@ -75,4 +76,8 @@ __all__ = [
     "TokenBucket",
     "MessagePriority",
     "BandwidthStats",
+    # Leader Election (Issue #405)
+    "LeaderElection",
+    "ElectionState",
+    "ElectionMetrics",
 ]
