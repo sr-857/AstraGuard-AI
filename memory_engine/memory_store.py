@@ -10,6 +10,7 @@ except ImportError:
     np = None
 
 import math
+import threading
 from datetime import datetime, timedelta
 from typing import List, Dict, Tuple, Optional, Union, Any, TYPE_CHECKING
 import pickle
@@ -25,6 +26,22 @@ logger = logging.getLogger(__name__)
 # Security: Base directory for memory store persistence
 # All storage paths must be contained within this directory to prevent traversal attacks
 MEMORY_STORE_BASE_DIR = os.path.abspath("memory_engine")
+
+# Constants for memory store configuration
+DEFAULT_DECAY_LAMBDA = 0.1
+DEFAULT_MAX_CAPACITY = 10000
+DEFAULT_SIMILARITY_THRESHOLD = 0.85
+DEFAULT_MAX_AGE_HOURS = 24
+DEFAULT_TOP_K = 5
+
+# Weighting constants for scoring
+SIMILARITY_WEIGHT = 0.5
+TEMPORAL_WEIGHT = 0.3
+RECURRENCE_WEIGHT = 0.2
+RECURRENCE_BOOST_FACTOR = 0.3
+
+# Numerical stability constant
+EPSILON = 1e-10
 
 
 class MemoryEvent:
@@ -54,18 +71,26 @@ class AdaptiveMemoryStore:
     - Clean interfaces: write, retrieve, prune, replay
     """
 
-    def __init__(self, decay_lambda: float = 0.1, max_capacity: int = 10000):
+    def __init__(self, decay_lambda: float = DEFAULT_DECAY_LAMBDA, max_capacity: int = DEFAULT_MAX_CAPACITY):
         """
         Initialize adaptive memory store.
 
         Args:
             decay_lambda: Decay rate for temporal weighting (default: 0.1)
             max_capacity: Maximum number of events to store
+
+        Raises:
+            ValueError: If decay_lambda is negative or max_capacity is not positive
         """
+        if decay_lambda < 0:
+            raise ValueError("decay_lambda must be non-negative")
+        if max_capacity <= 0:
+            raise ValueError("max_capacity must be positive")
         self.decay_lambda = decay_lambda
         self.max_capacity = max_capacity
         self.memory: List[MemoryEvent] = []
         self.storage_path = "memory_engine/memory_store.pkl"
+        self._lock = threading.RLock()  # Reentrant lock for thread safety
 
     def write(
         self,
@@ -80,28 +105,36 @@ class AdaptiveMemoryStore:
             embedding: Vector representation of event
             metadata: Event metadata (severity, type, etc.)
             timestamp: Event timestamp (defaults to now)
+
+        Raises:
+            ValueError: If embedding is empty or metadata is not a dict
         """
+        if not embedding:
+            raise ValueError("Embedding cannot be empty")
+        if not isinstance(metadata, dict):
+            raise ValueError("Metadata must be a dictionary")
         if timestamp is None:
             timestamp = datetime.now()
 
-        # Check for similar existing events (recurrence)
-        similar = self._find_similar(embedding, threshold=0.85)
+        with self._lock:
+            # Check for similar existing events (recurrence)
+            similar = self._find_similar(embedding, threshold=DEFAULT_SIMILARITY_THRESHOLD)
 
-        if similar:
-            # Boost recurrence count for existing event
-            similar.recurrence_count += 1
-            similar.metadata["last_seen"] = timestamp
-        else:
-            # Add new event
-            event = MemoryEvent(embedding, metadata, timestamp)
-            self.memory.append(event)
+            if similar:
+                # Boost recurrence count for existing event
+                similar.recurrence_count += 1
+                similar.metadata["last_seen"] = timestamp
+            else:
+                # Add new event
+                event = MemoryEvent(embedding, metadata, timestamp)
+                self.memory.append(event)
 
-        # Auto-prune if capacity exceeded
-        if len(self.memory) > self.max_capacity:
-            self.prune(keep_critical=True)
+            # Auto-prune if capacity exceeded
+            if len(self.memory) > self.max_capacity:
+                self.prune(keep_critical=True)
 
     def retrieve(
-        self, query_embedding: Union[List[float], "np.ndarray"], top_k: int = 5
+        self, query_embedding: Union[List[float], "np.ndarray"], top_k: int = DEFAULT_TOP_K
     ) -> List[Tuple[float, Dict, datetime]]:
         """
         Retrieve similar events with temporal weighting.
@@ -112,7 +145,14 @@ class AdaptiveMemoryStore:
 
         Returns:
             List of (weighted_score, metadata, timestamp) tuples
+
+        Raises:
+            ValueError: If query_embedding is empty or top_k is invalid
         """
+        if not query_embedding:
+            raise ValueError("Query embedding cannot be empty")
+        if top_k <= 0:
+            raise ValueError("top_k must be positive")
         if not self.memory:
             return []
 
@@ -125,11 +165,11 @@ class AdaptiveMemoryStore:
             temporal_weight = self._temporal_weight(event)
 
             # Apply recurrence boost
-            recurrence_boost = 1 + 0.3 * (np.log(1 + event.recurrence_count) if np is not None else math.log(1 + event.recurrence_count))
+            recurrence_boost = 1 + RECURRENCE_BOOST_FACTOR * (np.log(1 + event.recurrence_count) if np is not None else math.log(1 + event.recurrence_count))
 
             # Combined weighted score
             weighted_score = similarity * (
-                0.5 + 0.3 * temporal_weight + 0.2 * recurrence_boost
+                SIMILARITY_WEIGHT + TEMPORAL_WEIGHT * temporal_weight + RECURRENCE_WEIGHT * recurrence_boost
             )
 
             scores.append((weighted_score, event.metadata, event.timestamp))
@@ -138,7 +178,7 @@ class AdaptiveMemoryStore:
         scores.sort(reverse=True, key=lambda x: x[0])
         return scores[:top_k]
 
-    def prune(self, max_age_hours: int = 24, keep_critical: bool = True) -> int:
+    def prune(self, max_age_hours: int = DEFAULT_MAX_AGE_HOURS, keep_critical: bool = True) -> int:
         """
         Safe decay mechanism - remove old events.
 
@@ -148,23 +188,29 @@ class AdaptiveMemoryStore:
 
         Returns:
             Number of events pruned
+
+        Raises:
+            ValueError: If max_age_hours is negative
         """
-        cutoff = datetime.now() - timedelta(hours=max_age_hours)
-        initial_count = len(self.memory)
+        if max_age_hours < 0:
+            raise ValueError("max_age_hours must be non-negative")
+        with self._lock:
+            cutoff = datetime.now() - timedelta(hours=max_age_hours)
+            initial_count = len(self.memory)
 
-        if keep_critical:
-            # Keep critical events and recent events
-            self.memory = [
-                event
-                for event in self.memory
-                if event.is_critical or event.timestamp > cutoff
-            ]
-        else:
-            # Only keep recent events
-            self.memory = [event for event in self.memory if event.timestamp > cutoff]
+            if keep_critical:
+                # Keep critical events and recent events
+                self.memory = [
+                    event
+                    for event in self.memory
+                    if event.is_critical or event.timestamp > cutoff
+                ]
+            else:
+                # Only keep recent events
+                self.memory = [event for event in self.memory if event.timestamp > cutoff]
 
-        pruned_count = initial_count - len(self.memory)
-        return pruned_count
+            pruned_count = initial_count - len(self.memory)
+            return pruned_count
 
     def replay(self, start_time: datetime, end_time: datetime) -> List[Dict]:
         """
@@ -176,66 +222,74 @@ class AdaptiveMemoryStore:
 
         Returns:
             List of event metadata in chronological order
+
+        Raises:
+            ValueError: If start_time is after end_time
         """
-        # Filter events in time range and sort by timestamp
-        filtered_events = [
-            event
-            for event in self.memory
-            if start_time <= event.timestamp <= end_time
-        ]
+        if start_time > end_time:
+            raise ValueError("start_time must be before or equal to end_time")
+        with self._lock:
+            # Filter events in time range and sort by timestamp
+            filtered_events = [
+                event
+                for event in self.memory
+                if start_time <= event.timestamp <= end_time
+            ]
 
-        # Sort chronologically by event timestamp
-        filtered_events.sort(key=lambda event: event.timestamp)
+            # Sort chronologically by event timestamp
+            filtered_events.sort(key=lambda event: event.timestamp)
 
-        # Extract metadata
-        return [event.metadata for event in filtered_events]
+            # Extract metadata
+            return [event.metadata for event in filtered_events]
 
     def save(self) -> None:
         """Persist memory to disk with path validation."""
-        try:
-            # Security: Validate storage path is within base directory (prevents path traversal)
-            resolved_path = os.path.abspath(self.storage_path)
-            if not resolved_path.startswith(MEMORY_STORE_BASE_DIR):
-                logger.error(
-                    f"⚠️  Storage path traversal attempt blocked: {self.storage_path}"
-                )
-                raise ValueError(
-                    f"Storage path must be within {MEMORY_STORE_BASE_DIR}"
-                )
-            
-            os.makedirs(os.path.dirname(resolved_path), exist_ok=True)
-            with open(resolved_path, "wb") as f:
-                pickle.dump(self.memory, f)
-            logger.debug(f"Memory store saved to {resolved_path}")
-        except Exception as e:
-            logger.error(f"Failed to save memory store: {e}", exc_info=True)
-            raise
+        with self._lock:
+            try:
+                # Security: Validate storage path is within base directory (prevents path traversal)
+                resolved_path = os.path.abspath(self.storage_path)
+                if not resolved_path.startswith(MEMORY_STORE_BASE_DIR):
+                    logger.error(
+                        f"⚠️  Storage path traversal attempt blocked: {self.storage_path}"
+                    )
+                    raise ValueError(
+                        f"Storage path must be within {MEMORY_STORE_BASE_DIR}"
+                    )
+
+                os.makedirs(os.path.dirname(resolved_path), exist_ok=True)
+                with open(resolved_path, "wb") as f:
+                    pickle.dump(self.memory, f)
+                logger.debug(f"Memory store saved to {resolved_path}")
+            except Exception as e:
+                logger.error(f"Failed to save memory store: {e}", exc_info=True)
+                raise
 
     def load(self) -> bool:
         """Load memory from disk with validation and error handling."""
-        try:
-            # Security: Validate storage path is within base directory (prevents path traversal)
-            resolved_path = os.path.abspath(self.storage_path)
-            if not resolved_path.startswith(MEMORY_STORE_BASE_DIR):
-                logger.error(
-                    f"⚠️  Storage path traversal attempt blocked: {self.storage_path}"
-                )
-                raise ValueError(
-                    f"Storage path must be within {MEMORY_STORE_BASE_DIR}"
-                )
-            
-            if os.path.exists(resolved_path):
-                with open(resolved_path, "rb") as f:
-                    self.memory = pickle.load(f)  # nosec B301 - trusted internal persistence format
-                logger.debug(f"Memory store loaded from {resolved_path}")
-                return True
-            return False
-        except (pickle.UnpicklingError, EOFError, ValueError) as e:
-            logger.error(f"Failed to load memory store: {e}", exc_info=True)
-            return False
-        except Exception as e:
-            logger.error(f"Unexpected error loading memory store: {e}", exc_info=True)
-            return False
+        with self._lock:
+            try:
+                # Security: Validate storage path is within base directory (prevents path traversal)
+                resolved_path = os.path.abspath(self.storage_path)
+                if not resolved_path.startswith(MEMORY_STORE_BASE_DIR):
+                    logger.error(
+                        f"⚠️  Storage path traversal attempt blocked: {self.storage_path}"
+                    )
+                    raise ValueError(
+                        f"Storage path must be within {MEMORY_STORE_BASE_DIR}"
+                    )
+
+                if os.path.exists(resolved_path):
+                    with open(resolved_path, "rb") as f:
+                        self.memory = pickle.load(f)  # nosec B301 - trusted internal persistence format
+                    logger.debug(f"Memory store loaded from {resolved_path}")
+                    return True
+                return False
+            except (pickle.UnpicklingError, EOFError, ValueError) as e:
+                logger.error(f"Failed to load memory store: {e}", exc_info=True)
+                return False
+            except Exception as e:
+                logger.error(f"Unexpected error loading memory store: {e}", exc_info=True)
+                return False
 
     def get_stats(self) -> Dict:
         """Get memory statistics."""
@@ -275,7 +329,7 @@ class AdaptiveMemoryStore:
             return dot_product / (norm_a * norm_b + 1e-10)
 
     def _find_similar(
-        self, embedding: Union[List[float], "np.ndarray"], threshold: float = 0.85
+        self, embedding: Union[List[float], "np.ndarray"], threshold: float = DEFAULT_SIMILARITY_THRESHOLD
     ) -> Optional[MemoryEvent]:
         """Find similar event in memory."""
         for event in self.memory:

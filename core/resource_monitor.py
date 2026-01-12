@@ -16,6 +16,7 @@ Features:
 import psutil
 import logging
 import os
+import threading
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 from datetime import datetime, timedelta
@@ -343,37 +344,43 @@ class ResourceMonitor:
         return [m.to_dict() for m in history]
 
 
-# Singleton instance
+# Singleton instance and lock for thread safety
 _resource_monitor: Optional[ResourceMonitor] = None
+_resource_monitor_lock = threading.Lock()
 
 
 def get_resource_monitor() -> ResourceMonitor:
     """
     Get global resource monitor singleton.
-    
+
     Initializes with configuration from environment variables if not already created.
-    
+    Thread-safe using double-checked locking pattern.
+
     Returns:
         ResourceMonitor singleton instance
     """
     global _resource_monitor
-    
+
+    # First check without lock for performance
     if _resource_monitor is None:
-        import os
-        
-        # Load configuration from environment
-        thresholds = ResourceThresholds(
-            cpu_warning=get_secret('resource_cpu_warning'),
-            cpu_critical=get_secret('resource_cpu_critical'),
-            memory_warning=get_secret('resource_memory_warning'),
-            memory_critical=get_secret('resource_memory_critical'),
-        )
-        
-        monitoring_enabled = get_secret('resource_monitoring_enabled')
-        
-        _resource_monitor = ResourceMonitor(
-            thresholds=thresholds,
-            monitoring_enabled=monitoring_enabled
-        )
-    
+        with _resource_monitor_lock:
+            # Double-check pattern: check again inside lock
+            if _resource_monitor is None:
+                import os
+
+                # Load configuration from environment
+                thresholds = ResourceThresholds(
+                    cpu_warning=get_secret('resource_cpu_warning'),
+                    cpu_critical=get_secret('resource_cpu_critical'),
+                    memory_warning=get_secret('resource_memory_warning'),
+                    memory_critical=get_secret('resource_memory_critical'),
+                )
+
+                monitoring_enabled = get_secret('resource_monitoring_enabled')
+
+                _resource_monitor = ResourceMonitor(
+                    thresholds=thresholds,
+                    monitoring_enabled=monitoring_enabled
+                )
+
     return _resource_monitor
