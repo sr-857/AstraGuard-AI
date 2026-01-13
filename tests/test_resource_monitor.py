@@ -276,11 +276,11 @@ class TestResourceMonitorSingleton:
         from core import resource_monitor as rm
         from core.secrets import init_secrets_manager, get_secrets_manager
         
-        # Initialize secrets manager if not already done
+        # Initialize secrets manager if not already done with a test master key
         try:
-            init_secrets_manager()
-        except RuntimeError:
-            # Already initialized
+            init_secrets_manager(master_key="test_master_key_32_chars_minimum_")
+        except (RuntimeError, ValueError):
+            # Already initialized or key error - this is OK
             pass
         
         rm._resource_monitor = None

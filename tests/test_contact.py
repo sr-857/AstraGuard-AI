@@ -44,6 +44,10 @@ def setup_test_db(tmp_path, monkeypatch):
     monkeypatch.setattr("api.contact.DB_PATH", test_db_path)
     monkeypatch.setattr("api.contact.NOTIFICATION_LOG", test_data_dir / "contact_notifications.log")
     
+    # Clear the in-memory rate limiter between tests
+    from api.contact import _in_memory_limiter
+    _in_memory_limiter.requests.clear()
+    
     # Initialize database
     init_database()
     

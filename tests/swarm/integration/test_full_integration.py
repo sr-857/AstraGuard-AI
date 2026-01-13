@@ -648,12 +648,12 @@ class FullStackIntegrationTest:
         print(f"  • Integration (#410-413): {len(result.integration_results)}/4 passed")
         
         # Scenarios
-        passed_scenarios = sum(1 for s in result.scenarios if s.passed)
-        print(f"\nCross-Layer Scenarios: {passed_scenarios}/{len(result.scenarios)} passed")
+        passed_scenarios = sum(1 for s in result.cross_layer_scenarios if s.passed)
+        print(f"\nCross-Layer Scenarios: {passed_scenarios}/{len(result.cross_layer_scenarios)} passed")
         
         # Production gates
-        passed_gates = sum(1 for g in result.gates if g.passed)
-        print(f"Production Gates: {passed_gates}/{len(result.gates)} passed")
+        passed_gates = sum(1 for g in result.production_gates if g.passed)
+        print(f"Production Gates: {passed_gates}/{len(result.production_gates)} passed")
         
         if result.critical_failures:
             print(f"\n⚠️  Critical Failures:")

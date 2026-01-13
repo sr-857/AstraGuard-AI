@@ -243,23 +243,26 @@ class ResourceMonitor:
 
             # Memory usage
             memory = psutil.virtual_memory()
-            memory_percent = memory.percent
-            memory_available_mb = memory.available / (1024 * 1024)
+            memory_percent = memory.percent if memory.percent is not None else 0.0
+            memory_available_mb = memory.available / (1024 * 1024) if memory.available is not None else 0.0
 
-            # Disk usage
-            disk = psutil.disk_usage('/')
-            disk_usage_percent = disk.percent
+            # Disk usage - with fallback for CI environments
+            try:
+                disk = psutil.disk_usage('/')
+                disk_usage_percent = disk.percent if disk.percent is not None else 0.0
+            except (OSError, PermissionError):
+                disk_usage_percent = 0.0
 
             # Process memory
             process_info = self._process.memory_info()
-            process_memory_mb = process_info.rss / (1024 * 1024)
+            process_memory_mb = process_info.rss / (1024 * 1024) if process_info.rss is not None else 0.0
 
             metrics = ResourceMetrics(
-                cpu_percent=cpu_percent,
-                memory_percent=memory_percent,
-                memory_available_mb=memory_available_mb,
-                disk_usage_percent=disk_usage_percent,
-                process_memory_mb=process_memory_mb,
+                cpu_percent=float(cpu_percent) if cpu_percent is not None else 0.0,
+                memory_percent=float(memory_percent) if memory_percent is not None else 0.0,
+                memory_available_mb=float(memory_available_mb) if memory_available_mb is not None else 0.0,
+                disk_usage_percent=float(disk_usage_percent) if disk_usage_percent is not None else 0.0,
+                process_memory_mb=float(process_memory_mb) if process_memory_mb is not None else 0.0,
                 timestamp=datetime.now()
             )
 

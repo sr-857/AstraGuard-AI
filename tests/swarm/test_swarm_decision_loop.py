@@ -418,6 +418,7 @@ class TestDecisionConvergence:
         mock_inner_loop.reason = AsyncMock(return_value=decision_result)
         mock_registry.get_alive_peers = MagicMock(return_value=[])
         mock_registry.get_peer_health = MagicMock(return_value=None)
+        mock_registry.get_agent_role = MagicMock(return_value=SatelliteRole.PRIMARY)
         mock_election.is_leader = MagicMock(return_value=False)
         mock_election.get_leader = AsyncMock(return_value=None)
 

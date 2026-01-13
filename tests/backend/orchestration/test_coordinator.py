@@ -262,8 +262,8 @@ class TestDistributedCoordinatorVoting:
         
         score = coordinator._compute_health_score(state)
         
-        # Degraded: 0.6 * 0.40 + 0.5 * 0.35 + 0.5 * 0.25 = 0.615
-        assert abs(score - 0.615) < 0.001
+        # Degraded: 0.6 * 0.40 + 0.5 * 0.35 + 0.5 * 0.25 = 0.24 + 0.175 + 0.125 = 0.54
+        assert abs(score - 0.54) < 0.001
     
     def test_compute_health_score_failed(self, coordinator):
         """Test health score computation for failed state."""

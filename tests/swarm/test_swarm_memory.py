@@ -349,7 +349,7 @@ class TestBandwidthEviction:
     async def test_no_eviction_normal_bandwidth(self, swarm_memory):
         """Test no eviction when bandwidth is normal."""
         # Add peer cache entries
-        peer_id = AgentID(constellation="test", satellite_serial="sat-002", uuid=uuid5(NAMESPACE_DNS, "test:sat-002"))
+        peer_id = AgentID(constellation="astra-v3.0", satellite_serial="sat-002", uuid=uuid5(NAMESPACE_DNS, "astra-v3.0:sat-002"))
         swarm_memory.peer_caches[peer_id] = PeerCacheInfo(
             agent_id=peer_id,
             pattern_ids={"p1", "p2", "p3"},
@@ -368,7 +368,7 @@ class TestBandwidthEviction:
     async def test_eviction_during_congestion(self, swarm_memory):
         """Test eviction when bandwidth congested."""
         # Add peer cache entries
-        peer_id = AgentID(constellation="test", satellite_serial="sat-002", uuid=uuid5(NAMESPACE_DNS, "test:sat-002"))
+        peer_id = AgentID(constellation="astra-v3.0", satellite_serial="sat-002", uuid=uuid5(NAMESPACE_DNS, "astra-v3.0:sat-002"))
         swarm_memory.peer_caches[peer_id] = PeerCacheInfo(
             agent_id=peer_id,
             pattern_ids={"p1", "p2", "p3", "p4", "p5"},
@@ -387,7 +387,7 @@ class TestBandwidthEviction:
         """Test eviction removes ~20% of peer patterns."""
         # Add 20 patterns across peers
         for i in range(3):
-            peer_id = AgentID(constellation="test", satellite_serial=f"sat-{i:03d}", uuid=uuid5(NAMESPACE_DNS, f"test:sat-{i:03d}"))
+            peer_id = AgentID(constellation="astra-v3.0", satellite_serial=f"sat-{i:03d}", uuid=uuid5(NAMESPACE_DNS, f"astra-v3.0:sat-{i:03d}"))
             swarm_memory.peer_caches[peer_id] = PeerCacheInfo(
                 agent_id=peer_id,
                 pattern_ids={f"pattern-{j}" for j in range(20)},
@@ -416,7 +416,7 @@ class TestMultiAgentScenarios:
         """Test cache hit rate improvement with 5 peers."""
         # Simulate 5-agent scenario
         peers = [
-            AgentID(constellation="test", satellite_serial=f"sat-{i:03d}", uuid=uuid5(NAMESPACE_DNS, f"test:sat-{i:03d}"))
+            AgentID(constellation="astra-v3.0", satellite_serial=f"sat-{i:03d}", uuid=uuid5(NAMESPACE_DNS, f"astra-v3.0:sat-{i:03d}"))
             for i in range(1, 6)
         ]
 
