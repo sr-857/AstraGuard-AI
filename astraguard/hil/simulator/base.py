@@ -18,6 +18,7 @@ from ..schemas.telemetry import (
 from .attitude import AttitudeSimulator
 from .power import PowerSimulator
 from .thermal import ThermalSimulator
+from .orbit import OrbitSimulator
 
 
 class SatelliteSimulator(ABC):
@@ -116,23 +117,34 @@ class StubSatelliteSimulator(SatelliteSimulator):
         
         # Thermal dynamics simulator
         self.thermal_sim = ThermalSimulator(sat_id)
+        
+        # Orbital mechanics simulator
+        self.orbit_sim = OrbitSimulator(sat_id)
     
     async def generate_telemetry(self) -> TelemetryPacket:
         """
         Generate LEO satellite telemetry with production schemas.
         
-        Returns telemetry with realistic attitude and power dynamics.
+        Returns telemetry with realistic orbital, attitude, power, and thermal dynamics.
+        Propagates all physics in correct order: orbit → attitude → power → thermal.
         """
         import random
         
         timestamp = datetime.now()
         
+        # Update orbital mechanics first (drives eclipse timing and altitude)
+        self.orbit_sim.update(dt=1.0)
+        orbit = self.orbit_sim.get_orbit_data()
+        
         # Update attitude dynamics (1Hz telemetry)
         self.attitude_sim.update(dt=1.0)
         
-        # Update power dynamics - attitude affects solar panel exposure
+        # Eclipse timing from orbital true anomaly (90-270° = in shadow)
+        is_eclipse = self.orbit_sim.is_in_eclipse()
+        
+        # Update power dynamics - attitude affects solar panel exposure + eclipse disables solar
         nadir_error = self.attitude_sim.get_attitude_data().nadir_pointing_error_deg
-        sun_exposure = max(0.0, 1.0 - (nadir_error / 90.0))  # Degrades with pointing error
+        sun_exposure = 0.0 if is_eclipse else max(0.0, 1.0 - (nadir_error / 90.0))
         self.power_sim.update(dt=1.0, sun_exposure=sun_exposure)
         
         # Inject attitude fault if needed
@@ -152,8 +164,7 @@ class StubSatelliteSimulator(SatelliteSimulator):
         power = self.power_sim.get_power_data()
         
         # Thermal dynamics: coupled to power state and attitude error
-        # Solar heating depends on orbital position (eclipse flag from power sim)
-        is_eclipse = power.solar_current < 0.1  # Nearly zero current = eclipse
+        # Use eclipse from orbit (more accurate than power current threshold)
         solar_flux = 1366.0 if not is_eclipse else 0.0
         attitude_error_deg = attitude.nadir_pointing_error_deg
         
@@ -166,13 +177,6 @@ class StubSatelliteSimulator(SatelliteSimulator):
         )
         
         thermal = self.thermal_sim.get_thermal_data()
-        
-        # Orbit: LEO parameters
-        orbit = OrbitData(
-            altitude_m=520000 + random.uniform(-1000, 1000),
-            ground_speed_ms=7660,
-            true_anomaly_deg=random.uniform(0, 360)
-        )
         
         # Build packet
         packet = TelemetryPacket(
