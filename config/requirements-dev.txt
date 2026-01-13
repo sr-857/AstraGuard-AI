@@ -1,6 +1,10 @@
 # Development and CI dependencies for AstraGuard-AI
 # Install with: pip install -r requirements-dev.txt
 
+# ===== Core Dependencies =====
+# (These should be synced with requirements.txt for development)
+lz4>=4.0.0,<5.0
+
 # ===== Testing (required for CI) =====
 pytest==8.3.2
 pytest-cov==7.0.0
