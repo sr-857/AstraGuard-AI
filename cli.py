@@ -17,6 +17,7 @@ if sys.platform == "win32":
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
 
 from models.feedback import FeedbackEvent, FeedbackLabel
+from core.secrets import init_secrets_manager, store_secret, get_secret, rotate_secret, list_secrets, health_check
 
 
 class FeedbackCLI:
@@ -254,6 +255,66 @@ def run_report(args: argparse.Namespace) -> None:
         sys.exit(1)
 
 
+def run_secrets_command(args: argparse.Namespace) -> None:
+    """Handle secrets management commands."""
+    try:
+        # Initialize secrets manager if not already done
+        init_secrets_manager()
+
+        if args.secrets_command == "add":
+            metadata = store_secret(
+                args.key,
+                args.value,
+                description=args.description,
+                expires_in_days=args.expires
+            )
+            print(f"✅ Secret '{args.key}' stored successfully (version {metadata.version})")
+
+        elif args.secrets_command == "get":
+            try:
+                value = get_secret(args.key, version=args.version)
+                if args.show:
+                    print(f"🔑 {args.key}: {value}")
+                else:
+                    print(f"✅ Secret '{args.key}' retrieved (length: {len(value)})")
+            except KeyError:
+                print(f"❌ Secret '{args.key}' not found")
+                sys.exit(1)
+
+        elif args.secrets_command == "rotate":
+            metadata = rotate_secret(args.key, new_value=args.value)
+            print(f"🔄 Secret '{args.key}' rotated to version {metadata.version}")
+
+        elif args.secrets_command == "list":
+            secrets = list_secrets()
+            if not secrets:
+                print("📭 No secrets stored")
+            else:
+                print(f"🔐 {len(secrets)} secrets:")
+                for secret in secrets:
+                    expires = f" (expires: {secret.expires_at})" if secret.expires_at else ""
+                    print(f"  • {secret.key} (v{secret.version}){expires}")
+                    if secret.description:
+                        print(f"    {secret.description}")
+
+        elif args.secrets_command == "health":
+            health = health_check()
+            print("🔍 Secrets System Health Check")
+            print("=" * 40)
+            for component, status in health.items():
+                icon = "✅" if status else "❌"
+                print(f"{icon} {component}: {'OK' if status else 'FAILED'}")
+            print("=" * 40)
+
+        else:
+            print("❌ Unknown secrets command")
+            sys.exit(1)
+
+    except Exception as e:
+        print(f"❌ Secrets operation failed: {e}")
+        sys.exit(1)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="AstraGuard-AI: Unified CLI\nUse `cli.py <subcommand>`"
@@ -275,6 +336,34 @@ def main() -> None:
 
     fp = sub.add_parser("feedback", help="Operator feedback review interface")
     fp.add_argument("action", choices=["review"])
+
+    # Secrets management commands
+    secrets_parser = sub.add_parser("secrets", help="Secret management operations")
+    secrets_sub = secrets_parser.add_subparsers(dest="secrets_command", help="Secret operations")
+
+    # Add secret
+    add_parser = secrets_sub.add_parser("add", help="Add a new secret")
+    add_parser.add_argument("key", help="Secret key")
+    add_parser.add_argument("value", help="Secret value")
+    add_parser.add_argument("-d", "--description", help="Secret description")
+    add_parser.add_argument("-e", "--expires", type=int, help="Days until expiration")
+
+    # Get secret
+    get_parser = secrets_sub.add_parser("get", help="Retrieve a secret")
+    get_parser.add_argument("key", help="Secret key")
+    get_parser.add_argument("-v", "--version", type=int, help="Specific version")
+    get_parser.add_argument("-s", "--show", action="store_true", help="Display the secret value")
+
+    # Rotate secret
+    rotate_parser = secrets_sub.add_parser("rotate", help="Rotate a secret")
+    rotate_parser.add_argument("key", help="Secret key")
+    rotate_parser.add_argument("-v", "--value", help="New secret value (auto-generated if not provided)")
+
+    # List secrets
+    secrets_sub.add_parser("list", help="List all secrets")
+
+    # Health check
+    secrets_sub.add_parser("health", help="Check secrets system health")
 
     args = parser.parse_args()
 

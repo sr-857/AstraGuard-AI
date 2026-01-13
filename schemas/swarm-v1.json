@@ -1,0 +1,174 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AstraGuard Swarm v1.0 Schema",
+  "description": "JSON Schema for AstraGuard multi-agent swarm intelligence framework",
+  "definitions": {
+    "UUID": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "RFC 4122 UUID format"
+    },
+    "ISO8601DateTime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp (e.g., 2024-01-01T12:00:00)"
+    },
+    "AgentID": {
+      "type": "object",
+      "title": "Agent Identifier",
+      "description": "Unique identifier for satellite agents in the constellation",
+      "properties": {
+        "constellation": {
+          "type": "string",
+          "description": "Constellation identifier (e.g., 'astra-v3.0')",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "satellite_serial": {
+          "type": "string",
+          "description": "Physical satellite serial number (e.g., 'SAT-001-A')",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^SAT-\\d{3}-[A-Z]$"
+        },
+        "uuid": {
+          "$ref": "#/definitions/UUID",
+          "description": "UUIDv5 derived from constellation:satellite_serial"
+        }
+      },
+      "required": ["constellation", "satellite_serial", "uuid"],
+      "additionalProperties": false
+    },
+    "SatelliteRole": {
+      "type": "string",
+      "title": "Satellite Operational Role",
+      "description": "Role of satellite in the constellation",
+      "enum": ["primary", "backup", "standby", "safe_mode"],
+      "examples": [
+        "primary",
+        "backup",
+        "standby",
+        "safe_mode"
+      ]
+    },
+    "HealthSummary": {
+      "type": "object",
+      "title": "Health Summary Telemetry",
+      "description": "Compressed health telemetry for ISL bandwidth-constrained links (target: <1KB)",
+      "properties": {
+        "anomaly_signature": {
+          "type": "array",
+          "title": "Anomaly Signature Vector",
+          "description": "32-dimensional PCA vector for anomaly detection (Issue #399 prep)",
+          "items": {
+            "type": "number",
+            "description": "PCA component value"
+          },
+          "minItems": 32,
+          "maxItems": 32,
+          "examples": [
+            [0.1, 0.2, 0.15, 0.05]
+          ]
+        },
+        "risk_score": {
+          "type": "number",
+          "title": "Risk Score",
+          "description": "Normalized risk metric",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "examples": [0.35, 0.75, 0.0]
+        },
+        "recurrence_score": {
+          "type": "number",
+          "title": "Recurrence Score",
+          "description": "Weighted decay score for recurring anomalies",
+          "minimum": 0,
+          "maximum": 10,
+          "examples": [2.5, 7.8, 0.0]
+        },
+        "timestamp": {
+          "$ref": "#/definitions/ISO8601DateTime",
+          "description": "UTC timestamp of health snapshot"
+        },
+        "compressed_size": {
+          "type": "integer",
+          "title": "Compressed Payload Size",
+          "description": "Size after LZ4 compression in bytes",
+          "minimum": 0,
+          "maximum": 1024,
+          "default": 0,
+          "examples": [256, 512, 768]
+        }
+      },
+      "required": [
+        "anomaly_signature",
+        "risk_score",
+        "recurrence_score",
+        "timestamp"
+      ],
+      "additionalProperties": false
+    },
+    "SwarmConfig": {
+      "type": "object",
+      "title": "Swarm Configuration",
+      "description": "Configuration for multi-agent satellite constellation operations",
+      "properties": {
+        "agent_id": {
+          "$ref": "#/definitions/AgentID",
+          "description": "Unique identifier for this agent"
+        },
+        "role": {
+          "$ref": "#/definitions/SatelliteRole",
+          "description": "Operational role in constellation"
+        },
+        "constellation_id": {
+          "type": "string",
+          "title": "Constellation ID",
+          "description": "Constellation identifier (must match agent_id.constellation)",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "peers": {
+          "type": "array",
+          "title": "Peer Agents",
+          "description": "List of peer agent IDs for ISL communication",
+          "items": {
+            "$ref": "#/definitions/AgentID"
+          },
+          "default": [],
+          "examples": [
+            []
+          ]
+        },
+        "bandwidth_limit_kbps": {
+          "type": "integer",
+          "title": "ISL Bandwidth Limit",
+          "description": "Inter-satellite link bandwidth limit in KB/s",
+          "minimum": 1,
+          "maximum": 10000,
+          "default": 10,
+          "examples": [10, 100, 256]
+        }
+      },
+      "required": [
+        "agent_id",
+        "role",
+        "constellation_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "examples": [
+    {
+      "agent_id": {
+        "constellation": "astra-v3.0",
+        "satellite_serial": "SAT-001-A",
+        "uuid": "550e8400-e29b-41d4-a716-446655440000"
+      },
+      "role": "primary",
+      "constellation_id": "astra-v3.0",
+      "peers": [],
+      "bandwidth_limit_kbps": 10
+    }
+  ]
+}

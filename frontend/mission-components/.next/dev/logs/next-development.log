@@ -2889,3 +2889,566 @@
 [00:34:23.081] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
 [00:34:23.081] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
 [00:34:23.081] Browser WARN    [Polling] Failed - using mockup
+[00:35:14.960] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:35:14.960] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:35:14.960] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:35:14.960] Browser WARN    [Polling] Failed - using mockup
+[00:37:07.149] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:37:07.149] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:37:07.149] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:37:07.149] Browser WARN    [Polling] Failed - using mockup
+[00:38:09.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:38:09.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:38:09.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:38:09.539] Browser WARN    [Polling] Failed - using mockup
+[00:40:29.564] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:40:29.564] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:40:29.564] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:40:29.564] Browser WARN    [Polling] Failed - using mockup
+[00:41:41.932] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:41:41.932] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:41:41.932] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:41:41.932] Browser WARN    [Polling] Failed - using mockup
+[00:42:04.999] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:42:04.999] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:42:05.000] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:42:05.000] Browser WARN    [Polling] Failed - using mockup
+[00:43:07.244] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:43:07.244] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:43:07.244] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:43:07.244] Browser WARN    [Polling] Failed - using mockup
+[00:44:05.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:44:05.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:44:05.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:44:05.553] Browser WARN    [Polling] Failed - using mockup
+[00:44:54.364] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:44:54.364] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:44:54.364] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:44:56.355] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:44:56.355] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:44:56.355] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:44:56.863] Browser WARN    [Polling] Failed - using mockup
+[00:44:57.102] Browser WARN    [Polling] Failed - using mockup
+[00:44:58.307] Browser WARN    The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[00:44:58.307] Browser WARN    The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[00:44:58.307] Browser WARN    The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[00:44:58.307] Browser WARN    The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[00:44:58.307] Browser WARN    The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[00:44:58.307] Browser WARN    The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[00:44:58.307] Browser WARN    The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[00:44:58.307] Browser WARN    The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[00:44:58.307] Browser WARN    The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[00:44:58.307] Browser WARN    The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[00:44:58.307] Browser WARN    The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[00:44:58.307] Browser WARN    The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[00:44:58.660] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:44:58.660] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:44:58.660] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:44:59.218] Browser WARN    [Polling] Failed - using mockup
+[00:44:59.623] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/chaos/status undefined
+[00:44:59.623] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/chaos/status undefined
+[00:45:00.527] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:00.527] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:00.527] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:01.708] Browser ERROR   Failed to fetch chaos status {}
+[00:45:01.708] Browser DEBUG   [Recorder] Fetch request: POST http://localhost:3000/__nextjs_original-stack-frames {"body":"{\"frames\":[{\"file\":\"chrome-extension://ohcclfkaidblnjnggclkiecgkpgldihe/js/interceptor.js\",\"line1\":71,\"column1\":26,\"methodName\":\"window.fetch\",\"arguments\":[]},{\"file\":\"file://D:/Elite_Coders/AstraGuard-AI/frontend/mission-components/.next/dev/static/chunks/frontend_mission-components_app_components_4c45f24b._.js\",\"line1\":371,\"column1\":25,\"methodName\":\"async fetchStatus\",\"arguments\":[]}],\"isServer\":false,\"isEdgeServer\":false,\"isAppDirectory\":true}","method":"POST"}
+[00:45:01.708] Browser DEBUG   [Recorder] Fetch request: GET https://raw.githack.com/pmndrs/drei-assets/456060a26bbeb8fdf79326f224b6d99b8bcce736/hdri/dikhololo_night_1k.hdr undefined
+[00:45:02.010] Browser WARN    [Polling] Failed - using mockup
+[00:45:02.345] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:02.345] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:02.345] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:02.838] Browser LOG     THREE.WebGLRenderer: Context Lost.
+[00:45:03.907] Browser ERROR   Failed to fetch chaos status {}
+[00:45:03.907] Browser WARN    [Polling] Failed - using mockup
+[00:45:04.359] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:04.359] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:04.359] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:05.544] Browser WARN    [Polling] Failed - using mockup
+[00:45:06.469] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:06.469] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:06.469] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:07.464] Browser WARN    [Polling] Failed - using mockup
+[00:45:08.325] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:08.325] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:08.325] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:09.509] Browser WARN    [Polling] Failed - using mockup
+[00:45:10.350] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:10.350] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:10.350] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:11.445] Browser WARN    [Polling] Failed - using mockup
+[00:45:12.422] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:12.422] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:12.422] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:13.538] Browser WARN    [Polling] Failed - using mockup
+[00:45:14.325] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:14.325] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:14.325] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:15.460] Browser WARN    [Polling] Failed - using mockup
+[00:45:16.355] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:16.355] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:16.355] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:17.460] Browser WARN    [Polling] Failed - using mockup
+[00:45:18.411] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:18.411] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:18.411] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:19.437] Browser WARN    [Polling] Failed - using mockup
+[00:45:20.397] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:20.397] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:20.397] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:21.453] Browser WARN    [Polling] Failed - using mockup
+[00:45:22.362] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:22.362] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:22.362] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:23.436] Browser WARN    [Polling] Failed - using mockup
+[00:45:24.421] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:24.421] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:24.421] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:25.487] Browser WARN    [Polling] Failed - using mockup
+[00:45:26.326] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:26.326] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:26.326] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:27.590] Browser WARN    [Polling] Failed - using mockup
+[00:45:28.329] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:28.329] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:28.329] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:29.433] Browser WARN    [Polling] Failed - using mockup
+[00:45:30.403] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:30.403] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:30.403] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:31.471] Browser WARN    [Polling] Failed - using mockup
+[00:45:32.392] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:32.392] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:32.392] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:33.381] Browser WARN    [Polling] Failed - using mockup
+[00:45:34.575] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:34.575] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:34.575] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:35.420] Browser WARN    [Polling] Failed - using mockup
+[00:45:36.327] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:36.327] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:36.327] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:37.436] Browser WARN    [Polling] Failed - using mockup
+[00:45:38.328] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:38.328] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:38.328] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:39.414] Browser WARN    [Polling] Failed - using mockup
+[00:45:40.336] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:40.336] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:40.336] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:42.540] Browser WARN    [Polling] Failed - using mockup
+[00:45:43.651] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:43.651] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:43.651] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:43.651] Browser WARN    [Polling] Failed - using mockup
+[00:45:45.594] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:45.594] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:45.594] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:45.594] Browser WARN    [Polling] Failed - using mockup
+[00:45:47.577] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:47.577] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:47.577] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:47.577] Browser WARN    [Polling] Failed - using mockup
+[00:45:49.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:49.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:49.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:50.540] Browser WARN    [Polling] Failed - using mockup
+[00:45:51.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:51.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:51.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:52.540] Browser WARN    [Polling] Failed - using mockup
+[00:45:53.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:53.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:53.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:54.539] Browser WARN    [Polling] Failed - using mockup
+[00:45:55.540] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:55.540] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:55.540] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:56.540] Browser WARN    [Polling] Failed - using mockup
+[00:45:57.540] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:57.540] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:57.540] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:45:58.540] Browser WARN    [Polling] Failed - using mockup
+[00:45:59.540] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:45:59.540] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:45:59.540] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:46:00.540] Browser WARN    [Polling] Failed - using mockup
+[00:46:01.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:46:01.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:46:01.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:46:02.539] Browser WARN    [Polling] Failed - using mockup
+[00:46:03.554] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:46:03.554] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:46:03.554] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:46:04.546] Browser WARN    [Polling] Failed - using mockup
+[00:46:05.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:46:05.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:46:05.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:46:06.538] Browser WARN    [Polling] Failed - using mockup
+[00:46:07.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:46:07.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:46:07.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:46:08.539] Browser WARN    [Polling] Failed - using mockup
+[00:46:09.552] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:46:09.552] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:46:09.552] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:46:10.546] Browser WARN    [Polling] Failed - using mockup
+[00:46:11.543] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:46:11.543] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:46:11.543] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:46:12.539] Browser WARN    [Polling] Failed - using mockup
+[00:46:13.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:46:13.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:46:13.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:46:14.539] Browser WARN    [Polling] Failed - using mockup
+[00:46:15.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:46:15.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:46:15.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:46:16.540] Browser WARN    [Polling] Failed - using mockup
+[00:46:17.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:46:17.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:46:17.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:46:18.539] Browser WARN    [Polling] Failed - using mockup
+[00:46:19.538] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:46:19.538] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:46:19.538] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:46:20.539] Browser WARN    [Polling] Failed - using mockup
+[00:46:21.540] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:46:21.540] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:46:21.540] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:46:22.550] Browser WARN    [Polling] Failed - using mockup
+[00:46:23.541] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:46:23.541] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:46:23.541] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:46:24.539] Browser WARN    [Polling] Failed - using mockup
+[00:46:25.545] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:46:25.545] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:46:25.545] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:46:26.540] Browser WARN    [Polling] Failed - using mockup
+[00:46:27.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:46:27.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:46:27.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:46:28.540] Browser WARN    [Polling] Failed - using mockup
+[00:46:29.543] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:46:29.543] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:46:29.543] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:46:30.541] Browser WARN    [Polling] Failed - using mockup
+[00:46:31.538] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:46:31.538] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:46:31.538] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:46:32.540] Browser WARN    [Polling] Failed - using mockup
+[00:46:33.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:46:33.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:46:33.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:46:34.575] Browser WARN    [Polling] Failed - using mockup
+[00:46:35.550] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:46:35.550] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:46:35.550] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:46:36.540] Browser WARN    [Polling] Failed - using mockup
+[00:46:37.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:46:37.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:46:37.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:46:38.539] Browser WARN    [Polling] Failed - using mockup
+[00:46:39.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:46:39.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:46:39.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:46:40.542] Browser WARN    [Polling] Failed - using mockup
+[00:46:42.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:46:42.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:46:42.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:46:42.539] Browser WARN    [Polling] Failed - using mockup
+[00:47:00.543] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:47:00.543] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:47:00.543] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:47:00.543] Browser WARN    [Polling] Failed - using mockup
+[00:48:00.542] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:48:00.542] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:48:00.542] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:48:00.542] Browser WARN    [Polling] Failed - using mockup
+[00:49:00.538] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:49:00.538] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:49:00.538] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:49:00.538] Browser WARN    [Polling] Failed - using mockup
+[00:50:00.540] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:50:00.540] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:50:00.540] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:50:00.540] Browser WARN    [Polling] Failed - using mockup
+[00:51:00.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:51:00.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:51:00.539] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:51:00.539] Browser WARN    [Polling] Failed - using mockup
+[00:52:03.552] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:52:03.552] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:52:03.552] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:52:03.552] Browser WARN    [Polling] Failed - using mockup
+[00:53:00.550] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:53:00.550] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:53:00.550] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:53:00.550] Browser WARN    [Polling] Failed - using mockup
+[00:54:00.550] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:54:00.550] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:54:00.550] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:54:00.550] Browser WARN    [Polling] Failed - using mockup
+[00:55:00.555] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:55:00.555] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:55:00.555] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:55:00.555] Browser WARN    [Polling] Failed - using mockup
+[00:56:00.547] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:56:00.547] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:56:00.547] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:56:00.547] Browser WARN    [Polling] Failed - using mockup
+[00:57:00.538] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:57:00.538] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:57:00.538] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:57:00.538] Browser WARN    [Polling] Failed - using mockup
+[00:58:00.543] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:58:00.544] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:58:00.544] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:58:00.544] Browser WARN    [Polling] Failed - using mockup
+[00:59:00.557] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[00:59:00.557] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[00:59:00.557] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[00:59:00.557] Browser WARN    [Polling] Failed - using mockup
+[01:00:00.554] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:00:00.554] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:00:00.554] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:00:00.554] Browser WARN    [Polling] Failed - using mockup
+[01:01:00.542] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:01:00.542] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:01:00.542] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:01:00.542] Browser WARN    [Polling] Failed - using mockup
+[01:02:00.552] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:02:00.552] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:02:00.552] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:02:00.552] Browser WARN    [Polling] Failed - using mockup
+[01:03:01.555] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:03:01.555] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:03:01.555] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:03:01.555] Browser WARN    [Polling] Failed - using mockup
+[01:04:00.542] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:04:00.542] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:04:00.542] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:04:00.542] Browser WARN    [Polling] Failed - using mockup
+[01:05:00.562] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:05:00.562] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:05:00.562] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:05:00.562] Browser WARN    [Polling] Failed - using mockup
+[01:06:00.554] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:06:00.554] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:06:00.554] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:06:00.554] Browser WARN    [Polling] Failed - using mockup
+[01:07:00.549] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:07:00.549] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:07:00.549] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:07:00.549] Browser WARN    [Polling] Failed - using mockup
+[01:08:00.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:08:00.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:08:00.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:08:00.553] Browser WARN    [Polling] Failed - using mockup
+[01:09:00.560] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:09:00.560] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:09:00.560] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:09:00.560] Browser WARN    [Polling] Failed - using mockup
+[01:10:00.545] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:10:00.545] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:10:00.545] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:10:00.545] Browser WARN    [Polling] Failed - using mockup
+[01:11:00.555] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:11:00.555] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:11:00.555] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:11:00.556] Browser WARN    [Polling] Failed - using mockup
+[01:12:00.556] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:12:00.556] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:12:00.556] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:12:00.556] Browser WARN    [Polling] Failed - using mockup
+[01:13:00.555] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:13:00.555] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:13:00.555] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:13:00.555] Browser WARN    [Polling] Failed - using mockup
+[01:14:00.550] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:14:00.550] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:14:00.550] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:14:00.550] Browser WARN    [Polling] Failed - using mockup
+[01:15:00.552] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:15:00.552] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:15:00.552] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:15:00.552] Browser WARN    [Polling] Failed - using mockup
+[01:16:00.543] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:16:00.543] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:16:00.543] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:16:00.543] Browser WARN    [Polling] Failed - using mockup
+[01:17:00.552] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:17:00.552] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:17:00.552] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:17:00.552] Browser WARN    [Polling] Failed - using mockup
+[01:18:00.557] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:18:00.557] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:18:00.557] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:18:00.557] Browser WARN    [Polling] Failed - using mockup
+[01:19:00.542] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:19:00.542] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:19:00.542] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:19:00.542] Browser WARN    [Polling] Failed - using mockup
+[01:20:00.551] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:20:00.551] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:20:00.551] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:20:00.551] Browser WARN    [Polling] Failed - using mockup
+[01:21:00.547] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:21:00.547] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:21:00.547] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:21:00.547] Browser WARN    [Polling] Failed - using mockup
+[01:22:00.556] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:22:00.557] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:22:00.557] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:22:00.560] Browser WARN    [Polling] Failed - using mockup
+[01:23:00.547] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:23:00.547] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:23:00.547] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:23:00.547] Browser WARN    [Polling] Failed - using mockup
+[01:24:00.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:24:00.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:24:00.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:24:00.553] Browser WARN    [Polling] Failed - using mockup
+[01:25:00.543] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:25:00.543] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:25:00.543] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:25:00.543] Browser WARN    [Polling] Failed - using mockup
+[01:26:00.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:26:00.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:26:00.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:26:00.553] Browser WARN    [Polling] Failed - using mockup
+[01:27:00.542] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:27:00.542] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:27:00.542] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:27:00.542] Browser WARN    [Polling] Failed - using mockup
+[01:28:00.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:28:00.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:28:00.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:28:00.553] Browser WARN    [Polling] Failed - using mockup
+[01:29:00.560] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:29:00.560] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:29:00.560] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:29:00.560] Browser WARN    [Polling] Failed - using mockup
+[01:30:00.542] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:30:00.542] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:30:00.542] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:30:00.542] Browser WARN    [Polling] Failed - using mockup
+[01:31:00.556] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:31:00.556] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:31:00.556] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:31:00.556] Browser WARN    [Polling] Failed - using mockup
+[01:32:00.555] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:32:00.555] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:32:00.555] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:32:00.555] Browser WARN    [Polling] Failed - using mockup
+[01:33:00.543] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:33:00.543] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:33:00.543] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:33:00.543] Browser WARN    [Polling] Failed - using mockup
+[01:34:00.552] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:34:00.552] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:34:00.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:34:00.553] Browser WARN    [Polling] Failed - using mockup
+[01:35:00.549] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:35:00.549] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:35:00.549] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:35:00.549] Browser WARN    [Polling] Failed - using mockup
+[01:36:00.550] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:36:00.550] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:36:00.550] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:36:00.550] Browser WARN    [Polling] Failed - using mockup
+[01:37:00.555] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:37:00.555] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:37:00.555] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:37:00.555] Browser WARN    [Polling] Failed - using mockup
+[01:38:00.541] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:38:00.541] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:38:00.541] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:38:00.541] Browser WARN    [Polling] Failed - using mockup
+[01:39:00.551] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:39:00.551] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:39:00.551] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:39:00.551] Browser WARN    [Polling] Failed - using mockup
+[01:40:00.548] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:40:00.548] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:40:00.548] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:40:00.548] Browser WARN    [Polling] Failed - using mockup
+[01:41:00.552] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:41:00.552] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:41:00.552] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:41:00.552] Browser WARN    [Polling] Failed - using mockup
+[01:42:00.549] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:42:00.549] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:42:00.549] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:42:00.549] Browser WARN    [Polling] Failed - using mockup
+[01:43:00.545] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:43:00.545] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:43:00.545] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:43:00.545] Browser WARN    [Polling] Failed - using mockup
+[01:44:00.543] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:44:00.543] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:44:00.543] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:44:00.543] Browser WARN    [Polling] Failed - using mockup
+[01:45:00.555] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:45:00.555] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:45:00.555] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:45:00.555] Browser WARN    [Polling] Failed - using mockup
+[01:46:00.550] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:46:00.550] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:46:00.550] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:46:00.550] Browser WARN    [Polling] Failed - using mockup
+[01:47:00.545] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:47:00.545] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:47:00.545] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:47:00.545] Browser WARN    [Polling] Failed - using mockup
+[01:48:00.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:48:00.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:48:00.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:48:00.553] Browser WARN    [Polling] Failed - using mockup
+[01:49:00.548] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:49:00.548] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:49:00.548] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:49:00.548] Browser WARN    [Polling] Failed - using mockup
+[01:50:00.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:50:00.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:50:00.553] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:50:00.553] Browser WARN    [Polling] Failed - using mockup
+[01:51:00.550] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/status undefined
+[01:51:00.550] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/telemetry/latest undefined
+[01:51:00.550] Browser DEBUG   [Recorder] Fetch request: GET http://localhost:8002/api/v1/history/anomalies?limit=10 undefined
+[01:51:00.550] Browser WARN    [Polling] Failed - using mockup

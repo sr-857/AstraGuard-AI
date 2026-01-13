@@ -1,574 +1,782 @@
 """
-Core Secrets Management System
+Centralized Secrets Management Module
 
-Centralized, secure secrets management for AstraGuard AI.
-Provides unified access to secrets from environment variables, files, and external vaults.
-
-Features:
-- Secure secret retrieval with validation
-- Type conversion and validation
-- Secret masking in logs
-- Support for multiple secret sources
-- Environment-specific configurations
+Provides unified, secure secret access across the application with:
+- Environment variable loading
+- .env file support
+- Startup validation
+- Log masking for sensitive values
 """
 
 import os
-import json
+import re
 import logging
-from typing import Any, Dict, Optional, Union, List
+from typing import Optional, List, Dict, Any
 from pathlib import Path
-from dataclasses import dataclass
-from enum import Enum
-import secrets
-import hashlib
-import base64
+
+# Try to import dotenv for .env file support
+try:
+    from dotenv import load_dotenv
+    DOTENV_AVAILABLE = True
+except ImportError:
+    DOTENV_AVAILABLE = False
+
 
 logger = logging.getLogger(__name__)
 
 
-class SecretSource(Enum):
-    """Supported secret sources."""
-    ENVIRONMENT = "environment"
-    FILE = "file"
-    VAULT = "vault"  # For future Azure Key Vault, AWS Secrets Manager, etc.
+class SecretManager:
+    """
+    Centralized secret management with validation and masking.
+    
+    Usage:
+        from core.secrets import secrets_manager, get_secret, require_secrets
+        
+        # Validate required secrets at startup
+        require_secrets(["API_KEY", "JWT_SECRET"])
+        
+        # Get a secret
+        api_key = get_secret("API_KEY")
+    """
+    
+    _instance: Optional["SecretManager"] = None
+    _initialized: bool = False
+    
+    # Patterns that indicate a secret (for auto-masking in logs)
+    SECRET_PATTERNS = [
+        r".*password.*",
+        r".*secret.*",
+        r".*key.*",
+        r".*token.*",
+        r".*credential.*",
+        r".*auth.*",
+    ]
+    
+    def __new__(cls) -> "SecretManager":
+        """Singleton pattern to ensure single instance."""
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+    
+    def __init__(self):
+        """Initialize the secret manager."""
+        if SecretManager._initialized:
+            return
+        
+        self._secrets_cache: Dict[str, str] = {}
+        self._loaded_from_file = False
+        self._env_file_path: Optional[Path] = None
+        
+        # Auto-load .env file if available
+        self._load_env_file()
+        
+        SecretManager._initialized = True
+    
+    def _load_env_file(self, env_path: Optional[str] = None) -> bool:
+        """
+        Load secrets from .env file.
+        
+        Args:
+            env_path: Optional path to .env file. If None, searches for:
+                      .env.local, .env, in project root
+        
+        Returns:
+            True if .env file was loaded, False otherwise
+        """
+        if not DOTENV_AVAILABLE:
+            logger.debug("python-dotenv not installed, skipping .env file loading")
+            return False
+        
+        # Search paths for .env file
+        search_paths = []
+        if env_path:
+            search_paths.append(Path(env_path))
+        else:
+            # Look in common locations
+            project_root = Path(__file__).parent.parent
+            search_paths = [
+                project_root / ".env.local",
+                project_root / ".env",
+            ]
+        
+        for path in search_paths:
+            if path.exists():
+                load_dotenv(path, override=False)
+                self._loaded_from_file = True
+                self._env_file_path = path
+                logger.info(f"Loaded secrets from {path}")
+                return True
+        
+        return False
+    
+    def get(
+        self,
+        name: str,
+        default: Optional[str] = None,
+        required: bool = False
+    ) -> Optional[str]:
+        """
+        Get a secret value.
+        
+        Args:
+            name: Name of the secret (environment variable name)
+            default: Default value if secret is not set
+            required: If True, raises ValueError when secret is missing
+        
+        Returns:
+            The secret value, or default if not found
+        
+        Raises:
+            ValueError: If required=True and secret is not found
+        """
+        # Check cache first
+        if name in self._secrets_cache:
+            return self._secrets_cache[name]
+        
+        # Get from environment
+        value = os.environ.get(name)
+        
+        if value is None:
+            if required:
+                raise ValueError(
+                    f"Required secret '{name}' is not set. "
+                    f"Set it via environment variable or .env file."
+                )
+            return default
+        
+        # Cache the value
+        self._secrets_cache[name] = value
+        return value
+    
+    def require(self, names: List[str]) -> Dict[str, str]:
+        """
+        Validate that all required secrets exist.
+        
+        Args:
+            names: List of secret names to validate
+        
+        Returns:
+            Dictionary of secret name -> value
+        
+        Raises:
+            ValueError: If any required secret is missing
+        """
+        missing = []
+        secrets = {}
+        
+        for name in names:
+            value = os.environ.get(name)
+            if value is None:
+                missing.append(name)
+            else:
+                secrets[name] = value
+        
+        if missing:
+            raise ValueError(
+                f"Missing required secrets: {', '.join(missing)}. "
+                f"Set them via environment variables or .env file."
+            )
+        
+        return secrets
+    
+    def is_secret_name(self, name: str) -> bool:
+        """
+        Check if a name looks like it contains sensitive data.
+        
+        Args:
+            name: The name to check
+        
+        Returns:
+            True if the name matches secret patterns
+        """
+        name_lower = name.lower()
+        for pattern in self.SECRET_PATTERNS:
+            if re.match(pattern, name_lower):
+                return True
+        return False
+    
+    def mask(self, value: str, visible_chars: int = 4) -> str:
+        """
+        Mask a secret value for safe logging.
+        
+        Args:
+            value: The secret value to mask
+            visible_chars: Number of characters to show at the end
+        
+        Returns:
+            Masked string like "****abcd"
+        """
+        if not value:
+            return ""
+        
+        if len(value) <= visible_chars:
+            return "*" * len(value)
+        
+        masked_length = len(value) - visible_chars
+        return "*" * masked_length + value[-visible_chars:]
+    
+    def get_masked(self, name: str, default: Optional[str] = None) -> str:
+        """
+        Get a secret value in masked form (safe for logging).
+        
+        Args:
+            name: Name of the secret
+            default: Default value if not found
+        
+        Returns:
+            Masked secret value
+        """
+        value = self.get(name, default)
+        if value is None:
+            return "<not set>"
+        return self.mask(value)
+    
+    def clear_cache(self) -> None:
+        """Clear the secrets cache (useful for testing or secret rotation)."""
+        self._secrets_cache.clear()
+    
+    def reload(self, env_path: Optional[str] = None) -> bool:
+        """
+        Reload secrets from .env file (supports secret rotation).
+        
+        Args:
+            env_path: Optional path to .env file
+        
+        Returns:
+            True if reload was successful
+        """
+        self.clear_cache()
+        return self._load_env_file(env_path)
 
 
-class SecretType(Enum):
-    """Secret data types."""
-    STRING = "string"
-    INTEGER = "integer"
-    FLOAT = "float"
-    BOOLEAN = "boolean"
-    JSON = "json"
-    BYTES = "bytes"
+# Global singleton instance
+secrets_manager = SecretManager()
 
+
+# Convenience functions
+def get_secret(
+    name: str,
+    default: Optional[str] = None,
+    required: bool = False
+) -> Optional[str]:
+    """
+    Get a secret value from environment.
+    
+    Args:
+        name: Name of the secret (environment variable name)
+        default: Default value if secret is not set
+        required: If True, raises ValueError when secret is missing
+    
+    Returns:
+        The secret value, or default if not found
+    
+    Raises:
+        ValueError: If required=True and secret is not found
+    
+    Example:
+        api_key = get_secret("API_KEY", required=True)
+        optional_key = get_secret("OPTIONAL_KEY", default="fallback")
+    """
+    return secrets_manager.get(name, default, required)
+
+
+def require_secrets(names: List[str]) -> Dict[str, str]:
+    """
+    Validate that all required secrets exist at startup.
+    
+    Args:
+        names: List of secret names to validate
+    
+    Returns:
+        Dictionary of secret name -> value
+    
+    Raises:
+        ValueError: If any required secret is missing
+    
+    Example:
+        # At application startup
+        require_secrets(["API_KEY", "JWT_SECRET", "DATABASE_URL"])
+    """
+    return secrets_manager.require(names)
+
+
+def mask_secret(value: str, visible_chars: int = 4) -> str:
+    """
+    Mask a secret value for safe logging.
+    
+    Args:
+        value: The secret value to mask
+        visible_chars: Number of characters to show at end (default: 4)
+    
+    Returns:
+        Masked string like "****abcd"
+    
+    Example:
+        logger.info(f"Using API key: {mask_secret(api_key)}")
+        # Output: "Using API key: ****xyz1"
+    """
+    return secrets_manager.mask(value, visible_chars)
+
+
+import os
+import json
+import base64
+import hashlib
+import logging
+from typing import Dict, Optional, Any, List, Union
+from datetime import datetime, timedelta
+from pathlib import Path
+from dataclasses import dataclass, asdict
+from cryptography.fernet import Fernet, InvalidToken
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+
+# Optional external integrations
+try:
+    import hvac
+    HAS_VAULT = True
+except ImportError:
+    HAS_VAULT = False
+
+try:
+    import boto3
+    HAS_AWS = True
+except ImportError:
+    HAS_AWS = False
+
+logger = logging.getLogger(__name__)
 
 @dataclass
-class SecretConfig:
-    """Configuration for a secret."""
+class SecretMetadata:
+    """Metadata for a stored secret."""
     key: str
-    default: Any = None
-    required: bool = False
-    secret_type: SecretType = SecretType.STRING
-    source: SecretSource = SecretSource.ENVIRONMENT
-    file_path: Optional[str] = None
-    vault_path: Optional[str] = None
-    validate_func: Optional[callable] = None
-    mask_in_logs: bool = True
+    version: int
+    created_at: datetime
+    rotated_at: Optional[datetime] = None
+    expires_at: Optional[datetime] = None
+    description: Optional[str] = None
 
+@dataclass
+class SecretValue:
+    """Represents a secret with its metadata."""
+    value: str
+    metadata: SecretMetadata
 
 class SecretsManager:
     """
-    Centralized secrets management system.
-
-    Provides secure access to secrets with validation, type conversion,
-    and protection against accidental logging.
+    Comprehensive secrets management with encryption, rotation, and external integration.
     """
 
-    def __init__(self, environment: str = None):
+    def __init__(
+        self,
+        storage_path: str = ".secrets",
+        master_key: Optional[str] = None,
+        vault_url: Optional[str] = None,
+        vault_token: Optional[str] = None,
+        aws_region: Optional[str] = None,
+        aws_profile: Optional[str] = None
+    ):
         """
-        Initialize secrets manager.
+        Initialize the secrets manager.
 
         Args:
-            environment: Environment name (development, staging, production)
+            storage_path: Path for local encrypted storage
+            master_key: Master encryption key (env var or provided)
+            vault_url: HashiCorp Vault URL for external storage
+            vault_token: Vault authentication token
+            aws_region: AWS region for Secrets Manager
+            aws_profile: AWS profile for authentication
         """
-        self.environment = environment or os.getenv("ENVIRONMENT", "development")
-        self._cache: Dict[str, Any] = {}
-        self._masked_cache: Dict[str, str] = {}
+        self.storage_path = Path(storage_path)
+        self.storage_path.mkdir(exist_ok=True)
 
-        # Initialize secret configurations
-        self._secret_configs = self._initialize_secret_configs()
+        # Initialize encryption
+        self.master_key = master_key or os.getenv("SECRETS_MASTER_KEY")
+        if not self.master_key:
+            raise ValueError("Master key must be provided via parameter or SECRETS_MASTER_KEY env var")
 
-    def _initialize_secret_configs(self) -> Dict[str, SecretConfig]:
-        """Initialize all secret configurations."""
-        configs = {}
+        self.fernet = self._derive_fernet_key(self.master_key)
 
-        # API and Authentication
-        configs["api_key"] = SecretConfig(
-            key="API_KEY",
-            required=False,
-            mask_in_logs=True
+        # External integrations
+        self.vault_client = None
+        self.aws_client = None
+
+        if vault_url and vault_token and HAS_VAULT:
+            self.vault_client = hvac.Client(url=vault_url, token=vault_token)
+
+        if aws_region and HAS_AWS:
+            session = boto3.Session(profile_name=aws_profile, region_name=aws_region)
+            self.aws_client = session.client('secretsmanager')
+
+        # In-memory cache for performance
+        self._cache: Dict[str, SecretValue] = {}
+        self._cache_ttl = timedelta(minutes=5)
+
+        logger.info("SecretsManager initialized successfully")
+
+    def _derive_fernet_key(self, master_key: str) -> Fernet:
+        """Derive Fernet key from master key using PBKDF2."""
+        salt = b'astraguard_secrets_salt'  # Fixed salt for consistency
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=100000,
         )
+        key = base64.urlsafe_b64encode(kdf.derive(master_key.encode()))
+        return Fernet(key)
 
-        configs["api_secret"] = SecretConfig(
-            key="API_SECRET",
-            required=False,
-            mask_in_logs=True
-        )
+    def _get_secret_path(self, key: str, version: int = None) -> Path:
+        """Get filesystem path for a secret."""
+        if version is None:
+            # Get latest version
+            versions = [f for f in self.storage_path.glob(f"{key}.v*.enc")]
+            if not versions:
+                raise KeyError(f"Secret '{key}' not found")
+            version = max(int(f.stem.split('.v')[1]) for f in versions)
 
-        configs["jwt_secret"] = SecretConfig(
-            key="JWT_SECRET",
-            default=self._generate_secure_secret(),
-            required=True,
-            mask_in_logs=True
-        )
+        return self.storage_path / f"{key}.v{version}.enc"
 
-        # Database
-        configs["database_url"] = SecretConfig(
-            key="DATABASE_URL",
-            default="sqlite:///data/astraguard.db",
-            required=False
-        )
+    def _encrypt_data(self, data: Dict[str, Any]) -> bytes:
+        """Encrypt data dictionary."""
+        json_data = json.dumps(data, default=str)
+        return self.fernet.encrypt(json_data.encode())
 
-        configs["database_pool_size"] = SecretConfig(
-            key="DATABASE_POOL_SIZE",
-            default=5,
-            secret_type=SecretType.INTEGER,
-            required=False
-        )
+    def _decrypt_data(self, encrypted_data: bytes) -> Dict[str, Any]:
+        """Decrypt data dictionary."""
+        try:
+            json_data = self.fernet.decrypt(encrypted_data).decode()
+            return json.loads(json_data)
+        except InvalidToken:
+            raise ValueError("Invalid encryption key or corrupted data")
 
-        # Redis
-        configs["redis_url"] = SecretConfig(
-            key="REDIS_URL",
-            default="redis://localhost:6379",
-            required=False
-        )
-
-        configs["redis_host"] = SecretConfig(
-            key="REDIS_HOST",
-            default="localhost",
-            required=False
-        )
-
-        configs["redis_port"] = SecretConfig(
-            key="REDIS_PORT",
-            default=6379,
-            secret_type=SecretType.INTEGER,
-            required=False
-        )
-
-        # Metrics and Monitoring
-        configs["metrics_user"] = SecretConfig(
-            key="METRICS_USER",
-            required=False,
-            mask_in_logs=True
-        )
-
-        configs["metrics_password"] = SecretConfig(
-            key="METRICS_PASSWORD",
-            required=False,
-            mask_in_logs=True
-        )
-
-        configs["grafana_password"] = SecretConfig(
-            key="GRAFANA_PASSWORD",
-            default="admin",
-            required=False,
-            mask_in_logs=True
-        )
-
-        # Application Configuration
-        configs["log_level"] = SecretConfig(
-            key="LOG_LEVEL",
-            default="INFO",
-            required=False
-        )
-
-        configs["debug"] = SecretConfig(
-            key="DEBUG",
-            default=False,
-            secret_type=SecretType.BOOLEAN,
-            required=False
-        )
-
-        configs["environment"] = SecretConfig(
-            key="ENVIRONMENT",
-            default="development",
-            required=False
-        )
-
-        # API Configuration
-        configs["api_host"] = SecretConfig(
-            key="API_HOST",
-            default="0.0.0.0",
-            required=False
-        )
-
-        configs["api_port"] = SecretConfig(
-            key="API_PORT",
-            default=8000,
-            secret_type=SecretType.INTEGER,
-            required=False
-        )
-
-        # CORS
-        configs["allowed_origins"] = SecretConfig(
-            key="ALLOWED_ORIGINS",
-            default="http://localhost:3000,http://localhost:8080,http://127.0.0.1:3000",
-            required=False
-        )
-
-        # Rate Limiting
-        configs["rate_limit_telemetry"] = SecretConfig(
-            key="RATE_LIMIT_TELEMETRY",
-            default="1000/hour",
-            required=False
-        )
-
-        configs["rate_limit_api"] = SecretConfig(
-            key="RATE_LIMIT_API",
-            default="500/hour",
-            required=False
-        )
-
-        # Resource Monitoring
-        configs["resource_cpu_warning"] = SecretConfig(
-            key="RESOURCE_CPU_WARNING",
-            default=70.0,
-            secret_type=SecretType.FLOAT,
-            required=False
-        )
-
-        configs["resource_cpu_critical"] = SecretConfig(
-            key="RESOURCE_CPU_CRITICAL",
-            default=90.0,
-            secret_type=SecretType.FLOAT,
-            required=False
-        )
-
-        configs["resource_memory_warning"] = SecretConfig(
-            key="RESOURCE_MEMORY_WARNING",
-            default=75.0,
-            secret_type=SecretType.FLOAT,
-            required=False
-        )
-
-        configs["resource_memory_critical"] = SecretConfig(
-            key="RESOURCE_MEMORY_CRITICAL",
-            default=90.0,
-            secret_type=SecretType.FLOAT,
-            required=False
-        )
-
-        configs["resource_monitoring_enabled"] = SecretConfig(
-            key="RESOURCE_MONITORING_ENABLED",
-            default=True,
-            secret_type=SecretType.BOOLEAN,
-            required=False
-        )
-
-        # Timeouts
-        configs["timeout_model_load"] = SecretConfig(
-            key="OPERATION_TIMEOUT_MODEL_LOAD",
-            default=5.0,
-            secret_type=SecretType.FLOAT,
-            required=False
-        )
-
-        configs["timeout_inference"] = SecretConfig(
-            key="OPERATION_TIMEOUT_INFERENCE",
-            default=2.0,
-            secret_type=SecretType.FLOAT,
-            required=False
-        )
-
-        configs["timeout_redis"] = SecretConfig(
-            key="OPERATION_TIMEOUT_REDIS",
-            default=5.0,
-            secret_type=SecretType.FLOAT,
-            required=False
-        )
-
-        configs["timeout_file_io"] = SecretConfig(
-            key="OPERATION_TIMEOUT_FILE_IO",
-            default=10.0,
-            secret_type=SecretType.FLOAT,
-            required=False
-        )
-
-        # Azure Configuration (for production)
-        configs["azure_resource_group"] = SecretConfig(
-            key="AZURE_RESOURCE_GROUP",
-            required=False
-        )
-
-        configs["azure_container_registry"] = SecretConfig(
-            key="AZURE_CONTAINER_REGISTRY",
-            required=False
-        )
-
-        configs["azure_storage_account"] = SecretConfig(
-            key="AZURE_STORAGE_ACCOUNT",
-            required=False
-        )
-
-        # Simulation mode
-        configs["simulation_mode"] = SecretConfig(
-            key="ASTRAGUARD_SIMULATION_MODE",
-            default=False,
-            secret_type=SecretType.BOOLEAN,
-            required=False
-        )
-
-        # Backend URL for frontend
-        configs["backend_url"] = SecretConfig(
-            key="ASTRAGUARD_BACKEND_URL",
-            default="http://localhost:8000",
-            required=False
-        )
-
-        # Chaos engineering
-        configs["chaos_enabled"] = SecretConfig(
-            key="ENABLE_CHAOS",
-            default=False,
-            secret_type=SecretType.BOOLEAN,
-            required=False
-        )
-
-        configs["chaos_admin_key"] = SecretConfig(
-            key="CHAOS_ADMIN_KEY",
-            required=False,
-            mask_in_logs=True
-        )
-
-        # Tracing and observability
-        configs["jaeger_host"] = SecretConfig(
-            key="JAEGER_HOST",
-            default="localhost",
-            required=False
-        )
-
-        configs["jaeger_port"] = SecretConfig(
-            key="JAEGER_PORT",
-            default=6831,
-            secret_type=SecretType.INTEGER,
-            required=False
-        )
-
-        configs["app_version"] = SecretConfig(
-            key="APP_VERSION",
-            default="1.0.0",
-            required=False
-        )
-
-        configs["enable_json_logging"] = SecretConfig(
-            key="ENABLE_JSON_LOGGING",
-            default=False,
-            secret_type=SecretType.BOOLEAN,
-            required=False
-        )
-
-        # API Keys for authentication
-        configs["api_keys"] = SecretConfig(
-            key="API_KEYS",
-            required=False,
-            mask_in_logs=True
-        )
-
-        return configs
-
-    def _generate_secure_secret(self) -> str:
-        """Generate a secure random secret."""
-        return base64.b64encode(secrets.token_bytes(32)).decode('utf-8')
-
-    def get(self, name: str, default: Any = None) -> Any:
+    def store_secret(
+        self,
+        key: str,
+        value: str,
+        description: Optional[str] = None,
+        expires_in_days: Optional[int] = None,
+        use_external: bool = False
+    ) -> SecretMetadata:
         """
-        Get a secret value with validation and type conversion.
+        Store a secret securely.
 
         Args:
-            name: Secret name
-            default: Default value if secret not found
+            key: Secret identifier
+            value: Secret value
+            description: Optional description
+            expires_in_days: Days until expiration
+            use_external: Store in external manager instead of local
 
         Returns:
-            Secret value with proper type conversion
-
-        Raises:
-            ValueError: If required secret is missing
+            SecretMetadata for the stored secret
         """
-        if name in self._cache:
-            return self._cache[name]
+        if use_external:
+            return self._store_external(key, value, description, expires_in_days)
 
-        config = self._secret_configs.get(name)
-        if not config:
-            # Unknown secret, try environment variable
-            value = os.getenv(name.upper(), default)
-            self._cache[name] = value
-            return value
+        # Get next version
+        try:
+            current_version = self.get_secret_metadata(key).version
+            version = current_version + 1
+        except KeyError:
+            version = 1
 
-        # Get value based on source
-        if config.source == SecretSource.ENVIRONMENT:
-            value = self._get_from_environment(config, default if default is not None else config.default)
-        elif config.source == SecretSource.FILE:
-            value = self._get_from_file(config, default if default is not None else config.default)
-        elif config.source == SecretSource.VAULT:
-            value = self._get_from_vault(config, default if default is not None else config.default)
-        else:
-            value = default if default is not None else config.default
+        metadata = SecretMetadata(
+            key=key,
+            version=version,
+            created_at=datetime.now(),
+            description=description,
+            expires_at=datetime.now() + timedelta(days=expires_in_days) if expires_in_days else None
+        )
 
-        # Validate required secrets
-        if config.required and value is None:
-            raise ValueError(f"Required secret '{name}' is not set")
+        secret_data = {
+            'value': value,
+            'metadata': asdict(metadata)
+        }
 
-        # Type conversion
-        value = self._convert_type(value, config.secret_type)
+        encrypted_data = self._encrypt_data(secret_data)
+        secret_path = self._get_secret_path(key, version)
 
-        # Custom validation
-        if config.validate_func and value is not None:
-            config.validate_func(value)
+        with open(secret_path, 'wb') as f:
+            f.write(encrypted_data)
 
-        # Cache the value
-        self._cache[name] = value
+        # Update cache
+        self._cache[key] = SecretValue(value, metadata)
+
+        logger.info(f"Stored secret '{key}' version {version}")
+        return metadata
+
+    def get_secret(self, key: str, version: Optional[int] = None) -> str:
+        """
+        Retrieve a secret value.
+
+        Args:
+            key: Secret identifier
+            version: Specific version (latest if None)
+
+        Returns:
+            Decrypted secret value
+        """
+        # Check cache first
+        if key in self._cache:
+            cached = self._cache[key]
+            if datetime.now() - cached.metadata.created_at < self._cache_ttl:
+                return cached.value
+
+        # Try external first
+        try:
+            return self._get_external(key, version)
+        except (KeyError, NotImplementedError):
+            pass
+
+        # Get from local storage
+        secret_path = self._get_secret_path(key, version)
+        if not secret_path.exists():
+            raise KeyError(f"Secret '{key}' not found")
+
+        with open(secret_path, 'rb') as f:
+            encrypted_data = f.read()
+
+        secret_data = self._decrypt_data(encrypted_data)
+        metadata_dict = secret_data['metadata']
+        metadata = SecretMetadata(**metadata_dict)
+
+        # Check expiration
+        if metadata.expires_at and datetime.now() > metadata.expires_at:
+            raise ValueError(f"Secret '{key}' has expired")
+
+        value = secret_data['value']
+
+        # Update cache
+        self._cache[key] = SecretValue(value, metadata)
 
         return value
 
-    def _get_from_environment(self, config: SecretConfig, default: Any) -> Any:
-        """Get secret from environment variable."""
-        return os.getenv(config.key, default)
-
-    def _get_from_file(self, config: SecretConfig, default: Any) -> Any:
-        """Get secret from file."""
-        if not config.file_path:
-            return default
-
-        try:
-            with open(config.file_path, 'r') as f:
-                return f.read().strip()
-        except (FileNotFoundError, IOError):
-            logger.warning(f"Could not read secret file: {config.file_path}")
-            return default
-
-    def _get_from_vault(self, config: SecretConfig, default: Any) -> Any:
-        """Get secret from external vault (placeholder for future implementation)."""
-        # TODO: Implement Azure Key Vault, AWS Secrets Manager, etc.
-        logger.warning(f"Vault secrets not yet implemented for: {config.key}")
-        return default
-
-    def _convert_type(self, value: Any, secret_type: SecretType) -> Any:
-        """Convert value to the specified type."""
-        if value is None:
-            return None
-
-        try:
-            if secret_type == SecretType.STRING:
-                return str(value)
-            elif secret_type == SecretType.INTEGER:
-                return int(value)
-            elif secret_type == SecretType.FLOAT:
-                return float(value)
-            elif secret_type == SecretType.BOOLEAN:
-                if isinstance(value, str):
-                    return value.lower() in ('true', '1', 'yes', 'on')
-                return bool(value)
-            elif secret_type == SecretType.JSON:
-                if isinstance(value, str):
-                    return json.loads(value)
-                return value
-            elif secret_type == SecretType.BYTES:
-                if isinstance(value, str):
-                    return value.encode('utf-8')
-                return value
-            else:
-                return value
-        except (ValueError, TypeError, json.JSONDecodeError) as e:
-            logger.warning(f"Type conversion failed for value '{value}': {e}")
-            return value
-
-    def get_masked(self, name: str) -> str:
+    def rotate_secret(self, key: str, new_value: Optional[str] = None) -> SecretMetadata:
         """
-        Get a masked version of the secret for logging.
+        Rotate a secret with a new value or generate one.
 
         Args:
-            name: Secret name
+            key: Secret to rotate
+            new_value: New value (generate if None)
 
         Returns:
-            Masked secret string
+            New secret metadata
         """
-        if name in self._masked_cache:
-            return self._masked_cache[name]
+        if new_value is None:
+            # Generate a secure random value
+            import secrets
+            new_value = secrets.token_urlsafe(32)
 
-        config = self._secret_configs.get(name)
-        if config and config.mask_in_logs:
-            value = self.get(name)
-            if value is not None:
-                # Create a masked version
-                if isinstance(value, str) and len(value) > 4:
-                    masked = value[:2] + "*" * (len(value) - 4) + value[-2:]
-                else:
-                    masked = "***"
-                self._masked_cache[name] = masked
-                return masked
+        # Store new version
+        metadata = self.store_secret(key, new_value, description=f"Rotated at {datetime.now()}")
 
-        return self.get(name) or ""
+        # Mark old versions as rotated
+        old_metadata = self.get_secret_metadata(key, metadata.version - 1)
+        old_metadata.rotated_at = datetime.now()
 
-    def validate_all_required(self) -> List[str]:
-        """
-        Validate that all required secrets are available.
+        # Update old metadata file
+        old_path = self._get_secret_path(key, old_metadata.version)
+        with open(old_path, 'rb') as f:
+            encrypted_data = f.read()
 
-        Returns:
-            List of missing required secrets
-        """
-        missing = []
-        for name, config in self._secret_configs.items():
-            if config.required:
-                try:
-                    value = self.get(name)
-                    if value is None:
-                        missing.append(name)
-                except ValueError:
-                    missing.append(name)
-        return missing
+        old_data = self._decrypt_data(encrypted_data)
+        old_data['metadata'] = asdict(old_metadata)
 
-    def list_secrets(self, include_values: bool = False) -> Dict[str, Any]:
-        """
-        List all configured secrets.
+        with open(old_path, 'wb') as f:
+            f.write(self._encrypt_data(old_data))
 
-        Args:
-            include_values: Whether to include actual secret values
+        logger.info(f"Rotated secret '{key}' to version {metadata.version}")
+        return metadata
 
-        Returns:
-            Dictionary of secret information
-        """
-        result = {}
-        for name, config in self._secret_configs.items():
-            info = {
-                "key": config.key,
-                "required": config.required,
-                "type": config.secret_type.value,
-                "source": config.source.value,
-                "masked": config.mask_in_logs
+    def get_secret_metadata(self, key: str, version: Optional[int] = None) -> SecretMetadata:
+        """Get metadata for a secret."""
+        secret_path = self._get_secret_path(key, version)
+        with open(secret_path, 'rb') as f:
+            encrypted_data = f.read()
+
+        secret_data = self._decrypt_data(encrypted_data)
+        metadata_dict = secret_data['metadata']
+        return SecretMetadata(**metadata_dict)
+
+    def list_secrets(self) -> List[SecretMetadata]:
+        """List all stored secrets."""
+        secrets = []
+        for file_path in self.storage_path.glob("*.enc"):
+            try:
+                key_version = file_path.stem
+                key, version_str = key_version.rsplit('.v', 1)
+                version = int(version_str)
+
+                # Only include latest version
+                if version == self.get_secret_metadata(key).version:
+                    secrets.append(self.get_secret_metadata(key))
+            except Exception as e:
+                logger.warning(f"Failed to read secret metadata from {file_path}: {e}")
+
+        return secrets
+
+    def delete_secret(self, key: str, version: Optional[int] = None) -> None:
+        """Delete a secret or specific version."""
+        if version is None:
+            # Delete all versions
+            for file_path in self.storage_path.glob(f"{key}.v*.enc"):
+                file_path.unlink()
+        else:
+            secret_path = self._get_secret_path(key, version)
+            secret_path.unlink()
+
+        # Clear cache
+        if key in self._cache:
+            del self._cache[key]
+
+        logger.info(f"Deleted secret '{key}'")
+
+    def health_check(self) -> Dict[str, Any]:
+        """Perform health checks on secret accessibility."""
+        results = {
+            'local_storage': False,
+            'encryption': False,
+            'vault': False,
+            'aws_secrets_manager': False,
+            'total_secrets': 0
+        }
+
+        # Check local storage
+        try:
+            test_key = f"health_check_{datetime.now().timestamp()}"
+            self.store_secret(test_key, "test_value")
+            retrieved = self.get_secret(test_key)
+            assert retrieved == "test_value"
+            self.delete_secret(test_key)
+            results['local_storage'] = True
+            results['encryption'] = True
+        except Exception as e:
+            logger.error(f"Local storage health check failed: {e}")
+
+        # Count secrets
+        try:
+            results['total_secrets'] = len(self.list_secrets())
+        except Exception as e:
+            logger.error(f"Failed to count secrets: {e}")
+
+        # Check external integrations
+        if self.vault_client:
+            try:
+                results['vault'] = self.vault_client.is_authenticated()
+            except Exception as e:
+                logger.error(f"Vault health check failed: {e}")
+
+        if self.aws_client:
+            try:
+                self.aws_client.list_secrets(MaxResults=1)
+                results['aws_secrets_manager'] = True
+            except Exception as e:
+                logger.error(f"AWS Secrets Manager health check failed: {e}")
+
+        return results
+
+    # External integration methods
+    def _store_external(self, key: str, value: str, description: str = None, expires_in_days: int = None) -> SecretMetadata:
+        """Store secret in external manager."""
+        if self.vault_client and self.vault_client.is_authenticated():
+            # Store in Vault
+            data = {'value': value}
+            if description:
+                data['description'] = description
+            if expires_in_days:
+                data['expires_at'] = (datetime.now() + timedelta(days=expires_in_days)).isoformat()
+
+            self.vault_client.secrets.kv.v2.create_or_update_secret_version(
+                path=key,
+                secret=data
+            )
+            return SecretMetadata(
+                key=key,
+                version=1,  # Vault handles versioning
+                created_at=datetime.now(),
+                description=description,
+                expires_at=datetime.now() + timedelta(days=expires_in_days) if expires_in_days else None
+            )
+
+        elif self.aws_client:
+            # Store in AWS Secrets Manager
+            secret_string = json.dumps({'value': value})
+            kwargs = {
+                'Name': key,
+                'SecretString': secret_string,
+                'Description': description or f"Secret for {key}"
             }
-            if include_values:
-                info["value"] = self.get_masked(name) if config.mask_in_logs else self.get(name)
-            result[name] = info
-        return result
+            if expires_in_days:
+                kwargs['Tags'] = [{'Key': 'ExpiresInDays', 'Value': str(expires_in_days)}]
 
-    def reload_cache(self):
-        """Clear the secret cache to force reloading from sources."""
-        self._cache.clear()
-        self._masked_cache.clear()
+            response = self.aws_client.create_secret(**kwargs)
+            return SecretMetadata(
+                key=key,
+                version=1,
+                created_at=datetime.now(),
+                description=description,
+                expires_at=datetime.now() + timedelta(days=expires_in_days) if expires_in_days else None
+            )
 
+        else:
+            raise NotImplementedError("No external secret manager configured")
 
-# Global secrets manager instance
-_secrets_manager = None
+    def _get_external(self, key: str, version: Optional[int] = None) -> str:
+        """Retrieve secret from external manager."""
+        if self.vault_client and self.vault_client.is_authenticated():
+            try:
+                response = self.vault_client.secrets.kv.v2.read_secret_version(path=key, version=version or 'latest')
+                return response['data']['data']['value']
+            except Exception:
+                raise KeyError(f"Secret '{key}' not found in Vault")
+
+        elif self.aws_client:
+            try:
+                response = self.aws_client.get_secret_value(SecretId=key)
+                secret_data = json.loads(response['SecretString'])
+                return secret_data['value']
+            except Exception:
+                raise KeyError(f"Secret '{key}' not found in AWS Secrets Manager")
+
+        else:
+            raise NotImplementedError("No external secret manager configured")
+
+# Global instance for easy access
+_secrets_manager: Optional[SecretsManager] = None
+
+def init_secrets_manager(**kwargs) -> SecretsManager:
+    """Initialize the global secrets manager."""
+    global _secrets_manager
+    _secrets_manager = SecretsManager(**kwargs)
+    return _secrets_manager
 
 def get_secrets_manager() -> SecretsManager:
     """Get the global secrets manager instance."""
-    global _secrets_manager
     if _secrets_manager is None:
-        _secrets_manager = SecretsManager()
+        raise RuntimeError("Secrets manager not initialized. Call init_secrets_manager() first.")
     return _secrets_manager
 
-def get_secret(name: str, default: Any = None) -> Any:
-    """
-    Convenience function to get a secret.
+# Convenience functions
+def store_secret(key: str, value: str, **kwargs) -> SecretMetadata:
+    """Store a secret using the global manager."""
+    return get_secrets_manager().store_secret(key, value, **kwargs)
 
-    Args:
-        name: Secret name
-        default: Default value
+def get_secret(key: str, default: Optional[str] = None, **kwargs) -> Optional[str]:
+    """Get a secret using the global manager. Returns default if secret not found."""
+    try:
+        return get_secrets_manager().get_secret(key, **kwargs)
+    except (KeyError, RuntimeError):
+        return default
 
-    Returns:
-        Secret value
-    """
-    return get_secrets_manager().get(name, default)
+def rotate_secret(key: str, **kwargs) -> SecretMetadata:
+    """Rotate a secret using the global manager."""
+    return get_secrets_manager().rotate_secret(key, **kwargs)
 
-def get_secret_masked(name: str) -> str:
-    """
-    Convenience function to get a masked secret.
+def list_secrets() -> List[SecretMetadata]:
+    """List secrets using the global manager."""
+    return get_secrets_manager().list_secrets()
 
-    Args:
-        name: Secret name
-
-    Returns:
-        Masked secret string
-    """
-    return get_secrets_manager().get_masked(name)
+def health_check() -> Dict[str, Any]:
+    """Perform health check using the global manager."""
+    return get_secrets_manager().health_check()

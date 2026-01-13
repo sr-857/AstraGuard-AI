@@ -16,15 +16,103 @@ Features:
 import psutil
 import logging
 import os
+import threading
+import functools
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Callable, Any, TypeVar
 from datetime import datetime, timedelta
 from enum import Enum
 
 # Import centralized secrets management
 from core.secrets import get_secret
 
+T = TypeVar('T')
+
 logger = logging.getLogger(__name__)
+
+
+def monitor_operation_resources(operation_name: Optional[str] = None):
+    """
+    Decorator to monitor CPU and memory usage during operation execution.
+
+    Logs resource usage before and after the operation, and warns if usage
+    exceeds thresholds during the operation.
+
+    Args:
+        operation_name: Optional name for the operation (defaults to function name)
+
+    Returns:
+        Decorated function that monitors resource usage
+
+    Example:
+        @monitor_operation_resources()
+        def heavy_computation():
+            # Resource usage will be monitored
+            pass
+    """
+    def decorator(func: Callable[..., T]) -> Callable[..., T]:
+        @functools.wraps(func)
+        def wrapper(*args: Any, **kwargs: Any) -> T:
+            op_name = operation_name or func.__name__
+            monitor = get_resource_monitor()
+
+            # Get initial metrics
+            initial_metrics = monitor.get_current_metrics()
+
+            logger.debug(
+                f"Starting operation '{op_name}' - "
+                f"CPU: {initial_metrics.cpu_percent:.1f}%, "
+                f"Memory: {initial_metrics.memory_percent:.1f}% "
+                f"({initial_metrics.process_memory_mb:.1f}MB)"
+            )
+
+            try:
+                # Execute the function
+                result = func(*args, **kwargs)
+
+                # Get final metrics
+                final_metrics = monitor.get_current_metrics()
+
+                # Calculate resource usage during operation
+                cpu_used = final_metrics.cpu_percent - initial_metrics.cpu_percent
+                memory_used = final_metrics.process_memory_mb - initial_metrics.process_memory_mb
+
+                logger.debug(
+                    f"Completed operation '{op_name}' - "
+                    f"CPU delta: {cpu_used:+.1f}%, "
+                    f"Memory delta: {memory_used:+.1f}MB"
+                )
+
+                # Check for excessive resource usage
+                if cpu_used > 50.0:  # More than 50% CPU increase
+                    logger.warning(
+                        f"High CPU usage in '{op_name}': +{cpu_used:.1f}% "
+                        f"(final: {final_metrics.cpu_percent:.1f}%)"
+                    )
+
+                if memory_used > 100.0:  # More than 100MB memory increase
+                    logger.warning(
+                        f"High memory usage in '{op_name}': +{memory_used:.1f}MB "
+                        f"(final: {final_metrics.process_memory_mb:.1f}MB)"
+                    )
+
+                return result
+
+            except Exception as e:
+                # Log resource usage even on failure
+                final_metrics = monitor.get_current_metrics()
+                cpu_used = final_metrics.cpu_percent - initial_metrics.cpu_percent
+                memory_used = final_metrics.process_memory_mb - initial_metrics.process_memory_mb
+
+                logger.error(
+                    f"Operation '{op_name}' failed after using "
+                    f"CPU: +{cpu_used:.1f}%, Memory: +{memory_used:.1f}MB - {e}"
+                )
+                raise
+
+        return wrapper
+
+    return decorator
 
 
 class ResourceStatus(str, Enum):
@@ -100,35 +188,40 @@ class ResourceMonitor:
         self,
         thresholds: Optional[ResourceThresholds] = None,
         history_size: int = 100,
+        history_time_window_hours: int = 1,
         monitoring_enabled: bool = True
     ):
         """
         Initialize resource monitor.
-        
+
         Args:
             thresholds: Custom threshold configuration (uses defaults if None)
             history_size: Number of metric snapshots to retain
+            history_time_window_hours: Time window in hours to retain metrics
             monitoring_enabled: Whether monitoring is active
         """
         self.thresholds = thresholds or ResourceThresholds()
         self.history_size = history_size
+        self.history_time_window_hours = history_time_window_hours
         self.monitoring_enabled = monitoring_enabled
-        
+
         self._metrics_history: List[ResourceMetrics] = []
         self._process = psutil.Process()
-        
+
         logger.info(
             f"ResourceMonitor initialized: "
             f"cpu_warning={self.thresholds.cpu_warning}%, "
-            f"memory_warning={self.thresholds.memory_warning}%"
+            f"memory_warning={self.thresholds.memory_warning}%, "
+            f"history_size={self.history_size}, "
+            f"history_time_window={self.history_time_window_hours}h"
         )
     
     def get_current_metrics(self) -> ResourceMetrics:
         """
         Collect current resource metrics.
-        
+
         Uses interval=0 for CPU to ensure non-blocking operation.
-        
+
         Returns:
             ResourceMetrics snapshot of current system state
         """
@@ -140,27 +233,27 @@ class ResourceMonitor:
                 disk_usage_percent=0.0,
                 process_memory_mb=0.0
             )
-        
+
         try:
             # CPU usage (interval=0 for non-blocking return)
             # This returns usage since last call, which is ideal for periodic monitoring
             cpu_percent = psutil.cpu_percent(interval=0)
             # CPU usage (1 second interval for accuracy)
             cpu_percent = psutil.cpu_percent(interval=0.1)
-            
+
             # Memory usage
             memory = psutil.virtual_memory()
             memory_percent = memory.percent
             memory_available_mb = memory.available / (1024 * 1024)
-            
+
             # Disk usage
             disk = psutil.disk_usage('/')
             disk_usage_percent = disk.percent
-            
+
             # Process memory
             process_info = self._process.memory_info()
             process_memory_mb = process_info.rss / (1024 * 1024)
-            
+
             metrics = ResourceMetrics(
                 cpu_percent=cpu_percent,
                 memory_percent=memory_percent,
@@ -169,12 +262,66 @@ class ResourceMonitor:
                 process_memory_mb=process_memory_mb,
                 timestamp=datetime.now()
             )
-            
+
             # Add to history
             self._add_to_history(metrics)
-            
+
             return metrics
-            
+
+        except Exception as e:
+            logger.error(f"Error collecting resource metrics: {e}")
+            return ResourceMetrics(
+                cpu_percent=0.0,
+                memory_percent=0.0,
+                memory_available_mb=0.0,
+                disk_usage_percent=0.0,
+                process_memory_mb=0.0
+            )
+
+    def get_current_metrics_no_history(self) -> ResourceMetrics:
+        """
+        Collect current resource metrics without adding to history.
+
+        Used by operation monitoring decorator to avoid polluting history.
+
+        Returns:
+            ResourceMetrics snapshot of current system state
+        """
+        if not self.monitoring_enabled:
+            return ResourceMetrics(
+                cpu_percent=0.0,
+                memory_percent=0.0,
+                memory_available_mb=0.0,
+                disk_usage_percent=0.0,
+                process_memory_mb=0.0
+            )
+
+        try:
+            # CPU usage (interval=0 for non-blocking return)
+            cpu_percent = psutil.cpu_percent(interval=0.1)
+
+            # Memory usage
+            memory = psutil.virtual_memory()
+            memory_percent = memory.percent
+            memory_available_mb = memory.available / (1024 * 1024)
+
+            # Disk usage
+            disk = psutil.disk_usage('/')
+            disk_usage_percent = disk.percent
+
+            # Process memory
+            process_info = self._process.memory_info()
+            process_memory_mb = process_info.rss / (1024 * 1024)
+
+            return ResourceMetrics(
+                cpu_percent=cpu_percent,
+                memory_percent=memory_percent,
+                memory_available_mb=memory_available_mb,
+                disk_usage_percent=disk_usage_percent,
+                process_memory_mb=process_memory_mb,
+                timestamp=datetime.now()
+            )
+
         except Exception as e:
             logger.error(f"Error collecting resource metrics: {e}")
             return ResourceMetrics(
@@ -186,10 +333,17 @@ class ResourceMonitor:
             )
     
     def _add_to_history(self, metrics: ResourceMetrics):
-        """Add metrics to history, maintaining size limit"""
+        """Add metrics to history, maintaining size and time limits"""
         self._metrics_history.append(metrics)
-        
-        # Trim history if exceeded size
+
+        # Clean up old entries based on time window
+        cutoff_time = datetime.now() - timedelta(hours=self.history_time_window_hours)
+        self._metrics_history = [
+            m for m in self._metrics_history
+            if m.timestamp >= cutoff_time
+        ]
+
+        # Trim history if exceeded size (after time-based cleanup)
         if len(self._metrics_history) > self.history_size:
             self._metrics_history = self._metrics_history[-self.history_size:]
     
@@ -343,37 +497,43 @@ class ResourceMonitor:
         return [m.to_dict() for m in history]
 
 
-# Singleton instance
+# Singleton instance and lock for thread safety
 _resource_monitor: Optional[ResourceMonitor] = None
+_resource_monitor_lock = threading.Lock()
 
 
 def get_resource_monitor() -> ResourceMonitor:
     """
     Get global resource monitor singleton.
-    
+
     Initializes with configuration from environment variables if not already created.
-    
+    Thread-safe using double-checked locking pattern.
+
     Returns:
         ResourceMonitor singleton instance
     """
     global _resource_monitor
-    
+
+    # First check without lock for performance
     if _resource_monitor is None:
-        import os
-        
-        # Load configuration from environment
-        thresholds = ResourceThresholds(
-            cpu_warning=get_secret('resource_cpu_warning'),
-            cpu_critical=get_secret('resource_cpu_critical'),
-            memory_warning=get_secret('resource_memory_warning'),
-            memory_critical=get_secret('resource_memory_critical'),
-        )
-        
-        monitoring_enabled = get_secret('resource_monitoring_enabled')
-        
-        _resource_monitor = ResourceMonitor(
-            thresholds=thresholds,
-            monitoring_enabled=monitoring_enabled
-        )
-    
+        with _resource_monitor_lock:
+            # Double-check pattern: check again inside lock
+            if _resource_monitor is None:
+                import os
+
+                # Load configuration from environment
+                thresholds = ResourceThresholds(
+                    cpu_warning=get_secret('resource_cpu_warning'),
+                    cpu_critical=get_secret('resource_cpu_critical'),
+                    memory_warning=get_secret('resource_memory_warning'),
+                    memory_critical=get_secret('resource_memory_critical'),
+                )
+
+                monitoring_enabled = get_secret('resource_monitoring_enabled')
+
+                _resource_monitor = ResourceMonitor(
+                    thresholds=thresholds,
+                    monitoring_enabled=monitoring_enabled
+                )
+
     return _resource_monitor

@@ -8,6 +8,8 @@ import threading
 import logging
 from pathlib import Path
 import signal
+import platform
+import os
 
 from models.feedback import FeedbackEvent, FeedbackLabel
 from .error_handling import handle_file_operation_error
@@ -31,12 +33,33 @@ class ThreadSafeFeedbackStore:
     def append(self, event: FeedbackEvent) -> None:
         """Thread-safely append event to pending store."""
         with self.lock:
+            # Acquire file lock for cross-process safety on Windows
+            lock_fd = None
+            if self.msvcrt:
+                try:
+                    lock_fd = os.open(str(self.path), os.O_RDWR | os.O_CREAT)
+                    self.msvcrt.locking(lock_fd, self.msvcrt.LK_LOCK, 1)  # Lock first byte
+                except (OSError, IOError):
+                    # If locking fails, continue without it (fallback to thread safety only)
+                    if lock_fd is not None:
+                        os.close(lock_fd)
+                    lock_fd = None
+
             try:
-                pending = self._load()
-            except FileNotFoundError:
-                pending = []
-            pending.append(json.loads(event.model_dump_json()))
-            self._dump(pending)
+                try:
+                    pending = self._load()
+                except FileNotFoundError:
+                    pending = []
+                pending.append(json.loads(event.model_dump_json()))
+                self._dump(pending)
+            finally:
+                # Release file lock
+                if lock_fd is not None:
+                    try:
+                        self.msvcrt.locking(lock_fd, self.msvcrt.LK_UNLCK, 1)
+                        os.close(lock_fd)
+                    except (OSError, IOError):
+                        pass  # Ignore unlock errors
 
     def _load(self) -> list[Any]:
         """Load pending events from disk with timeout protection."""
