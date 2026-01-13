@@ -528,17 +528,17 @@ def get_resource_monitor() -> ResourceMonitor:
                 import os
 
                 # Load configuration from environment, with fallback defaults
-                # Convert to float if get_secret returns a value
-                cpu_warning = get_secret('resource_cpu_warning')
+                # Convert to float if get_secret returns a value, with direct os.environ fallback
+                cpu_warning = get_secret('resource_cpu_warning') or os.environ.get('RESOURCE_CPU_WARNING')
                 cpu_warning = float(cpu_warning) if cpu_warning else 70.0
                 
-                cpu_critical = get_secret('resource_cpu_critical')
+                cpu_critical = get_secret('resource_cpu_critical') or os.environ.get('RESOURCE_CPU_CRITICAL')
                 cpu_critical = float(cpu_critical) if cpu_critical else 90.0
                 
-                memory_warning = get_secret('resource_memory_warning')
+                memory_warning = get_secret('resource_memory_warning') or os.environ.get('RESOURCE_MEMORY_WARNING')
                 memory_warning = float(memory_warning) if memory_warning else 75.0
                 
-                memory_critical = get_secret('resource_memory_critical')
+                memory_critical = get_secret('resource_memory_critical') or os.environ.get('RESOURCE_MEMORY_CRITICAL')
                 memory_critical = float(memory_critical) if memory_critical else 90.0
 
                 thresholds = ResourceThresholds(
